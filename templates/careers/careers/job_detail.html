@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }} - Rori Hotel{% endblock %}
+
+{% block content %}
+<div class="container my-4" style="max-width:900px;">
+    <div class="card card-premium p-4 p-md-5 mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-gold text-white px-3 py-1 rounded-pill">{{ job.department_name|upper or 'GENERAL' }}</span>
+                    <span class="badge bg-navy text-white px-3 py-1 rounded-pill">RORI HOTEL</span>
+                    {% if job.is_featured %}
+                    <span class="badge bg-warning text-dark">⭐ Featured</span>
+                    {% endif %}
+                    {% if job.is_expired %}
+                    <span class="badge bg-danger">Expired</span>
+                    {% endif %}
+                </div>
+                <h1 class="fw-bold text-navy display-5 mb-3">{{ job.title }}</h1>
+                <div class="d-flex flex-wrap gap-3 text-muted small fw-semibold">
+                    <span><i class="bi bi-geo-alt-fill text-gold me-1"></i> {{ job.location_name or 'Hawassa' }}</span>
+                    <span><i class="bi bi-briefcase-fill text-gold me-1"></i> {{ job.employment_type }}</span>
+                    {% if job.salary_range %}<span><i class="bi bi-coin text-gold me-1"></i> {{ job.salary_range }}</span>{% endif %}
+                    {% if job.deadline %}<span><i class="bi bi-calendar-event-fill text-gold me-1"></i> Deadline: {{ job.deadline.strftime('%b %d, %Y') }}</span>{% endif %}
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                {% if not job.is_expired %}
+                <a href="{{ url_for('apply', job_id=job.id) }}" class="btn btn-gold w-100 py-3 text-uppercase fw-bold shadow-sm">Apply Now</a>
+                {% else %}
+                <span class="badge bg-danger fs-5">Position Closed</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-premium p-4 p-md-5">
+        <section class="mb-5">
+            <h3 class="fw-bold text-navy mb-3 border-bottom pb-2"><i class="bi bi-info-circle-fill text-gold me-2"></i>ABOUT THE ROLE</h3>
+            <p>{{ job.full_description }}</p>
+        </section>
+        <section class="mb-5">
+            <h3 class="fw-bold text-navy mb-3 border-bottom pb-2"><i class="bi bi-list-check text-gold me-2"></i>KEY RESPONSIBILITIES</h3>
+            <ul class="list-unstyled row g-3">
+                {% for item in job.responsibilities_list() %}
+                <li class="col-md-6 d-flex align-items-start gap-2">
+                    <i class="bi bi-check-circle-fill text-gold fs-5 flex-shrink-0"></i>
+                    <span>{{ item }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        <section class="mb-5">
+            <h3 class="fw-bold text-navy mb-3 border-bottom pb-2"><i class="bi bi-file-earmark-person-fill text-gold me-2"></i>REQUIREMENTS</h3>
+            <div class="row g-4">
+                {% for req in job.requirements_list() %}
+                <div class="col-md-6"><div class="p-3 bg-light rounded-3 h-100 border">{{ req }}</div></div>
+                {% endfor %}
+            </div>
+        </section>
+        <section class="mb-5">
+            <h3 class="fw-bold text-navy mb-3 border-bottom pb-2"><i class="bi bi-gift-fill text-gold me-2"></i>WHAT WE OFFER</h3>
+            <div class="row g-3">
+                {% for offer in job.what_we_offer_list() %}
+                <div class="col-md-4"><div class="p-4 border rounded-3 bg-white h-100 shadow-sm text-center"><i class="bi bi-check-circle-fill text-gold display-6 d-block mb-2"></i><p class="small text-muted mb-0">{{ offer }}</p></div></div>
+                {% endfor %}
+            </div>
+        </section>
+        <div class="text-center pt-4 border-top">
+            {% if not job.is_expired %}
+            <a href="{{ url_for('apply', job_id=job.id) }}" class="btn btn-gold btn-lg px-5 py-3 fw-bold text-uppercase shadow">Apply Now</a>
+            {% else %}
+            <p class="text-muted">This position has expired.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if similar_jobs %}
+    <div class="mt-5">
+        <h4 class="fw-bold text-navy mb-3">🔗 Similar Opportunities</h4>
+        <div class="row g-3">
+            {% for similar in similar_jobs %}
+            <div class="col-md-4">
+                <div class="card card-premium p-3 h-100">
+                    <h6 class="fw-bold text-navy">{{ similar.title }}</h6>
+                    <p class="text-muted small">{{ similar.short_description[:80] }}...</p>
+                    <a href="{{ url_for('job_detail', job_id=similar.id) }}" class="btn btn-sm btn-outline-navy mt-auto">View</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
