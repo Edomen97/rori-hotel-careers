@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Rori Hotel Careers - Home{% endblock %}
+{% block extra_css %}<link href="{{ url_for('static', filename='css/careers.css') }}" rel="stylesheet" />{% endblock %}
+
+{% block content %}
+<section class="hero-section d-flex align-items-center justify-content-center">
+    <div class="hero-overlay"></div>
+    <div class="container text-center position-relative z-2 py-5">
+        <span class="badge bg-gold text-white text-uppercase tracking-widest px-3 py-2 mb-3 rounded-pill fw-semibold">Hospitality Careers</span>
+        <h1 class="display-3 fw-bold text-white mb-3">BUILD YOUR CAREER<br><span class="text-gold">AT RORI</span></h1>
+        <p class="lead text-light opacity-90 mx-auto mb-4" style="max-width:600px;">Discover opportunities to grow, learn, and create exceptional guest experiences in Hawassa's premier hospitality destination.</p>
+        <a href="{{ url_for('jobs') }}" class="btn btn-gold btn-lg px-5 py-3 text-uppercase fw-bold shadow-lg"><i class="bi bi-briefcase me-2"></i> View Open Jobs</a>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 class="display-6 fw-bold text-navy mb-2">FEATURED JOBS</h2>
+            <div class="gold-divider mx-auto"></div>
+        </div>
+        <div class="row g-4">
+            {% for job in featured_jobs %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card card-premium h-100 overflow-hidden">
+                    {% if job.banner_image %}
+                    <img src="{{ url_for('static', filename='uploads/jobs/' + job.banner_image) }}" class="card-img-top" alt="{{ job.title }}" style="height:200px; object-fit:cover;">
+                    {% endif %}
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <span class="badge bg-gold text-white px-3 py-1 rounded-pill">{{ job.department_name or 'General' }}</span>
+                            <small class="text-muted"><i class="bi bi-geo-alt text-gold me-1"></i>{{ job.location_name or 'Hawassa' }}</small>
+                        </div>
+                        <h4 class="fw-bold text-navy mb-2">{{ job.title }}</h4>
+                        <p class="text-muted small mb-4">{{ job.short_description }}</p>
+                        <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+                            <span class="small fw-semibold text-navy"><i class="bi bi-clock me-1 text-gold"></i>{{ job.employment_type }}</span>
+                            <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-sm btn-outline-navy">View</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4"><a href="{{ url_for('jobs') }}" class="btn btn-gold btn-lg px-5 py-3 text-uppercase fw-bold shadow">View All Jobs</a></div>
+    </div>
+</section>
+
+<section class="py-5 bg-white border-top border-bottom">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-6 fw-bold text-navy mb-2">EXPLORE DEPARTMENTS</h2>
+            <p class="text-muted">Find where your talents can make the greatest impact</p>
+            <div class="gold-divider mx-auto"></div>
+        </div>
+        <div class="row g-3">
+            {% for dept in departments %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="dept-card p-3 rounded-3 text-center border h-100">
+                    <i class="bi {{ dept.icon or 'bi-building' }} text-gold fs-2 mb-2 d-block"></i>
+                    <h6 class="fw-bold text-navy mb-0">{{ dept.name }}</h6>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="py-4 bg-light border-top">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card card-premium p-4">
+                    <h4 class="fw-bold text-navy text-center mb-3">🔍 Check Application Status</h4>
+                    <form action="{{ url_for('application_lookup') }}" method="GET" class="d-flex gap-2">
+                        <input type="text" name="applicant_id" class="form-control form-control-lg" placeholder="Enter Application ID" required>
+                        <button type="submit" class="btn btn-gold btn-lg"><i class="bi bi-search"></i> Check</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-navy text-white text-center">
+    <div class="container">
+        <h2 class="display-6 fw-bold text-gold mb-3">JOIN OUR TALENT POOL</h2>
+        <p class="lead text-light mb-4 opacity-90 mx-auto" style="max-width:600px;">Don't see your ideal open position today? Submit your profile to stay in our database for upcoming vacancies.</p>
+        <a href="{{ url_for('talent_pool') }}" class="btn btn-gold btn-lg px-5 py-3 fw-bold text-uppercase shadow"><i class="bi bi-person-plus-fill me-2"></i> Join Talent Pool</a>
+    </div>
+</section>
+{% endblock %}
