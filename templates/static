@@ -1,0 +1,36 @@
+:root {
+    --navy: #0B132B;
+    --navy-light: #1C2541;
+    --gold: #C5A059;
+    --gold-hover: #B08B45;
+    --white: #FFFFFF;
+    --light-gray: #F8F9FA;
+    --border-color: #E9ECEF;
+    --text-muted: #6C757D;
+    --font-heading: 'Cormorant Garamond', serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
+    --radius-card: 20px;
+    --radius-btn: 12px;
+    --shadow-subtle: 0 10px 30px rgba(11,19,43,0.05);
+    --shadow-hover: 0 20px 40px rgba(11,19,43,0.12);
+    --transition-smooth: all 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background-color:var(--light-gray); color:var(--navy); font-family:var(--font-body); line-height:1.6; -webkit-font-smoothing:antialiased; }
+h1,h2,h3,h4,.font-heading { font-family:var(--font-heading); font-weight:700; letter-spacing:-0.01em; }
+.text-gold { color:var(--gold) !important; }
+.text-navy { color:var(--navy) !important; }
+.bg-navy { background-color:var(--navy) !important; }
+.bg-gold { background-color:var(--gold) !important; color:var(--white) !important; }
+.btn-gold { background-color:var(--gold); color:var(--white); border:none; border-radius:var(--radius-btn); padding:0.8rem 1.8rem; font-weight:600; transition:var(--transition-smooth); }
+.btn-gold:hover { background-color:var(--gold-hover); color:var(--white); transform:translateY(-2px); box-shadow:0 8px 20px rgba(197,160,89,0.3); }
+.btn-outline-navy { border:2px solid var(--navy); color:var(--navy); border-radius:var(--radius-btn); padding:0.8rem 1.8rem; font-weight:600; transition:var(--transition-smooth); background:transparent; }
+.btn-outline-navy:hover { background-color:var(--navy); color:var(--white); }
+.card-premium { background:var(--white); border:1px solid var(--border-color); border-radius:var(--radius-card); box-shadow:var(--shadow-subtle); transition:var(--transition-smooth); overflow:hidden; }
+.card-premium:hover { transform:translateY(-6px); box-shadow:var(--shadow-hover); }
+.gold-divider { width:60px; height:3px; background-color:var(--gold); border-radius:2px; margin:0 auto; }
+.luxury-card { background:white; border-radius:var(--radius-card); box-shadow:0 20px 60px rgba(11,19,43,0.06); transition:all 0.4s cubic-bezier(0.16,1,0.3,1); border:none; }
+.luxury-card:hover { transform:translateY(-8px); box-shadow:0 30px 80px rgba(11,19,43,0.1); }
+.luxury-divider { width:80px; height:2px; background:linear-gradient(to right, var(--gold), var(--gold-hover)); margin:1.5rem auto; }
+.text-serif { font-family:'Cormorant Garamond', serif; }
+.letter-spacing-1 { letter-spacing:1px; }
