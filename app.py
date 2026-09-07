@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, date
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, flash, session, abort, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, abort, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SelectField, DateField, FileField, BooleanField, PasswordField, IntegerField
@@ -9,6 +9,7 @@ from wtforms.validators import DataRequired, Email, Length, Optional, NumberRang
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
+from sqlalchemy import text, inspect
 import secrets
 
 # ========================= Configuration =========================
@@ -21,6 +22,10 @@ class Config:
         'sqlite:///' + os.path.join(BASE_DIR, 'instance', 'database.db')
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+    }
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads', 'resumes')
     UPLOAD_FOLDER_JOBS = os.path.join(BASE_DIR, 'static', 'uploads', 'jobs')
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10 MB
@@ -30,7 +35,6 @@ class Config:
     HR_PASSWORD_HASH = os.environ.get('HR_PASSWORD_HASH') or generate_password_hash(
         os.environ.get('HR_PASSWORD', 'RoriHR2026')
     )
-    # Mail settings (for notifications)
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
@@ -144,7 +148,7 @@ class Application(db.Model):
     status = db.Column(db.String(30), default='NEW')
     status_updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     notes = db.Column(db.Text, nullable=True)
-    tags = db.Column(db.String(255), nullable=True)          # Comma-separated
+    tags = db.Column(db.String(255), nullable=True)
     reviewed_by = db.Column(db.String(120), nullable=True)
     shortlisted_at = db.Column(db.DateTime, nullable=True)
     rejected_at = db.Column(db.DateTime, nullable=True)
@@ -298,7 +302,7 @@ class AdminLoginForm(FlaskForm):
 
 class InterviewForm(FlaskForm):
     application_id = SelectField('Candidate', coerce=int, validators=[DataRequired()])
-    scheduled_at = StringField('Scheduled Date/Time', validators=[DataRequired()])  # Expect ISO format
+    scheduled_at = StringField('Scheduled Date/Time', validators=[DataRequired()])
     duration_minutes = IntegerField('Duration (minutes)', default=30, validators=[NumberRange(min=5, max=120)])
     interview_type = SelectField('Type', choices=[
         ('In-person', 'In-person'),
@@ -308,6 +312,27 @@ class InterviewForm(FlaskForm):
     interviewer_name = StringField('Interviewer Name', validators=[Optional(), Length(max=120)])
     location = StringField('Location/Meeting Link', validators=[Optional(), Length(max=200)])
     notes = TextAreaField('Notes', validators=[Optional()])
+
+# ========================= Database Helpers (SQLAlchemy 2.0 Compatible) =========================
+
+def _safe_add_column(table, column_name, column_type):
+    """
+    ደህንነቱ የተጠበቀ የአምድ መጨመር - ነባር መረጃን አይሰርዝም
+    SQLAlchemy 2.0 ጋር ተኳሃኝ
+    """
+    try:
+        inspector = inspect(db.engine)
+        if table in inspector.get_table_names():
+            columns = [c['name'] for c in inspector.get_columns(table)]
+            if column_name not in columns:
+                with db.engine.connect() as conn:
+                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column_name} {column_type}"))
+                    conn.commit()
+                print(f"✅ Added column '{column_name}' to {table}")
+            else:
+                print(f"ℹ️ Column '{column_name}' already exists in {table}")
+    except Exception as e:
+        print(f"⚠️ Could not add column '{column_name}' to {table}: {e}")
 
 # ========================= Helper Functions =========================
 
@@ -532,7 +557,6 @@ def apply(job_id):
         db.session.add(application)
         db.session.commit()
 
-        # Create notification
         notif = Notification(
             title=f'New Application: {application.full_name}',
             message=f'{application.full_name} applied for {job.title}.',
@@ -608,7 +632,7 @@ def admin_login():
         if username == app.config['HR_USERNAME'] and check_password_hash(app.config['HR_PASSWORD_HASH'], password):
             session['admin_logged_in'] = True
             session['admin_username'] = username
-            session['admin_id'] = 1  # For audit log; set to actual ID if you have a User model
+            session['admin_id'] = 1
             flash('Logged in successfully.', 'success')
             log_audit('Login', f'Admin {username} logged in.')
             return redirect(url_for('admin_dashboard'))
@@ -723,7 +747,6 @@ def admin_application_action():
         new_status = 'REJECTED'
         application.rejected_at = datetime.utcnow()
     elif action == 'interview':
-        # Redirect to interview scheduling with pre-selected application
         flash('Please schedule the interview.', 'info')
         return redirect(url_for('admin_interview_new', application_id=app_id))
     elif action == 'select':
@@ -886,11 +909,9 @@ def admin_interviews():
 @admin_required
 def admin_interview_new():
     form = InterviewForm()
-    # Pre-fill application_id if provided
     pre_app_id = request.args.get('application_id', type=int)
     if pre_app_id:
         form.application_id.data = pre_app_id
-    # Populate candidates (shortlisted or interview status)
     candidates = Application.query.filter(
         db.or_(Application.status == 'SHORTLISTED', Application.status == 'INTERVIEW')
     ).all()
@@ -913,16 +934,15 @@ def admin_interview_new():
         db.session.add(interview)
         db.session.commit()
 
-        # Update application status to INTERVIEW if not already
-        app = Application.query.get(form.application_id.data)
-        if app and app.status != 'INTERVIEW':
-            old_status = app.status
-            app.status = 'INTERVIEW'
-            app.status_updated_at = datetime.utcnow()
+        app_obj = Application.query.get(form.application_id.data)
+        if app_obj and app_obj.status != 'INTERVIEW':
+            old_status = app_obj.status
+            app_obj.status = 'INTERVIEW'
+            app_obj.status_updated_at = datetime.utcnow()
             db.session.commit()
-            send_application_status_email(app, old_status, 'INTERVIEW', f'Interview scheduled for {scheduled_at.strftime("%Y-%m-%d %H:%M")}')
+            send_application_status_email(app_obj, old_status, 'INTERVIEW', f'Interview scheduled for {scheduled_at.strftime("%Y-%m-%d %H:%M")}')
 
-        log_audit('Scheduled Interview', f'Scheduled interview for {app.full_name if app else "candidate"}', 'Interview', interview.id)
+        log_audit('Scheduled Interview', f'Scheduled interview for {app_obj.full_name if app_obj else "candidate"}', 'Interview', interview.id)
         flash('Interview scheduled successfully.', 'success')
         return redirect(url_for('admin_interviews'))
     return render_template('admin/interview_form.html', form=form)
@@ -1059,23 +1079,12 @@ def admin_settings():
         return redirect(url_for('admin_settings'))
     return render_template('admin/settings.html')
 
-# ========================= Database Initialization (Safe) =========================
-
-def _safe_add_column(table, column_name, column_type):
-    inspector = db.inspect(db.engine)
-    if table in inspector.get_table_names():
-        columns = [c['name'] for c in inspector.get_columns(table)]
-        if column_name not in columns:
-            try:
-                db.engine.execute(f"ALTER TABLE {table} ADD COLUMN {column_name} {column_type}")
-                print(f"✅ Added column '{column_name}' to {table}")
-            except Exception as e:
-                print(f"⚠️ Could not add column '{column_name}': {e}")
+# ========================= Database Initialization (Safe - SQLAlchemy 2.0 Compatible) =========================
 
 def init_db_safe():
     with app.app_context():
         db.create_all()
-        inspector = db.inspect(db.engine)
+        inspector = inspect(db.engine)
         existing_tables = inspector.get_table_names()
         print(f"📋 Existing tables: {', '.join(existing_tables) if existing_tables else 'None'}")
 
@@ -1126,7 +1135,6 @@ def init_db_safe():
             print('Locations seeded.')
 
         if Job.query.count() == 0:
-            # Get department ids
             dept_eng = Department.query.filter_by(name='Engineering').first()
             dept_fo = Department.query.filter_by(name='Front Office').first()
             dept_fin = Department.query.filter_by(name='Finance').first()
@@ -1194,9 +1202,14 @@ def init_db_safe_command():
     init_db_safe()
     print("✅ Database initialization complete.")
 
-# ========================= Run Application =========================
+# ========================= Run Application & Init DB (Render/Gunicorn Compatible) =========================
+
+# ሰርቨሩ በ Render/Gunicorn ሲነሳ በራሱ ዴታቤዙንና ቴብሎቹን እንዲፈጥር
+with app.app_context():
+    try:
+        init_db_safe()
+    except Exception as e:
+        print(f"⚠️ DB Init Exception: {e}")
 
 if __name__ == '__main__':
-    with app.app_context():
-        init_db_safe()
     app.run(debug=True, host='0.0.0.0', port=5000)
