@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Apply for {{ job.title }}{% endblock %}
+{% block extra_css %}<link href="{{ url_for('static', filename='css/application.css') }}" rel="stylesheet" />{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card card-premium p-4 p-md-5">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-navy mb-1">APPLY NOW</h2>
+            <p class="text-muted small">Complete all steps to submit your application for <strong>{{ job.title }}</strong></p>
+            <div class="gold-divider mx-auto" style="width:80px;"></div>
+        </div>
+
+        <div class="wizard-steps mb-5">
+            <div class="wizard-step active" id="p-step-1"><div class="step-num">1</div><span class="step-label">Personal</span></div>
+            <div class="wizard-step" id="p-step-2"><div class="step-num">2</div><span class="step-label">Profile</span></div>
+            <div class="wizard-step" id="p-step-3"><div class="step-num">3</div><span class="step-label">Skills</span></div>
+            <div class="wizard-step" id="p-step-4"><div class="step-num">4</div><span class="step-label">Application</span></div>
+            <div class="wizard-step" id="p-step-5"><div class="step-num">5</div><span class="step-label">Documents</span></div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" id="applicationForm" novalidate>
+            {{ form.hidden_tag() }}
+
+            <!-- Step 1 -->
+            <div class="wizard-content active" id="wizard-step-1">
+                <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">STEP 1: PERSONAL INFORMATION</h4>
+                <div class="row g-3">
+                    <div class="col-md-6">{{ form.full_name.label(class="form-label fw-semibold") }} {{ form.full_name(class="form-control") }}</div>
+                    <div class="col-md-6">{{ form.email.label(class="form-label fw-semibold") }} {{ form.email(class="form-control") }}</div>
+                    <div class="col-md-6">{{ form.phone.label(class="form-label fw-semibold") }} {{ form.phone(class="form-control") }}</div>
+                    <div class="col-md-6">{{ form.location.label(class="form-label fw-semibold") }} {{ form.location(class="form-control") }}</div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="wizard-content" id="wizard-step-2">
+                <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">STEP 2: PROFESSIONAL PROFILE</h4>
+                <div class="row g-3">
+                    <div class="col-md-6">{{ form.education.label(class="form-label fw-semibold") }} {{ form.education(class="form-select") }}</div>
+                    <div class="col-md-6">{{ form.years_of_experience.label(class="form-label fw-semibold") }} {{ form.years_of_experience(class="form-control") }}</div>
+                    <div class="col-md-6">{{ form.current_position.label(class="form-label fw-semibold") }} {{ form.current_position(class="form-control") }}</div>
+                    <div class="col-md-6">{{ form.previous_employer.label(class="form-label fw-semibold") }} {{ form.previous_employer(class="form-control") }}</div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="wizard-content" id="wizard-step-3">
+                <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">STEP 3: SKILLS &amp; CERTIFICATIONS</h4>
+                <div class="row g-3">
+                    <div class="col-12">{{ form.skills.label(class="form-label fw-semibold") }} {{ form.skills(class="form-control") }}</div>
+                    <div class="col-md-6">{{ form.languages.label(class="form-label fw-semibold") }} {{ form.languages(class="form-control") }}</div>
+                    <div class="col-md-6">{{ form.certifications.label(class="form-label fw-semibold") }} {{ form.certifications(class="form-control") }}</div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="wizard-content" id="wizard-step-4">
+                <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">STEP 4: APPLICATION</h4>
+                <div class="row g-3">
+                    <div class="col-md-4">{{ form.availability_date.label(class="form-label fw-semibold") }} {{ form.availability_date(class="form-control") }}</div>
+                    <div class="col-md-4">{{ form.willing_to_relocate.label(class="form-label fw-semibold") }} {{ form.willing_to_relocate(class="form-select") }}</div>
+                    <div class="col-md-4">{{ form.expected_salary.label(class="form-label fw-semibold") }} {{ form.expected_salary(class="form-control") }}</div>
+                    <div class="col-12">{{ form.cover_letter.label(class="form-label fw-semibold") }} {{ form.cover_letter(class="form-control", rows="5") }}</div>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="wizard-content" id="wizard-step-5">
+                <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">STEP 5: DOCUMENTS</h4>
+                <div class="upload-area text-center p-4 border border-2 border-dashed rounded-3 bg-light">
+                    <i class="bi bi-cloud-arrow-up text-gold display-4 d-block mb-2"></i>
+                    <label class="form-label fw-bold text-navy fs-5">Upload Resume / CV</label>
+                    <p class="text-muted small mb-3">Accepted Formats: PDF, DOC, DOCX (Max 5MB)</p>
+                    {{ form.cv_file(class="form-control w-75 mx-auto") }}
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                <button type="button" class="btn btn-outline-navy px-4" id="prevBtn" onclick="changeStep(-1)" disabled><i class="bi bi-arrow-left me-1"></i> Back</button>
+                <button type="button" class="btn btn-gold px-4" id="nextBtn" onclick="changeStep(1)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
+                <button type="submit" class="btn btn-gold px-5 d-none" id="submitBtn"><i class="bi bi-send me-1"></i> SUBMIT</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/application.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadArea = document.querySelector('.upload-area');
+        const fileInput = document.querySelector('#cv_file');
+        if (uploadArea && fileInput) {
+            uploadArea.addEventListener('click', function() { fileInput.click(); });
+            fileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    uploadArea.querySelector('.fw-bold').textContent = this.files[0].name;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
