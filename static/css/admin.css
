@@ -1,0 +1,13 @@
+.admin-sidebar { background-color:var(--navy); min-height:100vh; padding:1.5rem 0; }
+.admin-sidebar .nav-link { color:rgba(255,255,255,0.7); padding:0.7rem 1.5rem; transition:var(--transition-smooth); }
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-link.active { color:var(--gold); background-color:rgba(197,160,89,0.1); }
+.admin-main { padding:2rem; }
+.status-badge { padding:0.25rem 0.75rem; border-radius:30px; font-size:0.75rem; font-weight:600; }
+.status-new { background:#e3f2fd; color:#0d47a1; }
+.status-under-review { background:#fff3e0; color:#e65100; }
+.status-shortlisted { background:#e8f5e9; color:#1b5e20; }
+.status-interview { background:#fce4ec; color:#880e4f; }
+.status-selected { background:#e8eaf6; color:#1a237e; }
+.status-hired { background:#c8e6c9; color:#1b5e20; }
+.status-rejected { background:#ffebee; color:#b71c1c; }
