@@ -1,0 +1,88 @@
+/* ===== CAREERS PAGE ENHANCEMENTS ===== */
+
+/* Glass card hover animation */
+.glass-card {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 24px;
+    padding: 2rem;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+.glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(197, 160, 89, 0.05), transparent 50%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+.glass-card:hover::before {
+    opacity: 1;
+}
+.glass-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(197, 160, 89, 0.3);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+}
+
+/* Smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Fade-in animation for sections */
+.fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Gold shimmer line */
+.gold-shimmer {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 1rem auto;
+    animation: shimmerLine 3s infinite;
+}
+@keyframes shimmerLine {
+    0% { opacity: 0.3; transform: scaleX(0.8); }
+    50% { opacity: 1; transform: scaleX(1.2); }
+    100% { opacity: 0.3; transform: scaleX(0.8); }
+}
+
+/* Loading skeleton animation for cards */
+.skeleton-loading {
+    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+    background-size: 200% 100%;
+    animation: skeleton 1.5s infinite;
+}
+@keyframes skeleton {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Mobile-first responsive adjustments */
+@media (max-width: 576px) {
+    .glass-card {
+        padding: 1.5rem;
+        border-radius: 18px;
+    }
+    .glass-card .icon-wrap {
+        width: 48px;
+        height: 48px;
+        font-size: 1.4rem;
+    }
+}
