@@ -1,0 +1,89 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Interviews - Rori Hotel HR{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-navy">📅 Interview Management</h2>
+    <a href="{{ url_for('admin_interview_new') }}" class="btn btn-gold">
+        <i class="bi bi-plus-circle"></i> Schedule Interview
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Candidate</th>
+                    <th>Job</th>
+                    <th>Scheduled</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for interview in interviews %}
+                <tr>
+                    <td>#{{ interview.id }}</td>
+                    <td>
+                        <strong>{{ interview.application.full_name }}</strong><br>
+                        <small class="text-muted">{{ interview.application.email }}</small>
+                    </td>
+                    <td>{{ interview.application.job.title }}</td>
+                    <td>
+                        {{ interview.scheduled_at.strftime('%Y-%m-%d %H:%M') }}
+                    </td>
+                    <td><span class="badge bg-secondary">{{ interview.interview_type }}</span></td>
+                    <td>
+                        <span class="badge 
+                            {% if interview.status == 'Scheduled' %}bg-warning
+                            {% elif interview.status == 'Completed' %}bg-success
+                            {% elif interview.status == 'Cancelled' %}bg-danger
+                            {% else %}bg-secondary{% endif %}">
+                            {{ interview.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-outline-navy" data-bs-toggle="modal" data-bs-target="#interviewModal{{ interview.id }}">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                <!-- Modal for details -->
+                <div class="modal fade" id="interviewModal{{ interview.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Interview #{{ interview.id }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>Candidate:</strong> {{ interview.application.full_name }}</p>
+                                <p><strong>Job:</strong> {{ interview.application.job.title }}</p>
+                                <p><strong>Scheduled:</strong> {{ interview.scheduled_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                                <p><strong>Duration:</strong> {{ interview.duration_minutes }} min</p>
+                                <p><strong>Type:</strong> {{ interview.interview_type }}</p>
+                                <p><strong>Interviewer:</strong> {{ interview.interviewer_name or 'N/A' }}</p>
+                                <p><strong>Location:</strong> {{ interview.location or 'N/A' }}</p>
+                                <p><strong>Notes:</strong> {{ interview.notes or 'None' }}</p>
+                                {% if interview.evaluation %}
+                                <p><strong>Evaluation:</strong> {{ interview.evaluation }}</p>
+                                {% endif %}
+                                {% if interview.rating %}
+                                <p><strong>Rating:</strong> {{ interview.rating }}/5</p>
+                                {% endif %}
+                                <p><strong>Status:</strong> {{ interview.status }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-muted py-4">No interviews scheduled yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
