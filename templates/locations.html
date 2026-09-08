@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}Locations - Rori Hotel Careers{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/careers.css') }}" rel="stylesheet" />
+<style>
+    .location-hero {
+        background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0B132B 100%);
+        padding: 4rem 0 3rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .location-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(ellipse at center, rgba(197,160,89,0.03), transparent 60%);
+        animation: shimmer 20s infinite alternate;
+    }
+    @keyframes shimmer {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(10%, 10%); }
+    }
+    .location-hero .container {
+        position: relative;
+        z-index: 1;
+    }
+    .location-hero .gold-line {
+        width: 80px;
+        height: 2px;
+        background: linear-gradient(90deg, var(--gold), transparent);
+        margin: 0 auto 1rem;
+    }
+    .location-hero h1 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.02em;
+    }
+    .location-hero h1 .gold-text {
+        color: var(--gold);
+        font-style: italic;
+    }
+    .location-hero p {
+        color: rgba(255,255,255,0.6);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0.5rem auto 0;
+        line-height: 1.8;
+    }
+
+    .location-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 3rem 0;
+    }
+
+    .location-card {
+        background: rgba(255,255,255,0.04);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 20px;
+        padding: 2rem 1.8rem;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .location-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(197,160,89,0.05), transparent 60%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .location-card:hover::before {
+        opacity: 1;
+    }
+
+    .location-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(197,160,89,0.25);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .location-card .loc-icon {
+        font-size: 2.5rem;
+        color: var(--gold);
+        display: block;
+        margin-bottom: 1rem;
+    }
+
+    .location-card .loc-name {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 0.3rem;
+    }
+
+    .location-card .loc-address {
+        font-size: 0.95rem;
+        color: rgba(255,255,255,0.5);
+        line-height: 1.6;
+        margin-bottom: 0.8rem;
+    }
+
+    .location-card .loc-address i {
+        color: var(--gold);
+        margin-right: 0.4rem;
+    }
+
+    .location-card .loc-count {
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 1.2rem;
+    }
+
+    .location-card .btn-loc {
+        display: inline-block;
+        background: rgba(197,160,89,0.12);
+        border: 1px solid rgba(197,160,89,0.2);
+        color: var(--gold);
+        padding: 0.5rem 1.5rem;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .location-card .btn-loc:hover {
+        background: var(--gold);
+        color: #0B132B;
+        border-color: var(--gold);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(197,160,89,0.2);
+    }
+
+    .location-empty {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: rgba(255,255,255,0.4);
+    }
+    .location-empty i {
+        font-size: 4rem;
+        color: rgba(197,160,89,0.2);
+        display: block;
+        margin-bottom: 1rem;
+    }
+    .location-empty h4 {
+        font-family: 'Cormorant Garamond', serif;
+        color: rgba(255,255,255,0.5);
+        font-size: 1.8rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .location-hero h1 {
+            font-size: 2.5rem;
+        }
+        .location-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            padding: 2rem 0;
+        }
+        .location-card {
+            padding: 1.5rem 1.2rem;
+        }
+        .location-card .loc-name {
+            font-size: 1.3rem;
+        }
+        .location-card .loc-address {
+            font-size: 0.85rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .location-hero {
+            padding: 3rem 0 2rem;
+        }
+        .location-hero h1 {
+            font-size: 2rem;
+        }
+        .location-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            padding: 1.5rem 0;
+        }
+        .location-card {
+            padding: 1.2rem 1rem;
+            border-radius: 16px;
+        }
+        .location-card .loc-icon {
+            font-size: 2rem;
+        }
+        .location-card .loc-name {
+            font-size: 1.2rem;
+        }
+        .location-card .btn-loc {
+            font-size: 0.8rem;
+            padding: 0.4rem 1.2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="location-hero">
+    <div class="container">
+        <div class="gold-line"></div>
+        <h1>Our <span class="gold-text">Locations</span></h1>
+        <p>Discover career opportunities at Rori Hotel’s properties across Ethiopia.</p>
+    </div>
+</section>
+
+<!-- Location Grid -->
+<section style="background: #0B132B;">
+    <div class="container">
+        {% if locations %}
+        <div class="location-grid">
+            {% for loc in locations %}
+            <div class="location-card">
+                <i class="bi bi-geo-alt-fill loc-icon"></i>
+                <h3 class="loc-name">{{ loc.name }}</h3>
+                {% if loc.address %}
+                <p class="loc-address"><i class="bi bi-pin-map"></i> {{ loc.address }}</p>
+                {% endif %}
+                <p class="loc-count">{{ loc.jobs|length }} open position{% if loc.jobs|length != 1 %}s{% endif %}</p>
+                <a href="{{ url_for('jobs') }}?location={{ loc.id }}" class="btn-loc">
+                    <i class="bi bi-briefcase me-1"></i> View Jobs
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="location-empty">
+            <i class="bi bi-geo-alt"></i>
+            <h4>No locations available</h4>
+            <p class="text-muted">Check back later for new opportunities.</p>
+        </div>
+        {% endif %}
+
+        <!-- Call to Action -->
+        <div class="text-center pb-4">
+            <a href="{{ url_for('jobs') }}" class="btn btn-gold btn-lg px-5 py-3 text-uppercase fw-bold shadow">
+                <i class="bi bi-briefcase me-2"></i> View All Jobs
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
