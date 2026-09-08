@@ -1,92 +1,293 @@
 {% extends "base.html" %}
-{% block title %}Jobs - Rori Hotel Careers{% endblock %}
-{% block extra_css %}<link href="{{ url_for('static', filename='css/jobs.css') }}" rel="stylesheet" />{% endblock %}
+
+{% block title %}Open Positions - Rori Hotel Careers{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/jobs.css') }}" rel="stylesheet" />
+{% endblock %}
 
 {% block content %}
+
 <div class="container my-5">
+
+    <!-- Header & Filters -->
     <div class="card card-premium p-4 p-md-5 mb-4">
+
         <div class="text-center mb-4">
-            <h2 class="fw-bold text-navy mb-1 display-6">OPEN POSITIONS</h2>
-            <p class="text-muted small mb-0">Discover exceptional career opportunities at Rori Hotel</p>
+            <h2 class="fw-bold text-navy mb-1 display-6">
+                OPEN POSITIONS
+            </h2>
+
+            <p class="text-muted small mb-0">
+                Discover exceptional career opportunities at Rori Hotel
+            </p>
         </div>
+
         <form method="GET" action="{{ url_for('jobs') }}" id="filterForm">
-            <div class="row g-3 mb-4">
+
+            <div class="row g-3 mb-2">
+
+                <!-- Search -->
                 <div class="col-md-5">
                     <div class="input-group shadow-sm rounded-pill overflow-hidden border">
-                        <span class="input-group-text bg-white border-0 ps-4 text-muted"><i class="bi bi-search text-gold"></i></span>
-                        <input type="text" name="q" class="form-control border-0 py-2 shadow-none" placeholder="Search jobs..." value="{{ request.args.get('q', '') }}">
-                        <button class="btn btn-gold px-4" type="submit">Search</button>
+
+                        <span class="input-group-text bg-white border-0 ps-4 text-muted">
+                            <i class="bi bi-search text-gold"></i>
+                        </span>
+
+                        <input
+                            type="text"
+                            name="q"
+                            class="form-control border-0 py-2 shadow-none"
+                            placeholder="Search jobs..."
+                            value="{{ request.args.get('q', '') }}"
+                        >
+
+                        <button class="btn btn-gold px-4" type="submit">
+                            Search
+                        </button>
+
                     </div>
                 </div>
+
+                <!-- Department -->
                 <div class="col-md-2">
-                    <select name="department" class="form-select custom-select-navy py-2" onchange="this.form.submit()">
+                    <select
+                        name="department"
+                        class="form-select custom-select-navy py-2"
+                        onchange="this.form.submit()"
+                    >
                         <option value="">All Departments</option>
+
                         {% for dept in departments %}
-                        <option value="{{ dept.id }}" {% if request.args.get('department')|int == dept.id %}selected{% endif %}>{{ dept.name }}</option>
+                        <option
+                            value="{{ dept.id }}"
+                            {% if request.args.get('department')|int == dept.id %}
+                            selected
+                            {% endif %}
+                        >
+                            {{ dept.name }}
+                        </option>
                         {% endfor %}
+
                     </select>
                 </div>
+
+                <!-- Location -->
                 <div class="col-md-2">
-                    <select name="location" class="form-select custom-select-navy py-2" onchange="this.form.submit()">
+                    <select
+                        name="location"
+                        class="form-select custom-select-navy py-2"
+                        onchange="this.form.submit()"
+                    >
                         <option value="">All Locations</option>
+
                         {% for loc in locations %}
-                        <option value="{{ loc.id }}" {% if request.args.get('location')|int == loc.id %}selected{% endif %}>{{ loc.name }}</option>
+                        <option
+                            value="{{ loc.id }}"
+                            {% if request.args.get('location')|int == loc.id %}
+                            selected
+                            {% endif %}
+                        >
+                            {{ loc.name }}
+                        </option>
                         {% endfor %}
+
                     </select>
                 </div>
+
+                <!-- Employment Type -->
                 <div class="col-md-2">
-                    <select name="type" class="form-select custom-select-navy py-2" onchange="this.form.submit()">
+                    <select
+                        name="type"
+                        class="form-select custom-select-navy py-2"
+                        onchange="this.form.submit()"
+                    >
                         <option value="">All Types</option>
-                        <option value="Full-time" {% if request.args.get('type') == 'Full-time' %}selected{% endif %}>Full-time</option>
-                        <option value="Part-time" {% if request.args.get('type') == 'Part-time' %}selected{% endif %}>Part-time</option>
-                        <option value="Contract" {% if request.args.get('type') == 'Contract' %}selected{% endif %}>Contract</option>
+
+                        <option
+                            value="Full-time"
+                            {% if request.args.get('type') == 'Full-time' %}
+                            selected
+                            {% endif %}
+                        >
+                            Full-time
+                        </option>
+
+                        <option
+                            value="Part-time"
+                            {% if request.args.get('type') == 'Part-time' %}
+                            selected
+                            {% endif %}
+                        >
+                            Part-time
+                        </option>
+
+                        <option
+                            value="Contract"
+                            {% if request.args.get('type') == 'Contract' %}
+                            selected
+                            {% endif %}
+                        >
+                            Contract
+                        </option>
+
                     </select>
                 </div>
+
+                <!-- Reset -->
                 <div class="col-md-1">
-                    <a href="{{ url_for('jobs') }}" class="btn btn-outline-navy w-100">Reset</a>
+                    <a
+                        href="{{ url_for('jobs') }}"
+                        class="btn btn-outline-navy w-100"
+                    >
+                        Reset
+                    </a>
                 </div>
+
             </div>
+
         </form>
+
     </div>
 
+
+    <!-- Job Listings -->
+
     <div class="d-flex flex-column gap-3">
+
         {% for job in jobs %}
+
         <div class="card card-premium p-4">
+
             <div class="row align-items-center g-3">
+
                 <div class="col-lg-8">
+
+                    <!-- Job Meta -->
                     <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                        <span class="badge bg-gold text-white px-3 py-1 rounded-pill">{{ job.department_name or 'General' }}</span>
-                        <span class="badge bg-light text-navy border px-3 py-1 rounded-pill"><i class="bi bi-geo-alt-fill text-gold me-1"></i> {{ job.location_name or 'Hawassa' }}</span>
+
+                        <span class="badge bg-gold text-white px-3 py-1 rounded-pill">
+                            {{ job.department_name or 'General' }}
+                        </span>
+
+                        <span class="badge bg-light text-navy border px-3 py-1 rounded-pill">
+                            <i class="bi bi-geo-alt-fill text-gold me-1"></i>
+                            {{ job.location_name or 'Hawassa' }}
+                        </span>
+
                         {% if job.is_featured %}
-                        <span class="badge bg-warning text-dark">⭐ Featured</span>
+                        <span class="badge bg-warning text-dark">
+                            ⭐ Featured
+                        </span>
                         {% endif %}
+
                         {% if job.is_expired %}
-                        <span class="badge bg-danger">Expired</span>
+                        <span class="badge bg-danger">
+                            Application Closed
+                        </span>
                         {% endif %}
+
                     </div>
-                    <h3 class="fw-bold text-navy mb-2 fs-3">{{ job.title }}</h3>
-                    <p class="text-muted small">{{ job.short_description }}</p>
+
+
+                    <!-- Job Title -->
+                    <h3 class="fw-bold text-navy mb-2 fs-3">
+                        {{ job.title }}
+                    </h3>
+
+
+                    <!-- Description -->
+                    <p class="text-muted small mb-3">
+                        {{ job.short_description }}
+                    </p>
+
+
+                    <!-- Public Job Information -->
                     <div class="d-flex flex-wrap gap-3 text-muted small fw-semibold">
-                        <span><i class="bi bi-briefcase-fill text-gold me-1"></i> {{ job.employment_type }}</span>
-                        <span><i class="bi bi-clock-history text-gold me-1"></i> {{ job.experience_level or 'Not specified' }}</span>
-                        {% if job.salary_range %}<span><i class="bi bi-coin text-gold me-1"></i> {{ job.salary_range }}</span>{% endif %}
+
+                        <span>
+                            <i class="bi bi-briefcase-fill text-gold me-1"></i>
+                            {{ job.employment_type }}
+                        </span>
+
+                        <span>
+                            <i class="bi bi-clock-history text-gold me-1"></i>
+                            {{ job.experience_level or 'Not specified' }}
+                        </span>
+
                     </div>
+
                 </div>
-                <div class="col-lg-4 text-lg-end d-flex gap-2 justify-content-lg-end mt-3 mt-lg-0">
-                    <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-outline-navy flex-fill flex-lg-grow-0 py-2 px-3">View Details</a>
-                    {% if not job.is_expired %}
-                    <a href="{{ url_for('apply', job_id=job.id) }}" class="btn btn-gold flex-fill flex-lg-grow-0 py-2 px-4 fw-bold">Apply</a>
-                    {% else %}
-                    <span class="badge bg-secondary align-self-center">Expired</span>
-                    {% endif %}
+
+
+                <!-- Actions -->
+                <div class="col-lg-4">
+
+                    <div class="d-flex gap-2 justify-content-lg-end mt-3 mt-lg-0">
+
+                        <a
+                            href="{{ url_for('job_detail', job_id=job.id) }}"
+                            class="btn btn-outline-navy py-2 px-3 flex-fill flex-lg-grow-0"
+                        >
+                            View Details
+                        </a>
+
+                        {% if not job.is_expired %}
+
+                        <a
+                            href="{{ url_for('apply', job_id=job.id) }}"
+                            class="btn btn-gold py-2 px-4 fw-bold flex-fill flex-lg-grow-0"
+                        >
+                            Apply Now
+                        </a>
+
+                        {% else %}
+
+                        <span class="badge bg-secondary align-self-center">
+                            Applications Closed
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
                 </div>
+
             </div>
+
         </div>
+
         {% else %}
-        <div class="text-center py-5">
-            <p class="text-muted">No jobs found matching your criteria.</p>
+
+        <!-- No Jobs -->
+        <div class="card card-premium text-center py-5">
+
+            <div class="mb-3">
+                <i class="bi bi-briefcase text-gold fs-1"></i>
+            </div>
+
+            <h4 class="fw-bold text-navy">
+                No Open Positions
+            </h4>
+
+            <p class="text-muted mb-3">
+                There are currently no vacancies matching your search.
+            </p>
+
+            <a
+                href="{{ url_for('jobs') }}"
+                class="btn btn-outline-navy"
+            >
+                View All Positions
+            </a>
+
         </div>
+
         {% endfor %}
+
     </div>
+
 </div>
+
 {% endblock %}
