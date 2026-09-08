@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}500 - Server Error | Rori Hotel Careers{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h1 class="display-1 fw-bold text-danger">500</h1>
+            <h3 class="mb-3">የሰርቨር ስህተት አጋጥሟል!</h3>
+            <p class="text-secondary mb-4">
+                በሲስተሙ ላይ ያልተጠበቀ ችግር ተከሰቷል። እባክዎን ትንሽ ቆይተው እንደገና ይሞክሩ።
+            </p>
+            <a href="{{ url_for('home') }}" class="btn btn-gold px-4 py-2">
+                <i class="bi bi-house-door me-2"></i>ወደ ዋና ገጽ ተመለስ
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
