@@ -1,0 +1,1231 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if job %}
+        Apply for {{ job.title }} - Rori Hotel Careers
+    {% else %}
+        Talent Pool - Rori Hotel Careers
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/application.css') }}" rel="stylesheet" />
+
+<style>
+    .wizard-content {
+        display: none;
+    }
+
+    .wizard-content.active {
+        display: block;
+        animation: fadeIn .25s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .wizard-steps {
+        position: relative;
+    }
+
+    .wizard-step {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        flex: 1;
+    }
+
+    .step-num {
+        width: 38px;
+        height: 38px;
+        line-height: 38px;
+        padding: 0 !important;
+        border-radius: 50%;
+        background: #0B132B;
+        color: #fff;
+        display: inline-block;
+        font-weight: 700;
+        transition: all .2s ease;
+    }
+
+    .wizard-step.active .step-num {
+        background-color: #C5A059;
+        color: #0B132B;
+    }
+
+    .wizard-step.completed .step-num {
+        background-color: #198754;
+        color: #fff;
+    }
+
+    .step-label {
+        display: block;
+        margin-top: 7px;
+        font-weight: 600;
+        color: #6c757d;
+    }
+
+    .wizard-step.active .step-label {
+        color: #0B132B;
+    }
+
+    .required::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .application-summary {
+        background: #f8f9fa;
+        border: 1px solid #e5e5e5;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .upload-area {
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+
+    .upload-area:hover {
+        border-color: #C5A059 !important;
+        background: #fffdf7 !important;
+    }
+
+    .review-box {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #C5A059;
+        box-shadow: 0 0 0 .2rem rgba(197, 160, 89, .15);
+    }
+
+    @media (max-width: 576px) {
+        .wizard-steps {
+            gap: 3px;
+        }
+
+        .step-num {
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            font-size: 13px;
+        }
+
+        .step-label {
+            font-size: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container my-4 my-md-5">
+
+    <div class="card card-premium p-3 p-md-5">
+
+        <!-- HEADER -->
+        <div class="text-center mb-4">
+
+            <h2 class="fw-bold text-navy mb-2">
+                {% if job %}
+                    APPLY NOW
+                {% else %}
+                    JOIN OUR TALENT POOL
+                {% endif %}
+            </h2>
+
+            <p class="text-muted mb-2">
+
+                {% if job %}
+                    Submit your application for
+                    <strong>{{ job.title }}</strong>
+                {% else %}
+                    Submit your professional profile for future opportunities at Rori Hotel.
+                {% endif %}
+
+            </p>
+
+            <div
+                class="gold-divider mx-auto"
+                style="width:80px;height:3px;background-color:#C5A059;">
+            </div>
+
+        </div>
+
+
+        <!-- JOB SUMMARY -->
+        {% if job %}
+
+        <div class="application-summary mb-4">
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <small class="text-muted d-block">
+                        Position
+                    </small>
+
+                    <strong class="text-navy">
+                        {{ job.title }}
+                    </strong>
+                </div>
+
+                <div class="col-md-3">
+                    <small class="text-muted d-block">
+                        Department
+                    </small>
+
+                    <strong class="text-navy">
+                        {{ job.department_name or 'General' }}
+                    </strong>
+                </div>
+
+                <div class="col-md-3">
+                    <small class="text-muted d-block">
+                        Location
+                    </small>
+
+                    <strong class="text-navy">
+                        {{ job.location_name or 'Hawassa' }}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- WIZARD STEPS -->
+
+        <div class="wizard-steps d-flex justify-content-between mb-5">
+
+            <div class="wizard-step active" id="p-step-1">
+                <div class="step-num">1</div>
+                <span class="step-label">Personal</span>
+            </div>
+
+            <div class="wizard-step" id="p-step-2">
+                <div class="step-num">2</div>
+                <span class="step-label">Profile</span>
+            </div>
+
+            <div class="wizard-step" id="p-step-3">
+                <div class="step-num">3</div>
+                <span class="step-label">Skills</span>
+            </div>
+
+            <div class="wizard-step" id="p-step-4">
+                <div class="step-num">4</div>
+                <span class="step-label">Application</span>
+            </div>
+
+            <div class="wizard-step" id="p-step-5">
+                <div class="step-num">5</div>
+                <span class="step-label">Documents</span>
+            </div>
+
+        </div>
+
+
+        <!-- FORM -->
+
+        <form
+            method="POST"
+            enctype="multipart/form-data"
+            id="applicationForm"
+            novalidate
+        >
+
+            {% if form %}
+                {{ form.hidden_tag() }}
+            {% endif %}
+
+
+            <!-- ========================= -->
+            <!-- STEP 1 -->
+            <!-- ========================= -->
+
+            <div
+                class="wizard-content active"
+                id="wizard-step-1"
+            >
+
+                <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">
+                    STEP 1: PERSONAL INFORMATION
+                </h4>
+
+                <p class="text-muted small mb-4">
+                    Please provide your contact information.
+                </p>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        {% if form %}
+                            {{ form.full_name.label(
+                                class="form-label fw-semibold required"
+                            ) }}
+
+                            {{ form.full_name(
+                                class="form-control",
+                                required=true,
+                                placeholder="Enter your full name"
+                            ) }}
+
+                        {% else %}
+
+                            <label class="form-label fw-semibold required">
+                                Full Name
+                            </label>
+
+                            <input
+                                type="text"
+                                name="full_name"
+                                class="form-control"
+                                required
+                                placeholder="Enter your full name"
+                            >
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        {% if form %}
+
+                            {{ form.email.label(
+                                class="form-label fw-semibold required"
+                            ) }}
+
+                            {{ form.email(
+                                class="form-control",
+                                required=true,
+                                placeholder="name@example.com"
+                            ) }}
+
+                        {% else %}
+
+                            <label class="form-label fw-semibold required">
+                                Email Address
+                            </label>
+
+                            <input
+                                type="email"
+                                name="email"
+                                class="form-control"
+                                required
+                                placeholder="name@example.com"
+                            >
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        {% if form %}
+
+                            {{ form.phone.label(
+                                class="form-label fw-semibold required"
+                            ) }}
+
+                            {{ form.phone(
+                                class="form-control",
+                                required=true,
+                                placeholder="+251 ..."
+                            ) }}
+
+                        {% else %}
+
+                            <label class="form-label fw-semibold required">
+                                Phone Number
+                            </label>
+
+                            <input
+                                type="tel"
+                                name="phone"
+                                class="form-control"
+                                required
+                                placeholder="+251 ..."
+                            >
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        {% if form %}
+
+                            {{ form.location.label(
+                                class="form-label fw-semibold"
+                            ) }}
+
+                            {{ form.location(
+                                class="form-control",
+                                placeholder="City / Town"
+                            ) }}
+
+                        {% else %}
+
+                            <label class="form-label fw-semibold">
+                                Current Location
+                            </label>
+
+                            <input
+                                type="text"
+                                name="location"
+                                class="form-control"
+                                placeholder="City / Town"
+                                value="Hawassa"
+                            >
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================= -->
+            <!-- STEP 2 -->
+            <!-- ========================= -->
+
+            <div
+                class="wizard-content"
+                id="wizard-step-2"
+            >
+
+                <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">
+                    STEP 2: PROFESSIONAL PROFILE
+                </h4>
+
+                <p class="text-muted small mb-4">
+                    Tell us about your education and professional background.
+                </p>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        {% if form %}
+
+                            {{ form.education.label(
+                                class="form-label fw-semibold"
+                            ) }}
+
+                            {{ form.education(
+                                class="form-select"
+                            ) }}
+
+                        {% else %}
+
+                            <label class="form-label fw-semibold">
+                                Highest Education Level
+                            </label>
+
+                            <select
+                                name="education"
+                                class="form-select"
+                            >
+                                <option value="">Select education</option>
+                                <option>High School</option>
+                                <option>Certificate</option>
+                                <option>Diploma</option>
+                                <option>Advanced Diploma</option>
+                                <option>Bachelor's Degree</option>
+                                <option>Master's Degree</option>
+                                <option>Other</option>
+                            </select>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        {% if form %}
+
+                            {{ form.years_of_experience.label(
+                                class="form-label fw-semibold"
+                            ) }}
+
+                            {{ form.years_of_experience(
+                                class="form-control",
+                                placeholder="e.g. 3 years"
+                            ) }}
+
+                        {% else %}
+
+                            <label class="form-label fw-semibold">
+                                Years of Experience
+                            </label>
+
+                            <input
+                                type="text"
+                                name="years_of_experience"
+                                class="form-control"
+                                placeholder="e.g. 3 years"
+                            >
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        {% if form %}
+
+                            {{ form.current_position.label(
+                                class="form-label fw-semibold"
+                            ) }}
+
+                            {{ form.current_position(
+                                class="form-control",
+                                placeholder="Current / Most Recent Position"
+                            ) }}
+
+                        {% else %}
+
+                            <label class="form-label fw-semibold">
+                                Current / Most Recent Position
+                            </label>
+
+                            <input
+                                type="text"
+                                name="current_position"
+                                class="form-control"
+                            >
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        {% if form %}
+
+                            {{ form.previous_employer.label(
+                                class="form-label fw-semibold"
+                            ) }}
+
+                            {{ form.previous_employer(
+                                class="form-control",
+                                placeholder="Company / Organization"
+                            ) }}
+
+                        {% else %}
+
+                            <label class="form-label fw-semibold">
+                                Previous Employer
+                            </label>
+
+                            <input
+                                type="text"
+                                name="previous_employer"
+                                class="form-control"
+                            >
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================= -->
+            <!-- STEP 3 -->
+            <!-- ========================= -->
+
+            <div
+                class="wizard-content"
+                id="wizard-step-3"
+            >
+
+                <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">
+                    STEP 3: SKILLS &amp; CERTIFICATIONS
+                </h4>
+
+                <p class="text-muted small mb-4">
+                    Highlight the skills and certifications relevant to your career.
+                </p>
+
+                <div class="row g-3">
+
+                    <div class="col-12">
+
+                        {% if form %}
+
+                            {{ form.skills.label(
+                                class="form-label fw-semibold"
+                            ) }}
+
+                            {{ form.skills(
+                                class="form-control",
+                                placeholder="e.g. Customer Service, Accounting, IT Support..."
+                            ) }}
+
+                        {% else %}
+
+                            <label class="form-label fw-semibold">
+                                Key Skills
+                            </label>
+
+                            <textarea
+                                name="skills"
+                                class="form-control"
+                                rows="3"
+                                placeholder="List your key skills..."
+                            ></textarea>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        {% if form %}
+
+                            {{ form.languages.label(
+                                class="form-label fw-semibold"
+                            ) }}
+
+                            {{ form.languages(
+                                class="form-control",
+                                placeholder="e.g. Amharic, English..."
+                            ) }}
+
+                        {% else %}
+
+                            <label class="form-label fw-semibold">
+                                Languages
+                            </label>
+
+                            <input
+                                type="text"
+                                name="languages"
+                                class="form-control"
+                                placeholder="e.g. Amharic, English"
+                            >
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        {% if form %}
+
+                            {{ form.certifications.label(
+                                class="form-label fw-semibold"
+                            ) }}
+
+                            {{ form.certifications(
+                                class="form-control",
+                                placeholder="Certificates / Training"
+                            ) }}
+
+                        {% else %}
+
+                            <label class="form-label fw-semibold">
+                                Certifications
+                            </label>
+
+                            <input
+                                type="text"
+                                name="certifications"
+                                class="form-control"
+                                placeholder="Certificates / Training"
+                            >
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================= -->
+            <!-- STEP 4 -->
+            <!-- ========================= -->
+
+            <div
+                class="wizard-content"
+                id="wizard-step-4"
+            >
+
+                <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">
+                    STEP 4: APPLICATION
+                </h4>
+
+                <p class="text-muted small mb-4">
+                    Provide your availability and a short introduction.
+                </p>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        {% if form %}
+
+                            {{ form.availability_date.label(
+                                class="form-label fw-semibold"
+                            ) }}
+
+                            {{ form.availability_date(
+                                class="form-control"
+                            ) }}
+
+                        {% else %}
+
+                            <label class="form-label fw-semibold">
+                                Availability Date
+                            </label>
+
+                            <input
+                                type="date"
+                                name="availability_date"
+                                class="form-control"
+                            >
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        {% if form %}
+
+                            {{ form.willing_to_relocate.label(
+                                class="form-label fw-semibold"
+                            ) }}
+
+                            {{ form.willing_to_relocate(
+                                class="form-select"
+                            ) }}
+
+                        {% else %}
+
+                            <label class="form-label fw-semibold">
+                                Willing to Relocate?
+                            </label>
+
+                            <select
+                                name="willing_to_relocate"
+                                class="form-select"
+                            >
+                                <option value="">Select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="col-12">
+
+                        {% if form %}
+
+                            {{ form.cover_letter.label(
+                                class="form-label fw-semibold"
+                            ) }}
+
+                            {{ form.cover_letter(
+                                class="form-control",
+                                rows="6",
+                                placeholder="Tell us briefly about yourself, your experience and why you are interested in working at Rori Hotel."
+                            ) }}
+
+                        {% else %}
+
+                            <label class="form-label fw-semibold">
+                                Cover Letter / Short Introduction
+                            </label>
+
+                            <textarea
+                                name="cover_letter"
+                                class="form-control"
+                                rows="6"
+                                placeholder="Tell us briefly about yourself, your experience and why you are interested in working at Rori Hotel."
+                            ></textarea>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================= -->
+            <!-- STEP 5 -->
+            <!-- ========================= -->
+
+            <div
+                class="wizard-content"
+                id="wizard-step-5"
+            >
+
+                <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">
+                    STEP 5: DOCUMENTS
+                </h4>
+
+                <p class="text-muted small mb-4">
+                    Upload your latest CV or Resume.
+                </p>
+
+
+                <div
+                    class="upload-area text-center p-4 p-md-5 border border-2 border-dashed rounded-3 bg-light"
+                    id="uploadArea"
+                >
+
+                    <i class="bi bi-cloud-arrow-up text-gold display-4 d-block mb-3"></i>
+
+                    <label
+                        class="form-label fw-bold text-navy fs-5 d-block"
+                        id="uploadLabel"
+                    >
+                        Upload Resume / CV
+                    </label>
+
+                    <p class="text-muted small mb-3">
+                        Accepted formats: PDF, DOC, DOCX
+                        <br>
+                        Maximum file size: 5MB
+                    </p>
+
+
+                    {% if form and form.cv_file %}
+
+                        {{ form.cv_file(
+                            class="form-control w-100 w-md-75 mx-auto",
+                            id="cv_file",
+                            accept=".pdf,.doc,.docx"
+                        ) }}
+
+                    {% else %}
+
+                        <input
+                            type="file"
+                            name="cv_file"
+                            id="cv_file"
+                            class="form-control w-100 w-md-75 mx-auto"
+                            accept=".pdf,.doc,.docx"
+                            required
+                        >
+
+                    {% endif %}
+
+
+                    <div
+                        id="fileError"
+                        class="text-danger small mt-2 d-none">
+                    </div>
+
+                </div>
+
+
+                <!-- Confirmation -->
+
+                <div class="form-check mt-4">
+
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="confirmInformation"
+                        required
+                    >
+
+                    <label
+                        class="form-check-label small"
+                        for="confirmInformation"
+                    >
+                        I confirm that the information provided in this application
+                        is accurate and complete to the best of my knowledge.
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- NAVIGATION -->
+
+            <div
+                class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top"
+            >
+
+                <button
+                    type="button"
+                    class="btn btn-outline-navy px-4"
+                    id="prevBtn"
+                    disabled
+                >
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Back
+                </button>
+
+
+                <div class="text-muted small d-none d-md-block">
+                    Step <span id="currentStepText">1</span> of 5
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn btn-gold px-4"
+                    id="nextBtn"
+                >
+                    Next Step
+                    <i class="bi bi-arrow-right ms-1"></i>
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="btn btn-gold px-4 px-md-5 d-none"
+                    id="submitBtn"
+                >
+                    <i class="bi bi-send me-1"></i>
+                    SUBMIT APPLICATION
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const totalSteps = 5;
+    let currentStep = 1;
+
+    const form = document.getElementById("applicationForm");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const submitBtn = document.getElementById("submitBtn");
+    const currentStepText = document.getElementById("currentStepText");
+
+    const uploadArea = document.getElementById("uploadArea");
+    const fileInput = document.getElementById("cv_file");
+    const uploadLabel = document.getElementById("uploadLabel");
+    const fileError = document.getElementById("fileError");
+
+
+    function getCurrentContent() {
+        return document.getElementById(
+            "wizard-step-" + currentStep
+        );
+    }
+
+
+    function validateCurrentStep() {
+
+        const currentContent = getCurrentContent();
+
+        if (!currentContent) {
+            return true;
+        }
+
+        const fields = currentContent.querySelectorAll(
+            "input, select, textarea"
+        );
+
+        for (const field of fields) {
+
+            if (
+                field.type === "hidden" ||
+                field.type === "button" ||
+                field.type === "submit"
+            ) {
+                continue;
+            }
+
+            if (!field.checkValidity()) {
+
+                field.reportValidity();
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    function showStep(step) {
+
+        document.querySelectorAll(".wizard-content")
+            .forEach(function (content) {
+                content.classList.remove("active");
+            });
+
+
+        document.querySelectorAll(".wizard-step")
+            .forEach(function (indicator) {
+                indicator.classList.remove("active");
+            });
+
+
+        const content = document.getElementById(
+            "wizard-step-" + step
+        );
+
+        const indicator = document.getElementById(
+            "p-step-" + step
+        );
+
+
+        if (content) {
+            content.classList.add("active");
+        }
+
+        if (indicator) {
+            indicator.classList.add("active");
+        }
+
+
+        // Mark previous steps as completed
+
+        document.querySelectorAll(".wizard-step")
+            .forEach(function (indicator, index) {
+
+                const stepNumber = index + 1;
+
+                if (stepNumber < step) {
+                    indicator.classList.add("completed");
+                } else {
+                    indicator.classList.remove("completed");
+                }
+
+            });
+
+
+        prevBtn.disabled = step === 1;
+
+
+        if (step === totalSteps) {
+
+            nextBtn.classList.add("d-none");
+            submitBtn.classList.remove("d-none");
+
+        } else {
+
+            nextBtn.classList.remove("d-none");
+            submitBtn.classList.add("d-none");
+
+        }
+
+
+        if (currentStepText) {
+            currentStepText.textContent = step;
+        }
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }
+
+
+    nextBtn.addEventListener("click", function () {
+
+        if (!validateCurrentStep()) {
+            return;
+        }
+
+        if (currentStep < totalSteps) {
+
+            currentStep++;
+
+            showStep(currentStep);
+
+        }
+
+    });
+
+
+    prevBtn.addEventListener("click", function () {
+
+        if (currentStep > 1) {
+
+            currentStep--;
+
+            showStep(currentStep);
+
+        }
+
+    });
+
+
+    // CV validation
+
+    if (fileInput) {
+
+        fileInput.addEventListener("change", function () {
+
+            fileError.classList.add("d-none");
+            fileError.textContent = "";
+
+            if (!this.files || this.files.length === 0) {
+
+                uploadLabel.textContent = "Upload Resume / CV";
+
+                return;
+            }
+
+
+            const file = this.files[0];
+
+            const maxSize = 5 * 1024 * 1024;
+
+            const allowedExtensions = [
+                "pdf",
+                "doc",
+                "docx"
+            ];
+
+
+            const extension = file.name
+                .split(".")
+                .pop()
+                .toLowerCase();
+
+
+            if (!allowedExtensions.includes(extension)) {
+
+                fileError.textContent =
+                    "Please upload a PDF, DOC, or DOCX file.";
+
+                fileError.classList.remove("d-none");
+
+                this.value = "";
+
+                uploadLabel.textContent =
+                    "Upload Resume / CV";
+
+                return;
+            }
+
+
+            if (file.size > maxSize) {
+
+                fileError.textContent =
+                    "File size must not exceed 5MB.";
+
+                fileError.classList.remove("d-none");
+
+                this.value = "";
+
+                uploadLabel.textContent =
+                    "Upload Resume / CV";
+
+                return;
+            }
+
+
+            uploadLabel.textContent =
+                "Selected: " + file.name;
+
+        });
+
+    }
+
+
+    // Submit validation
+
+    form.addEventListener("submit", function (event) {
+
+        if (!validateCurrentStep()) {
+
+            event.preventDefault();
+
+            return;
+        }
+
+
+        const confirmation =
+            document.getElementById("confirmInformation");
+
+
+        if (confirmation && !confirmation.checked) {
+
+            event.preventDefault();
+
+            confirmation.reportValidity();
+
+            return;
+        }
+
+
+        if (fileInput && fileInput.files.length === 0) {
+
+            event.preventDefault();
+
+            fileError.textContent =
+                "Please upload your CV before submitting.";
+
+            fileError.classList.remove("d-none");
+
+            return;
+        }
+
+    });
+
+
+    showStep(currentStep);
+
+});
+
+</script>
+
+{% endblock %}
