@@ -1,0 +1,418 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Applications - Rori Hotel HR{% endblock %}
+
+{% block admin_content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-navy mb-1">📋 Applications</h2>
+        <p class="text-muted mb-0">Manage and review candidate applications.</p>
+    </div>
+
+    <span class="badge bg-gold fs-6 px-3 py-2">
+        {{ applications|length }} Total
+    </span>
+</div>
+
+
+<!-- ================= FILTERS ================= -->
+
+<div class="card p-3 mb-4 border-0 shadow-sm">
+
+    <form method="GET" class="row g-3">
+
+        <!-- Search -->
+        <div class="col-md-3">
+            <input
+                type="text"
+                name="search"
+                class="form-control"
+                placeholder="Search by name or email"
+                value="{{ request.args.get('search', '') }}"
+            >
+        </div>
+
+
+        <!-- Status -->
+        <div class="col-md-2">
+            <select
+                name="status"
+                class="form-select"
+                onchange="this.form.submit()"
+            >
+                <option value="ALL">All Statuses</option>
+
+                {% for s in statuses %}
+                    <option
+                        value="{{ s }}"
+                        {% if request.args.get('status') == s %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ s }}
+                    </option>
+                {% endfor %}
+
+            </select>
+        </div>
+
+
+        <!-- Tags -->
+        <div class="col-md-2">
+
+            <select
+                name="tag"
+                class="form-select"
+                onchange="this.form.submit()"
+            >
+
+                <option value="">All Tags</option>
+
+                {% for tag in all_tags %}
+
+                    <option
+                        value="{{ tag }}"
+                        {% if request.args.get('tag') == tag %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ tag }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <!-- Department -->
+        <div class="col-md-2">
+
+            <select
+                name="department"
+                class="form-select"
+                onchange="this.form.submit()"
+            >
+
+                <option value="">All Departments</option>
+
+                {% for dept in departments %}
+
+                    <option
+                        value="{{ dept.id }}"
+                        {% if request.args.get('department')|int == dept.id %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ dept.name }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <!-- Date -->
+        <div class="col-md-2">
+
+            <input
+                type="date"
+                name="date_from"
+                class="form-control"
+                value="{{ request.args.get('date_from', '') }}"
+            >
+
+        </div>
+
+
+        <!-- Reset -->
+        <div class="col-md-1">
+
+            <a
+                href="{{ url_for('admin_candidates') }}"
+                class="btn btn-outline-navy w-100"
+            >
+                Reset
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- ================= APPLICATION TABLE ================= -->
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body p-0">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th class="px-3">ID</th>
+                        <th>Name</th>
+                        <th>Job</th>
+                        <th>Tags</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th class="text-end px-3">Actions</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for app in applications %}
+
+                    <tr>
+
+                        <!-- ID -->
+                        <td class="px-3">
+
+                            <strong>
+                                #{{ app.id }}
+                            </strong>
+
+                            {% if app.reference_no %}
+
+                                <br>
+
+                                <small class="text-muted">
+                                    {{ app.reference_no }}
+                                </small>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Candidate -->
+                        <td>
+
+                            <strong>
+                                {{ app.full_name }}
+                            </strong>
+
+                            <br>
+
+                            <small class="text-muted">
+                                {{ app.email }}
+                            </small>
+
+                            {% if app.phone %}
+
+                                <br>
+
+                                <small class="text-muted">
+                                    📞 {{ app.phone }}
+                                </small>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Job -->
+                        <td>
+
+                            {% if app.job %}
+
+                                <strong>
+                                    {{ app.job.title }}
+                                </strong>
+
+                                {% if app.job.department_name %}
+
+                                    <br>
+
+                                    <small class="text-muted">
+                                        {{ app.job.department_name }}
+                                    </small>
+
+                                {% endif %}
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    Job unavailable
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Tags -->
+                        <td>
+
+                            {% if app.tags %}
+
+                                {% for tag in app.tags.split(',') %}
+
+                                    {% if tag.strip() %}
+
+                                        <span class="badge bg-light text-navy border me-1 mb-1">
+                                            {{ tag.strip() }}
+                                        </span>
+
+                                    {% endif %}
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Status -->
+                        <td>
+
+                            {% if app.status == 'NEW' %}
+
+                                <span class="badge bg-info">
+                                    NEW
+                                </span>
+
+                            {% elif app.status == 'UNDER REVIEW' %}
+
+                                <span class="badge bg-warning text-dark">
+                                    UNDER REVIEW
+                                </span>
+
+                            {% elif app.status == 'SHORTLISTED' %}
+
+                                <span class="badge bg-success">
+                                    SHORTLISTED
+                                </span>
+
+                            {% elif app.status == 'INTERVIEW' %}
+
+                                <span class="badge bg-primary">
+                                    INTERVIEW
+                                </span>
+
+                            {% elif app.status == 'SELECTED' %}
+
+                                <span class="badge bg-gold text-dark">
+                                    SELECTED
+                                </span>
+
+                            {% elif app.status == 'HIRED' %}
+
+                                <span class="badge bg-dark">
+                                    HIRED
+                                </span>
+
+                            {% elif app.status == 'REJECTED' %}
+
+                                <span class="badge bg-danger">
+                                    REJECTED
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+                                    {{ app.status or 'UNKNOWN' }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Submitted -->
+                        <td>
+
+                            {% if app.submitted_at %}
+
+                                {{ app.submitted_at.strftime('%b %d, %Y') }}
+
+                                <br>
+
+                                <small class="text-muted">
+                                    {{ app.submitted_at.strftime('%I:%M %p') }}
+                                </small>
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Actions -->
+                        <td class="text-end px-3">
+
+                            <a
+                                href="{{ url_for('admin_candidate_detail', app_id=app.id) }}"
+                                class="btn btn-sm btn-outline-navy"
+                            >
+                                👁 View
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+
+                    {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="text-center text-muted py-5"
+                        >
+
+                            <div class="fs-1 mb-2">
+                                📭
+                            </div>
+
+                            <h5 class="fw-bold">
+                                No applications found
+                            </h5>
+
+                            <p class="mb-0">
+                                No candidate applications match your current filters.
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
