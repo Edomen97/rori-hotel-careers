@@ -1,4 +1,5 @@
 import os
+import logging
 from datetime import datetime, date
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, flash, session, abort, jsonify, send_from_directory
@@ -10,8 +11,8 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from sqlalchemy import text, inspect
+import jinja2
 import secrets
-import jinja2  # <-- added for custom loader
 
 # ========================= Configuration =========================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -36,27 +37,30 @@ class Config:
     HR_PASSWORD_HASH = os.environ.get('HR_PASSWORD_HASH') or generate_password_hash(
         os.environ.get('HR_PASSWORD', 'RoriHR2026')
     )
+    # Email settings
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
     MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'false').lower() in ['true', 'on', '1']
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@rorihotel.com')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', os.environ.get('MAIL_USERNAME'))
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# ========================= Custom Jinja2 Loader for Multiple Template Folders =========================
+# ========================= Custom Jinja2 Loader =========================
+# Allows templates to be placed in subfolders without subfolder prefix
 template_dirs = [
-    os.path.join(app.root_path, 'templates'),                  # root
-    os.path.join(app.root_path, 'templates', 'careers'),       # public career pages
-    os.path.join(app.root_path, 'templates', 'application'),   # application forms & status
-    os.path.join(app.root_path, 'templates', 'auth'),          # login pages
-    os.path.join(app.root_path, 'templates', 'admin'),         # admin dashboard
+    os.path.join(app.root_path, 'templates'),
+    os.path.join(app.root_path, 'templates', 'careers'),
+    os.path.join(app.root_path, 'templates', 'application'),
+    os.path.join(app.root_path, 'templates', 'auth'),
+    os.path.join(app.root_path, 'templates', 'admin'),
 ]
 app.jinja_loader = jinja2.FileSystemLoader(template_dirs)
 
+# ========================= Database & Mail =========================
 db = SQLAlchemy(app)
 mail = Mail(app)
 
@@ -64,8 +68,15 @@ mail = Mail(app)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['UPLOAD_FOLDER_JOBS'], exist_ok=True)
 
-# ========================= Models =========================
+# ========================= Logging =========================
+if not app.debug:
+    # Set up file handler for production (Render logs to stdout)
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
+    app.logger.addHandler(stream_handler)
+    app.logger.setLevel(logging.INFO)
 
+# ========================= Models =========================
 class Department(db.Model):
     __tablename__ = 'departments'
     id = db.Column(db.Integer, primary_key=True)
@@ -242,7 +253,6 @@ class AuditLog(db.Model):
         return f'<AuditLog {self.user_name} - {self.action}>'
 
 # ========================= Forms =========================
-
 class ApplicationForm(FlaskForm):
     full_name = StringField('Full Name', validators=[DataRequired(), Length(max=120)])
     email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
@@ -324,13 +334,8 @@ class InterviewForm(FlaskForm):
     location = StringField('Location/Meeting Link', validators=[Optional(), Length(max=200)])
     notes = TextAreaField('Notes', validators=[Optional()])
 
-# ========================= Database Helpers (SQLAlchemy 2.0 Compatible) =========================
-
+# ========================= Database Helpers (SQLAlchemy 2.0 compatible) =========================
 def _safe_add_column(table, column_name, column_type):
-    """
-    ደህንነቱ የተጠበቀ የአምድ መጨመር - ነባር መረጃን አይሰርዝም
-    SQLAlchemy 2.0 ጋር ተኳሃኝ
-    """
     try:
         inspector = inspect(db.engine)
         if table in inspector.get_table_names():
@@ -339,14 +344,13 @@ def _safe_add_column(table, column_name, column_type):
                 with db.engine.connect() as conn:
                     conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column_name} {column_type}"))
                     conn.commit()
-                print(f"✅ Added column '{column_name}' to {table}")
+                app.logger.info(f"✅ Added column '{column_name}' to {table}")
             else:
-                print(f"ℹ️ Column '{column_name}' already exists in {table}")
+                app.logger.info(f"ℹ️ Column '{column_name}' already exists in {table}")
     except Exception as e:
-        print(f"⚠️ Could not add column '{column_name}' to {table}: {e}")
+        app.logger.error(f"⚠️ Could not add column '{column_name}' to {table}: {e}")
 
 # ========================= Helper Functions =========================
-
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
@@ -401,7 +405,71 @@ def log_audit(action, description=None, target_type=None, target_id=None):
     db.session.commit()
     return log
 
+def send_application_notification(application, job):
+    """Send email notification to HR when a new application is submitted."""
+    if not app.config['MAIL_USERNAME']:
+        app.logger.warning("Email not configured. Skipping notification.")
+        return
+    try:
+        hr_email = os.environ.get('HR_EMAIL', app.config['MAIL_USERNAME'])
+        msg = Message(
+            subject=f"📋 New Job Application: {job.title} - {application.full_name}",
+            recipients=[hr_email],
+            sender=app.config['MAIL_DEFAULT_SENDER']
+        )
+        # HTML email body
+        msg.html = f"""
+        <div style="font-family: 'Cormorant Garamond', serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #C5A059; background: #fff;">
+            <h2 style="color: #0B132B;">Rori Hotel</h2>
+            <div style="background: #F8F9FA; padding: 20px; border-radius: 12px;">
+                <h3 style="color: #0B132B; margin-top: 0;">📋 New Job Application</h3>
+                <p>A new application has been submitted for <strong>{job.title}</strong>.</p>
+                <table style="width:100%; border-collapse:collapse; margin:15px 0;">
+                    <tr style="border-bottom:1px solid #E9ECEF;">
+                        <td style="padding:8px 0; font-weight:600;">Candidate</td>
+                        <td style="padding:8px 0;">{application.full_name}</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #E9ECEF;">
+                        <td style="padding:8px 0; font-weight:600;">Email</td>
+                        <td style="padding:8px 0;"><a href="mailto:{application.email}">{application.email}</a></td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #E9ECEF;">
+                        <td style="padding:8px 0; font-weight:600;">Phone</td>
+                        <td style="padding:8px 0;">{application.phone}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:8px 0; font-weight:600;">Cover Letter</td>
+                        <td style="padding:8px 0;">{application.cover_letter or 'N/A'}</td>
+                    </tr>
+                </table>
+                <div style="margin-top:15px; padding-top:15px; border-top:1px solid #E9ECEF;">
+                    <a href="{url_for('admin_candidate_detail', app_id=application.id, _external=True)}" 
+                       style="background:#C5A059; color:#0B132B; padding:10px 25px; text-decoration:none; border-radius:30px; display:inline-block; font-weight:600;">
+                       🔍 View Application
+                    </a>
+                </div>
+            </div>
+            <p style="color:#6C757D; font-size:12px;">© 2026 Rori Hotel. All rights reserved.</p>
+        </div>
+        """
+        # Plain text fallback
+        msg.body = f"""
+New Job Application: {job.title}
+
+Candidate: {application.full_name}
+Email: {application.email}
+Phone: {application.phone}
+Cover Letter: {application.cover_letter or 'N/A'}
+
+View application: {url_for('admin_candidate_detail', app_id=application.id, _external=True)}
+"""
+        mail.send(msg)
+        app.logger.info(f"📧 Email notification sent for application #{application.id}")
+    except Exception as e:
+        app.logger.error(f"❌ Failed to send email notification: {str(e)}")
+
 def send_application_status_email(application, old_status, new_status, notes=""):
+    """Send status update email to applicant."""
     if not app.config['MAIL_USERNAME']:
         return
     messages = {
@@ -414,10 +482,11 @@ def send_application_status_email(application, old_status, new_status, notes="")
     try:
         msg = Message(
             subject=f'Rori Hotel - Application Status: {new_status}',
-            recipients=[application.email]
+            recipients=[application.email],
+            sender=app.config['MAIL_DEFAULT_SENDER']
         )
         msg.html = f"""
-        <div style="font-family: 'Cormorant Garamond', serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #C5A059;">
+        <div style="font-family: 'Cormorant Garamond', serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #C5A059; background: #fff;">
             <h2 style="color: #0B132B;">Rori Hotel</h2>
             <div style="background: #F8F9FA; padding: 20px; border-radius: 12px;">
                 <p>Dear <strong>{application.full_name}</strong>,</p>
@@ -435,7 +504,7 @@ def send_application_status_email(application, old_status, new_status, notes="")
         """
         mail.send(msg)
     except Exception as e:
-        print(f"Email failed: {e}")
+        app.logger.error(f"Email status update failed: {e}")
 
 def get_similar_jobs(job, limit=3):
     similar = Job.query.filter(
@@ -449,7 +518,6 @@ def get_similar_jobs(job, limit=3):
     return similar
 
 # ========================= Context Processors =========================
-
 @app.context_processor
 def inject_now():
     return {'now': datetime.utcnow}
@@ -460,8 +528,7 @@ def inject_departments_and_locations():
     locs = Location.query.all()
     return dict(all_departments=depts, all_locations=locs)
 
-# ========================= Public Routes (updated to use bare template names) =========================
-
+# ========================= Public Routes =========================
 @app.route('/')
 def home():
     featured_jobs = Job.query.filter_by(is_active=True, is_featured=True).order_by(Job.created_at.desc()).limit(6).all()
@@ -533,7 +600,7 @@ def application_lookup():
         application = Application.query.get_or_404(app_id)
         return redirect(url_for('application_status', app_id=application.id))
     except ValueError:
-        flash('Invalid application ID format. Please enter a number.', 'danger')
+        flash('Invalid application ID. Please enter a number.', 'danger')
         return redirect(url_for('home'))
 
 @app.route('/apply/<int:job_id>', methods=['GET', 'POST'])
@@ -568,6 +635,10 @@ def apply(job_id):
         db.session.add(application)
         db.session.commit()
 
+        # Send email notification
+        send_application_notification(application, job)
+
+        # Create internal notification
         notif = Notification(
             title=f'New Application: {application.full_name}',
             message=f'{application.full_name} applied for {job.title}.',
@@ -631,7 +702,6 @@ def talent_pool():
     return render_template('talent_pool.html', form=form)
 
 # ========================= Admin Auth =========================
-
 @app.route('/auth/login', methods=['GET', 'POST'])
 def admin_login():
     if session.get('admin_logged_in'):
@@ -668,8 +738,7 @@ def forgot_password():
         return redirect(url_for('admin_login'))
     return render_template('forgot_password.html')
 
-# ========================= Admin Dashboard (templates kept with admin/ prefix to avoid conflicts) =========================
-
+# ========================= Admin Dashboard =========================
 @app.route('/admin')
 @admin_required
 def admin_dashboard():
@@ -1090,33 +1159,47 @@ def admin_settings():
         return redirect(url_for('admin_settings'))
     return render_template('admin/settings.html')
 
-# ========================= Database Initialization (Safe - SQLAlchemy 2.0 Compatible) =========================
+# ========================= Error Handlers =========================
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
+@app.errorhandler(500)
+def internal_server_error(e):
+    db.session.rollback()
+    app.logger.error(f'500 error: {e}')
+    return render_template('500.html'), 500
+
+@app.errorhandler(403)
+def forbidden(e):
+    flash('You do not have permission to access this page.', 'danger')
+    return redirect(url_for('home'))
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    flash('Method not allowed.', 'warning')
+    return redirect(url_for('home'))
+
+# ========================= Database Initialization (Safe) =========================
 def init_db_safe():
     with app.app_context():
         db.create_all()
         inspector = inspect(db.engine)
         existing_tables = inspector.get_table_names()
-        print(f"📋 Existing tables: {', '.join(existing_tables) if existing_tables else 'None'}")
+        app.logger.info(f"Existing tables: {', '.join(existing_tables) if existing_tables else 'None'}")
 
-        # Add missing columns for jobs
+        # Add missing columns
         _safe_add_column('jobs', 'is_featured', 'BOOLEAN DEFAULT 0')
         _safe_add_column('jobs', 'banner_image', 'VARCHAR(255)')
-
-        # Add missing columns for applications
         _safe_add_column('applications', 'tags', 'VARCHAR(255)')
         _safe_add_column('applications', 'reviewed_by', 'VARCHAR(120)')
         _safe_add_column('applications', 'shortlisted_at', 'DATETIME')
         _safe_add_column('applications', 'rejected_at', 'DATETIME')
         _safe_add_column('applications', 'viewed_at', 'DATETIME')
         _safe_add_column('applications', 'notes', 'TEXT')
-
-        # Add missing columns for interviews
         _safe_add_column('interviews', 'evaluation', 'TEXT')
         _safe_add_column('interviews', 'rating', 'INTEGER')
         _safe_add_column('interviews', 'decision', 'VARCHAR(30)')
-
-        print("✅ Database schema verified/updated safely.")
 
         # Seed initial data if empty
         if Department.query.count() == 0:
@@ -1138,12 +1221,12 @@ def init_db_safe():
             for d in depts:
                 db.session.add(Department(name=d['name'], icon=d['icon']))
             db.session.commit()
-            print('Departments seeded.')
+            app.logger.info('Departments seeded.')
 
         if Location.query.count() == 0:
             db.session.add(Location(name='Hawassa', address='Hawassa, Sidama Region, Ethiopia'))
             db.session.commit()
-            print('Locations seeded.')
+            app.logger.info('Locations seeded.')
 
         if Job.query.count() == 0:
             dept_eng = Department.query.filter_by(name='Engineering').first()
@@ -1159,7 +1242,7 @@ def init_db_safe():
                     full_description='Rori Hotel is seeking an experienced and visionary Engineering Head to lead our facility management and technical operations in Hawassa.',
                     responsibilities='Direct and manage overall hotel engineering maintenance and facility operations.\nDevelop and execute comprehensive Preventive Maintenance Plans (PMP) for all equipment.\nLead, mentor, and evaluate the engineering and maintenance technical team.\nEnsure strict compliance with national safety, occupational health, and fire codes.\nManage departmental budgets, spare parts inventory, and contractor service contracts.\nImplement energy efficiency, water conservation, and sustainability initiatives.',
                     requirements='BSc Degree in Electrical, Mechanical, Civil Engineering, or equivalent technical discipline.\nMinimum 5+ years of progressive engineering leadership experience in luxury hotels or large commercial facilities.\nDeep expertise in HVAC, heavy generators, BMS, plumbing, electrical distribution, and fire suppression systems.\nFluent in Amharic (Native) and strong working proficiency in English (Written and Verbal).',
-                    what_we_offer='Career Development: Leadership growth opportunities within a premier hospitality brand.\nTraining: Specialized technical certifications and hospitality management training.\nEmployee Benefits: Competitive executive salary package, duty meals, and health coverage.',
+                    what_we_offer='Career Development: Leadership growth opportunities.\nTraining: Specialized technical certifications.\nEmployee Benefits: Competitive salary package, duty meals, and health coverage.',
                     employment_type='Full-time',
                     experience_level='3+ Years',
                     salary_range='50,000 - 70,000 ETB',
@@ -1202,25 +1285,25 @@ def init_db_safe():
             ]
             db.session.add_all(sample_jobs)
             db.session.commit()
-            print('Sample jobs seeded.')
+            app.logger.info('Sample jobs seeded.')
+
+        app.logger.info('✅ Database initialization complete.')
 
 # ========================= CLI Commands =========================
-
 @app.cli.command('init-db-safe')
 def init_db_safe_command():
     """Initialize database safely without dropping existing data."""
-    print("🔍 Checking database...")
+    app.logger.info('🔍 Checking database...')
     init_db_safe()
-    print("✅ Database initialization complete.")
+    app.logger.info('✅ Database initialization complete.')
 
-# ========================= Run Application & Init DB (Render/Gunicorn Compatible) =========================
-
-# ሰርቨሩ በ Render/Gunicorn ሲነሳ በራሱ ዴታቤዙንና ቴብሎቹን እንዲፈጥር
+# ========================= Run Application =========================
+# Initialize database on startup (for Render/Gunicorn)
 with app.app_context():
     try:
         init_db_safe()
     except Exception as e:
-        print(f"⚠️ DB Init Exception: {e}")
+        app.logger.error(f"⚠️ DB Init Exception: {e}")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
