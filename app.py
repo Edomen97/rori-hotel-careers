@@ -456,7 +456,7 @@ def home():
     featured_jobs = Job.query.filter_by(is_active=True, is_featured=True).order_by(Job.created_at.desc()).limit(6).all()
     latest_jobs = Job.query.filter_by(is_active=True).order_by(Job.created_at.desc()).limit(3).all()
     departments = Department.query.all()
-    return render_template('home.html',
+    return render_template('careers/home.html',
                            featured_jobs=featured_jobs,
                            latest_jobs=latest_jobs,
                            departments=departments)
@@ -483,33 +483,33 @@ def jobs():
     jobs_list = query.order_by(Job.created_at.desc()).all()
     departments = Department.query.all()
     locations = Location.query.all()
-    return render_template('jobs.html', jobs=jobs_list, departments=departments, locations=locations)
+    return render_template('careers/jobs.html', jobs=jobs_list, departments=departments, locations=locations)
 
 @app.route('/job/<int:job_id>')
 def job_detail(job_id):
     job = Job.query.get_or_404(job_id)
     similar_jobs = get_similar_jobs(job)
-    return render_template('job_detail.html', job=job, similar_jobs=similar_jobs)
+    return render_template('careers/job_detail.html', job=job, similar_jobs=similar_jobs)
 
 @app.route('/departments')
 def departments():
     depts = Department.query.all()
-    return render_template('departments.html', departments=depts)
+    return render_template('careers/departments.html', departments=depts)
 
 @app.route('/department/<int:dept_id>')
 def department_detail(dept_id):
     dept = Department.query.get_or_404(dept_id)
     jobs = Job.query.filter_by(department_id=dept_id, is_active=True).all()
-    return render_template('department_detail.html', department=dept, jobs=jobs)
+    return render_template('careers/department_detail.html', department=dept, jobs=jobs)
 
 @app.route('/locations')
 def locations():
     locs = Location.query.all()
-    return render_template('locations.html', locations=locs)
+    return render_template('careers/locations.html', locations=locs)
 
 @app.route('/about-careers')
 def about_careers():
-    return render_template('about_careers.html')
+    return render_template('careers/about_careers.html')
 
 @app.route('/application/lookup', methods=['GET'])
 def application_lookup():
@@ -533,7 +533,7 @@ def apply(job_id):
         cv_filename = save_uploaded_file(form.cv_file.data)
         if not cv_filename:
             flash('Invalid file format. Please upload PDF, DOC, or DOCX.', 'danger')
-            return render_template('apply.html', form=form, job=job)
+            return render_template('application/apply.html', form=form, job=job)
 
         application = Application(
             job_id=job.id,
@@ -567,12 +567,12 @@ def apply(job_id):
 
         flash('Your application has been submitted successfully!', 'success')
         return redirect(url_for('application_success', app_id=application.id))
-    return render_template('apply.html', form=form, job=job)
+    return render_template('application/apply.html', form=form, job=job)
 
 @app.route('/application/success/<int:app_id>')
 def application_success(app_id):
     application = Application.query.get_or_404(app_id)
-    return render_template('success.html', application=application)
+    return render_template('application/success.html', application=application)
 
 @app.route('/application/status/<int:app_id>')
 def application_status(app_id):
@@ -581,7 +581,7 @@ def application_status(app_id):
         application.viewed_at = datetime.utcnow()
         db.session.commit()
     job = application.job
-    return render_template('application_status.html', application=application, job=job)
+    return render_template('application/application_status.html', application=application, job=job)
 
 @app.route('/talent-pool', methods=['GET', 'POST'])
 def talent_pool():
@@ -590,7 +590,7 @@ def talent_pool():
         cv_filename = save_uploaded_file(form.cv_file.data)
         if not cv_filename:
             flash('Invalid file format. Please upload PDF, DOC, or DOCX.', 'danger')
-            return render_template('talent_pool.html', form=form)
+            return render_template('application/talent_pool.html', form=form)
 
         existing = TalentPool.query.filter_by(email=form.email.data).first()
         if existing:
@@ -617,7 +617,7 @@ def talent_pool():
         db.session.commit()
         flash('You have successfully joined the Rori Hotel Talent Pool!', 'success')
         return redirect(url_for('home'))
-    return render_template('talent_pool.html', form=form)
+    return render_template('application/talent_pool.html', form=form)
 
 # ========================= Admin Auth =========================
 
@@ -638,7 +638,7 @@ def admin_login():
             return redirect(url_for('admin_dashboard'))
         else:
             flash('Invalid credentials.', 'danger')
-    return render_template('login.html', form=form)
+    return render_template('auth/login.html', form=form)
 
 @app.route('/auth/logout')
 def admin_logout():
@@ -655,7 +655,7 @@ def forgot_password():
     if request.method == 'POST':
         flash('If an account exists with that email, we will send a reset link.', 'info')
         return redirect(url_for('admin_login'))
-    return render_template('forgot_password.html')
+    return render_template('auth/forgot_password.html')
 
 # ========================= Admin Dashboard =========================
 
