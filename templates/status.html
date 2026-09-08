@@ -3,7 +3,6 @@
 {% block title %}Application Status - Rori Hotel Careers{% endblock %}
 
 {% block extra_css %}
-
 <style>
 .status-tracker {
     display: flex;
@@ -61,7 +60,7 @@
 .status-step.pending .step-icon {
     background-color: var(--white);
     border: 2px solid var(--border-color);
-    color: #ADB5BD;
+    color: #adb5bd;
 }
 
 .step-content {
@@ -103,6 +102,63 @@
 .application-summary-value {
     font-weight: 600;
     color: var(--navy);
+}
+
+.current-status-box {
+    border-radius: 14px;
+    padding: 1.25rem;
+    border: 1px solid var(--border-color);
+    background: #fff;
+}
+
+.current-status-box.rejected {
+    background: #fff5f5;
+    border-color: #f1b0b7;
+}
+
+.current-status-box.hired {
+    background: #f1fbf5;
+    border-color: #a8dfbd;
+}
+
+.current-status-box.selected {
+    background: #fffaf0;
+    border-color: #e7d39c;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.status-badge.default {
+    background: var(--navy);
+    color: var(--gold);
+}
+
+.status-badge.rejected {
+    background: #dc3545;
+    color: #fff;
+}
+
+.status-badge.hired {
+    background: #198754;
+    color: #fff;
+}
+
+.status-badge.selected {
+    background: var(--gold);
+    color: #fff;
+}
+
+.status-update {
+    font-size: 0.8rem;
+    color: var(--text-muted);
 }
 
 @keyframes pulse {
@@ -162,334 +218,596 @@
         font-size: 0.9rem;
     }
 }
-</style>{% endblock %}
+</style>
+{% endblock %}
+
 
 {% block content %}
 
-<div class="container my-5"><div class="card card-premium p-4 p-md-5">
+<div class="container my-5">
 
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 border-bottom pb-3">
+    <div class="card card-premium p-4 p-md-5">
 
-        <div>
-            <span class="badge bg-gold text-white mb-2 px-3 py-2 rounded-pill fw-semibold">
-                APPLICATION #RORI-{{ '%04d' % application.id }}
-            </span>
+        <!-- HEADER -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 border-bottom pb-3">
 
-            <h2 class="fw-bold text-navy mb-0">
-                {{ job.title }}
-            </h2>
-        </div>
+            <div>
 
-        <div class="text-md-end">
-            <small class="text-muted d-block text-uppercase fw-bold"
-                   style="font-size:0.75rem; letter-spacing:0.5px;">
-                Submitted
-            </small>
-
-            <span class="fw-semibold text-navy fs-6">
-                {% if application.submitted_at %}
-                    {{ application.submitted_at.strftime('%B %d, %Y') }}
-                {% else %}
-                    Not available
-                {% endif %}
-            </span>
-        </div>
-
-    </div>
-
-
-    <!-- Application Summary -->
-    <div class="application-summary mb-4">
-
-        <div class="row g-3">
-
-            <div class="col-md-4">
-                <div class="application-summary-label">
-                    Position
-                </div>
-
-                <div class="application-summary-value">
-                    {{ job.title }}
-                </div>
-            </div>
-
-            {% if job.department_name %}
-            <div class="col-md-4">
-                <div class="application-summary-label">
-                    Department
-                </div>
-
-                <div class="application-summary-value">
-                    {{ job.department_name }}
-                </div>
-            </div>
-            {% endif %}
-
-            {% if job.location_name %}
-            <div class="col-md-4">
-                <div class="application-summary-label">
-                    Location
-                </div>
-
-                <div class="application-summary-value">
-                    {{ job.location_name }}
-                </div>
-            </div>
-            {% endif %}
-
-        </div>
-
-    </div>
-
-
-    <!-- Status Tracker -->
-
-    {% set statuses = [
-        'NEW',
-        'UNDER REVIEW',
-        'SHORTLISTED',
-        'INTERVIEW',
-        'SELECTED',
-        'HIRED'
-    ] %}
-
-    {% set current_idx =
-        statuses.index(application.status)
-        if application.status in statuses
-        else 0
-    %}
-
-
-    <div class="status-tracker my-5">
-
-        <!-- Application Submitted -->
-        <div class="status-step completed">
-
-            <div class="step-icon">
-                <i class="bi bi-check-lg"></i>
-            </div>
-
-            <div class="step-content">
-                <span class="step-title">
-                    Application Submitted
-                </span>
-
-                <span class="step-date">
-                    {% if application.submitted_at %}
-                        {{ application.submitted_at.strftime('%b %d, %Y') }}
+                <span class="badge bg-gold text-white mb-2 px-3 py-2 rounded-pill fw-semibold">
+                    APPLICATION
+                    {% if application.reference_no %}
+                        #{{ application.reference_no }}
                     {% else %}
-                        Submitted
+                        #RORI-{{ '%04d' % application.id }}
                     {% endif %}
                 </span>
+
+                <h2 class="fw-bold text-navy mb-0">
+                    {{ job.title }}
+                </h2>
+
+            </div>
+
+            <div class="text-md-end">
+
+                <small class="text-muted d-block text-uppercase fw-bold"
+                       style="font-size:0.75rem; letter-spacing:0.5px;">
+                    Submitted
+                </small>
+
+                <span class="fw-semibold text-navy fs-6">
+
+                    {% if application.submitted_at %}
+
+                        {{ application.submitted_at.strftime('%B %d, %Y') }}
+
+                    {% else %}
+
+                        Not available
+
+                    {% endif %}
+
+                </span>
+
             </div>
 
         </div>
 
 
-        <!-- HR Review -->
-        <div class="status-step
-            {% if current_idx >= 1 %}
-                completed
-            {% elif current_idx == 0 %}
-                active
-            {% else %}
-                pending
-            {% endif %}">
+        <!-- APPLICATION SUMMARY -->
+        <div class="application-summary mb-4">
 
-            <div class="step-icon">
+            <div class="row g-3">
 
-                {% if current_idx >= 1 %}
-                    <i class="bi bi-check-lg"></i>
-                {% elif current_idx == 0 %}
-                    <i class="bi bi-hourglass-split"></i>
-                {% else %}
-                    <i class="bi bi-circle"></i>
+                <div class="col-md-4">
+
+                    <div class="application-summary-label">
+                        Position
+                    </div>
+
+                    <div class="application-summary-value">
+                        {{ job.title }}
+                    </div>
+
+                </div>
+
+
+                {% if job.department_name %}
+
+                <div class="col-md-4">
+
+                    <div class="application-summary-label">
+                        Department
+                    </div>
+
+                    <div class="application-summary-value">
+                        {{ job.department_name }}
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+
+                {% if job.location_name %}
+
+                <div class="col-md-4">
+
+                    <div class="application-summary-label">
+                        Location
+                    </div>
+
+                    <div class="application-summary-value">
+                        {{ job.location_name }}
+                    </div>
+
+                </div>
+
                 {% endif %}
 
             </div>
 
-            <div class="step-content">
+        </div>
 
-                <span class="step-title">
-                    Under HR Review
+
+        <!-- STATUS LOGIC -->
+
+        {% set statuses = [
+            'NEW',
+            'UNDER REVIEW',
+            'SHORTLISTED',
+            'INTERVIEW',
+            'SELECTED',
+            'HIRED'
+        ] %}
+
+        {% set current_status = application.status or 'NEW' %}
+
+        {% if current_status in statuses %}
+
+            {% set current_idx = statuses.index(current_status) %}
+
+        {% else %}
+
+            {% set current_idx = 0 %}
+
+        {% endif %}
+
+
+        <!-- REJECTED APPLICATION -->
+
+        {% if current_status == 'REJECTED' %}
+
+        <div class="current-status-box rejected text-center mb-5">
+
+            <div class="mb-3">
+
+                <span class="status-badge rejected">
+
+                    <i class="bi bi-x-circle-fill"></i>
+
+                    Application Not Selected
+
                 </span>
 
-                <span class="step-date">
+            </div>
+
+            <h4 class="fw-bold text-danger mb-2">
+                Thank you for your interest
+            </h4>
+
+            <p class="text-muted mb-0">
+                After careful consideration, your application was not selected
+                for this position at this time.
+            </p>
+
+            {% if application.status_updated_at %}
+
+            <div class="status-update mt-3">
+
+                Last updated:
+                {{ application.status_updated_at.strftime('%B %d, %Y') }}
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+        {% else %}
+
+
+        <!-- NORMAL STATUS TRACKER -->
+
+        <div class="status-tracker my-5">
+
+
+            <!-- APPLICATION SUBMITTED -->
+
+            <div class="status-step completed">
+
+                <div class="step-icon">
+
+                    <i class="bi bi-check-lg"></i>
+
+                </div>
+
+                <div class="step-content">
+
+                    <span class="step-title">
+                        Application Submitted
+                    </span>
+
+                    <span class="step-date">
+
+                        {% if application.submitted_at %}
+
+                            {{ application.submitted_at.strftime('%b %d, %Y') }}
+
+                        {% else %}
+
+                            Submitted
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- HR REVIEW -->
+
+            <div class="status-step
+                {% if current_idx >= 1 %}
+                    completed
+                {% elif current_idx == 0 %}
+                    active
+                {% else %}
+                    pending
+                {% endif %}
+            ">
+
+                <div class="step-icon">
 
                     {% if current_idx >= 1 %}
-                        Completed
+
+                        <i class="bi bi-check-lg"></i>
+
                     {% elif current_idx == 0 %}
-                        In Progress
+
+                        <i class="bi bi-hourglass-split"></i>
+
                     {% else %}
-                        Pending
+
+                        <i class="bi bi-circle"></i>
+
                     {% endif %}
 
-                </span>
+                </div>
+
+                <div class="step-content">
+
+                    <span class="step-title">
+                        Under HR Review
+                    </span>
+
+                    <span class="step-date">
+
+                        {% if current_idx >= 1 %}
+
+                            Completed
+
+                        {% elif current_idx == 0 %}
+
+                            In Progress
+
+                        {% else %}
+
+                            Pending
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
 
             </div>
 
-        </div>
 
+            <!-- SHORTLISTED -->
 
-        <!-- Shortlisted -->
-        <div class="status-step
-            {% if current_idx >= 2 %}
-                completed
-            {% elif current_idx == 1 %}
-                active
-            {% else %}
-                pending
-            {% endif %}">
-
-            <div class="step-icon">
-
+            <div class="status-step
                 {% if current_idx >= 2 %}
-                    <i class="bi bi-check-lg"></i>
+                    completed
                 {% elif current_idx == 1 %}
-                    <i class="bi bi-hourglass-split"></i>
+                    active
                 {% else %}
-                    <i class="bi bi-circle"></i>
+                    pending
                 {% endif %}
+            ">
 
-            </div>
-
-            <div class="step-content">
-
-                <span class="step-title">
-                    Shortlisted
-                </span>
-
-                <span class="step-date">
+                <div class="step-icon">
 
                     {% if current_idx >= 2 %}
-                        Completed
+
+                        <i class="bi bi-check-lg"></i>
+
                     {% elif current_idx == 1 %}
-                        In Progress
+
+                        <i class="bi bi-hourglass-split"></i>
+
                     {% else %}
-                        Pending
+
+                        <i class="bi bi-circle"></i>
+
                     {% endif %}
 
-                </span>
+                </div>
+
+                <div class="step-content">
+
+                    <span class="step-title">
+                        Shortlisted
+                    </span>
+
+                    <span class="step-date">
+
+                        {% if current_idx >= 2 %}
+
+                            Completed
+
+                        {% elif current_idx == 1 %}
+
+                            In Progress
+
+                        {% else %}
+
+                            Pending
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
 
             </div>
 
-        </div>
 
+            <!-- INTERVIEW -->
 
-        <!-- Interview -->
-        <div class="status-step
-            {% if current_idx >= 3 %}
-                completed
-            {% elif current_idx == 2 %}
-                active
-            {% else %}
-                pending
-            {% endif %}">
-
-            <div class="step-icon">
-
+            <div class="status-step
                 {% if current_idx >= 3 %}
-                    <i class="bi bi-check-lg"></i>
+                    completed
                 {% elif current_idx == 2 %}
-                    <i class="bi bi-hourglass-split"></i>
+                    active
                 {% else %}
-                    <i class="bi bi-circle"></i>
+                    pending
                 {% endif %}
+            ">
 
-            </div>
-
-            <div class="step-content">
-
-                <span class="step-title">
-                    Interview
-                </span>
-
-                <span class="step-date">
+                <div class="step-icon">
 
                     {% if current_idx >= 3 %}
-                        Completed
+
+                        <i class="bi bi-check-lg"></i>
+
                     {% elif current_idx == 2 %}
-                        In Progress
+
+                        <i class="bi bi-hourglass-split"></i>
+
                     {% else %}
-                        Pending
+
+                        <i class="bi bi-circle"></i>
+
                     {% endif %}
 
-                </span>
+                </div>
+
+                <div class="step-content">
+
+                    <span class="step-title">
+                        Interview
+                    </span>
+
+                    <span class="step-date">
+
+                        {% if current_idx >= 3 %}
+
+                            Completed
+
+                        {% elif current_idx == 2 %}
+
+                            In Progress
+
+                        {% else %}
+
+                            Pending
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- FINAL DECISION -->
+
+            <div class="status-step
+                {% if current_idx >= 4 %}
+                    completed
+                {% elif current_idx == 3 %}
+                    active
+                {% else %}
+                    pending
+                {% endif %}
+            ">
+
+                <div class="step-icon">
+
+                    {% if current_idx >= 4 %}
+
+                        <i class="bi bi-check-lg"></i>
+
+                    {% elif current_idx == 3 %}
+
+                        <i class="bi bi-hourglass-split"></i>
+
+                    {% else %}
+
+                        <i class="bi bi-circle"></i>
+
+                    {% endif %}
+
+                </div>
+
+                <div class="step-content">
+
+                    <span class="step-title">
+                        Final Decision
+                    </span>
+
+                    <span class="step-date">
+
+                        {% if current_idx >= 4 %}
+
+                            Completed
+
+                        {% elif current_idx == 3 %}
+
+                            In Progress
+
+                        {% else %}
+
+                            Pending
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
 
             </div>
 
         </div>
 
 
-        <!-- Final Decision -->
-        <div class="status-step
-            {% if current_idx >= 4 %}
-                completed
-            {% elif current_idx == 3 %}
-                active
-            {% else %}
-                pending
-            {% endif %}">
+        <!-- CURRENT STATUS -->
 
-            <div class="step-icon">
+        <div class="current-status-box
+            {% if current_status == 'HIRED' %}
+                hired
+            {% elif current_status == 'SELECTED' %}
+                selected
+            {% endif %}
+            text-center mt-4 pt-4 border-top">
 
-                {% if current_idx >= 4 %}
-                    <i class="bi bi-check-lg"></i>
-                {% elif current_idx == 3 %}
-                    <i class="bi bi-hourglass-split"></i>
+            <div class="mb-3">
+
+                {% if current_status == 'HIRED' %}
+
+                    <span class="status-badge hired">
+                        <i class="bi bi-check-circle-fill"></i>
+                        HIRED
+                    </span>
+
+                {% elif current_status == 'SELECTED' %}
+
+                    <span class="status-badge selected">
+                        <i class="bi bi-star-fill"></i>
+                        SELECTED
+                    </span>
+
                 {% else %}
-                    <i class="bi bi-circle"></i>
+
+                    <span class="status-badge default">
+                        <i class="bi bi-hourglass-split"></i>
+                        {{ current_status }}
+                    </span>
+
                 {% endif %}
 
             </div>
 
-            <div class="step-content">
 
-                <span class="step-title">
-                    Final Decision
-                </span>
+            {% if current_status == 'HIRED' %}
 
-                <span class="step-date">
+                <h4 class="fw-bold text-success mb-2">
+                    Congratulations! 🎉
+                </h4>
 
-                    {% if current_idx >= 4 %}
-                        Completed
-                    {% elif current_idx == 3 %}
-                        In Progress
-                    {% else %}
-                        Pending
-                    {% endif %}
+                <p class="text-muted mb-0">
+                    We are pleased to confirm that you have been selected
+                    to join the Rori Hotel team.
+                </p>
 
-                </span>
+            {% elif current_status == 'SELECTED' %}
+
+                <h4 class="fw-bold text-gold mb-2">
+                    You have been selected
+                </h4>
+
+                <p class="text-muted mb-0">
+                    Your application has successfully passed the selection stage.
+                    Our HR team will contact you with the next steps.
+                </p>
+
+            {% elif current_status == 'INTERVIEW' %}
+
+                <h4 class="fw-bold text-navy mb-2">
+                    Interview Stage
+                </h4>
+
+                <p class="text-muted mb-0">
+                    Your application has progressed to the interview stage.
+                    Please check your email or phone for interview details.
+                </p>
+
+            {% elif current_status == 'SHORTLISTED' %}
+
+                <h4 class="fw-bold text-navy mb-2">
+                    You have been shortlisted
+                </h4>
+
+                <p class="text-muted mb-0">
+                    Congratulations! Your application has been shortlisted.
+                    Our HR team will contact you regarding the next step.
+                </p>
+
+            {% elif current_status == 'UNDER REVIEW' %}
+
+                <h4 class="fw-bold text-navy mb-2">
+                    Your application is under review
+                </h4>
+
+                <p class="text-muted mb-0">
+                    Our HR team is currently reviewing your application.
+                    We appreciate your patience.
+                </p>
+
+            {% else %}
+
+                <h4 class="fw-bold text-navy mb-2">
+                    Application Received
+                </h4>
+
+                <p class="text-muted mb-0">
+                    Your application has been successfully received.
+                    Our HR team will review it shortly.
+                </p>
+
+            {% endif %}
+
+
+            {% if application.status_updated_at %}
+
+            <div class="status-update mt-3">
+
+                Last updated:
+                {{ application.status_updated_at.strftime('%B %d, %Y at %I:%M %p') }}
 
             </div>
 
+            {% endif %}
+
         </div>
 
-    </div>
+        {% endif %}
 
 
-    <!-- Current Status -->
+        <!-- ACTION BUTTONS -->
 
-    <div class="text-center mt-4 pt-4 border-top">
-
-        <p class="text-muted mb-4">
-
-            Your application is currently
-
-            <strong class="text-gold">
-                {{ application.status }}
-            </strong>.
-
-        </p>
-
-
-        <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <div class="d-flex justify-content-center gap-3 flex-wrap mt-4">
 
             <a href="{{ url_for('home') }}"
                class="btn btn-outline-navy">
 
                 <i class="bi bi-house me-1"></i>
+
                 Return Home
 
             </a>
@@ -499,6 +817,7 @@
                class="btn btn-gold">
 
                 <i class="bi bi-briefcase me-1"></i>
+
                 View Other Jobs
 
             </a>
@@ -509,4 +828,4 @@
 
 </div>
 
-</div>{% endblock %}
+{% endblock %}
