@@ -23,23 +23,30 @@ class Config:
         'DATABASE_URL',
         'sqlite:///' + os.path.join(BASE_DIR, 'instance', 'database.db')
     )
+    # Fix Render postgres:// issue
+    if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
+        SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_pre_ping': True,
         'pool_recycle': 300,
     }
+
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads', 'resumes')
     UPLOAD_FOLDER_JOBS = os.path.join(BASE_DIR, 'static', 'uploads', 'jobs')
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10 MB
     ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
     ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
     HR_USERNAME = os.environ.get('HR_USERNAME', 'admin')
     HR_PASSWORD_HASH = os.environ.get('HR_PASSWORD_HASH') or generate_password_hash(
         os.environ.get('HR_PASSWORD', 'RoriHR2026')
     )
-    # Email settings
+
+    # Email Configuration
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587) or 587)
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
     MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'false').lower() in ['true', 'on', '1']
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
@@ -50,7 +57,6 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # ========================= Custom Jinja2 Loader =========================
-# Allows templates to be placed in subfolders without subfolder prefix
 template_dirs = [
     os.path.join(app.root_path, 'templates'),
     os.path.join(app.root_path, 'templates', 'careers'),
@@ -70,7 +76,6 @@ os.makedirs(app.config['UPLOAD_FOLDER_JOBS'], exist_ok=True)
 
 # ========================= Logging =========================
 if not app.debug:
-    # Set up file handler for production (Render logs to stdout)
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.INFO)
     app.logger.addHandler(stream_handler)
@@ -85,18 +90,12 @@ class Department(db.Model):
     description = db.Column(db.Text, nullable=True)
     jobs = db.relationship('Job', backref='department_ref', lazy=True)
 
-    def __repr__(self):
-        return f'<Department {self.name}>'
-
 class Location(db.Model):
     __tablename__ = 'locations'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
     address = db.Column(db.String(200), nullable=True)
     jobs = db.relationship('Job', backref='location_ref', lazy=True)
-
-    def __repr__(self):
-        return f'<Location {self.name}>'
 
 class Job(db.Model):
     __tablename__ = 'jobs'
@@ -144,9 +143,6 @@ class Job(db.Model):
             return True
         return False
 
-    def __repr__(self):
-        return f'<Job {self.title}>'
-
 class Application(db.Model):
     __tablename__ = 'applications'
     id = db.Column(db.Integer, primary_key=True)
@@ -177,9 +173,6 @@ class Application(db.Model):
     viewed_at = db.Column(db.DateTime, nullable=True)
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __repr__(self):
-        return f'<Application {self.full_name} for {self.job.title}>'
-
 class TalentPool(db.Model):
     __tablename__ = 'talent_pool'
     id = db.Column(db.Integer, primary_key=True)
@@ -198,9 +191,6 @@ class TalentPool(db.Model):
     cover_letter = db.Column(db.Text, nullable=False)
     cv_filename = db.Column(db.String(255), nullable=False)
     submitted_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __repr__(self):
-        return f'<TalentPool {self.full_name}>'
 
 class Interview(db.Model):
     __tablename__ = 'interviews'
@@ -221,9 +211,6 @@ class Interview(db.Model):
 
     application = db.relationship('Application', backref='interviews', lazy=True)
 
-    def __repr__(self):
-        return f'<Interview for Application {self.application_id}>'
-
 class Notification(db.Model):
     __tablename__ = 'notifications'
     id = db.Column(db.Integer, primary_key=True)
@@ -232,9 +219,6 @@ class Notification(db.Model):
     recipient = db.Column(db.String(120), nullable=True)
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def __repr__(self):
-        return f'<Notification {self.title}>'
 
 class AuditLog(db.Model):
     __tablename__ = 'audit_logs'
@@ -248,9 +232,6 @@ class AuditLog(db.Model):
     ip_address = db.Column(db.String(45), nullable=True)
     user_agent = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-
-    def __repr__(self):
-        return f'<AuditLog {self.user_name} - {self.action}>'
 
 # ========================= Forms =========================
 class ApplicationForm(FlaskForm):
@@ -334,7 +315,7 @@ class InterviewForm(FlaskForm):
     location = StringField('Location/Meeting Link', validators=[Optional(), Length(max=200)])
     notes = TextAreaField('Notes', validators=[Optional()])
 
-# ========================= Database Helpers (SQLAlchemy 2.0 compatible) =========================
+# ========================= Database Helpers =========================
 def _safe_add_column(table, column_name, column_type):
     try:
         inspector = inspect(db.engine)
@@ -345,10 +326,8 @@ def _safe_add_column(table, column_name, column_type):
                     conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column_name} {column_type}"))
                     conn.commit()
                 app.logger.info(f"✅ Added column '{column_name}' to {table}")
-            else:
-                app.logger.info(f"ℹ️ Column '{column_name}' already exists in {table}")
     except Exception as e:
-        app.logger.error(f"⚠️ Could not add column '{column_name}' to {table}: {e}")
+        app.logger.error(f"⚠️ Could not add column '{column_name}': {e}")
 
 # ========================= Helper Functions =========================
 def allowed_file(filename):
@@ -406,9 +385,7 @@ def log_audit(action, description=None, target_type=None, target_id=None):
     return log
 
 def send_application_notification(application, job):
-    """Send email notification to HR when a new application is submitted."""
     if not app.config['MAIL_USERNAME']:
-        app.logger.warning("Email not configured. Skipping notification.")
         return
     try:
         hr_email = os.environ.get('HR_EMAIL', app.config['MAIL_USERNAME'])
@@ -417,12 +394,11 @@ def send_application_notification(application, job):
             recipients=[hr_email],
             sender=app.config['MAIL_DEFAULT_SENDER']
         )
-        # HTML email body
         msg.html = f"""
         <div style="font-family: 'Cormorant Garamond', serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #C5A059; background: #fff;">
             <h2 style="color: #0B132B;">Rori Hotel</h2>
             <div style="background: #F8F9FA; padding: 20px; border-radius: 12px;">
-                <h3 style="color: #0B132B; margin-top: 0;">📋 New Job Application</h3>
+                <h3 style="color: #0B132B;">📋 New Job Application</h3>
                 <p>A new application has been submitted for <strong>{job.title}</strong>.</p>
                 <table style="width:100%; border-collapse:collapse; margin:15px 0;">
                     <tr style="border-bottom:1px solid #E9ECEF;">
@@ -452,30 +428,18 @@ def send_application_notification(application, job):
             <p style="color:#6C757D; font-size:12px;">© 2026 Rori Hotel. All rights reserved.</p>
         </div>
         """
-        # Plain text fallback
-        msg.body = f"""
-New Job Application: {job.title}
-
-Candidate: {application.full_name}
-Email: {application.email}
-Phone: {application.phone}
-Cover Letter: {application.cover_letter or 'N/A'}
-
-View application: {url_for('admin_candidate_detail', app_id=application.id, _external=True)}
-"""
         mail.send(msg)
         app.logger.info(f"📧 Email notification sent for application #{application.id}")
     except Exception as e:
-        app.logger.error(f"❌ Failed to send email notification: {str(e)}")
+        app.logger.error(f"❌ Email failed: {str(e)}")
 
 def send_application_status_email(application, old_status, new_status, notes=""):
-    """Send status update email to applicant."""
     if not app.config['MAIL_USERNAME']:
         return
     messages = {
         'SHORTLISTED': 'Congratulations! You have been shortlisted for an interview.',
         'INTERVIEW': 'An interview has been scheduled for you.',
-        'SELECTED': 'Congratulations! You have been selected for the position.',
+        'SELECTED': 'Congratulations! You have been selected.',
         'HIRED': 'Congratulations! You have been hired.',
         'REJECTED': 'We regret to inform you that your application was not successful.'
     }
@@ -635,10 +599,8 @@ def apply(job_id):
         db.session.add(application)
         db.session.commit()
 
-        # Send email notification
         send_application_notification(application, job)
 
-        # Create internal notification
         notif = Notification(
             title=f'New Application: {application.full_name}',
             message=f'{application.full_name} applied for {job.title}.',
@@ -1180,7 +1142,7 @@ def method_not_allowed(e):
     flash('Method not allowed.', 'warning')
     return redirect(url_for('home'))
 
-# ========================= Database Initialization (Safe) =========================
+# ========================= Database Initialization =========================
 def init_db_safe():
     with app.app_context():
         db.create_all()
@@ -1188,7 +1150,6 @@ def init_db_safe():
         existing_tables = inspector.get_table_names()
         app.logger.info(f"Existing tables: {', '.join(existing_tables) if existing_tables else 'None'}")
 
-        # Add missing columns
         _safe_add_column('jobs', 'is_featured', 'BOOLEAN DEFAULT 0')
         _safe_add_column('jobs', 'banner_image', 'VARCHAR(255)')
         _safe_add_column('applications', 'tags', 'VARCHAR(255)')
@@ -1239,10 +1200,10 @@ def init_db_safe():
                     department_id=dept_eng.id if dept_eng else None,
                     location_id=loc_hawassa.id if loc_hawassa else None,
                     short_description='Lead facility management, MEP systems, and maintenance operations.',
-                    full_description='Rori Hotel is seeking an experienced and visionary Engineering Head to lead our facility management and technical operations in Hawassa.',
-                    responsibilities='Direct and manage overall hotel engineering maintenance and facility operations.\nDevelop and execute comprehensive Preventive Maintenance Plans (PMP) for all equipment.\nLead, mentor, and evaluate the engineering and maintenance technical team.\nEnsure strict compliance with national safety, occupational health, and fire codes.\nManage departmental budgets, spare parts inventory, and contractor service contracts.\nImplement energy efficiency, water conservation, and sustainability initiatives.',
-                    requirements='BSc Degree in Electrical, Mechanical, Civil Engineering, or equivalent technical discipline.\nMinimum 5+ years of progressive engineering leadership experience in luxury hotels or large commercial facilities.\nDeep expertise in HVAC, heavy generators, BMS, plumbing, electrical distribution, and fire suppression systems.\nFluent in Amharic (Native) and strong working proficiency in English (Written and Verbal).',
-                    what_we_offer='Career Development: Leadership growth opportunities.\nTraining: Specialized technical certifications.\nEmployee Benefits: Competitive salary package, duty meals, and health coverage.',
+                    full_description='Rori Hotel is seeking an experienced and visionary Engineering Head.',
+                    responsibilities='Direct and manage overall hotel engineering maintenance.\nDevelop PMP.\nLead and mentor team.',
+                    requirements='BSc Degree in Engineering.\n5+ years experience.',
+                    what_we_offer='Career growth.\nTraining.\nCompetitive salary.',
                     employment_type='Full-time',
                     experience_level='3+ Years',
                     salary_range='50,000 - 70,000 ETB',
@@ -1254,11 +1215,11 @@ def init_db_safe():
                     title='Front Office Supervisor',
                     department_id=dept_fo.id if dept_fo else None,
                     location_id=loc_hawassa.id if loc_hawassa else None,
-                    short_description='Oversee reception operations and ensure luxury guest reception services.',
-                    full_description='We are looking for a Front Office Supervisor to manage the daily operations of our front desk, ensuring exceptional guest experiences.',
-                    responsibilities='Supervise front office staff and daily operations.\nEnsure smooth check-in/check-out processes.\nHandle guest complaints and special requests.\nTrain and evaluate front office team members.\nMaintain high standards of service and professionalism.',
-                    requirements='Diploma or Bachelor\'s degree in Hospitality Management or related field.\nMinimum 2 years of front office experience in a luxury hotel.\nStrong leadership and communication skills.\nProficiency in Opera PMS is a plus.',
-                    what_we_offer='Competitive salary and benefits.\nCareer growth opportunities.\nStaff meals and uniforms.\nTraining and development programs.',
+                    short_description='Oversee reception operations.',
+                    full_description='We are looking for a Front Office Supervisor.',
+                    responsibilities='Supervise staff.\nEnsure check-in/out.\nHandle complaints.',
+                    requirements='Diploma in Hospitality.\n2+ years experience.',
+                    what_we_offer='Competitive salary.\nCareer growth.',
                     employment_type='Full-time',
                     experience_level='2+ Years',
                     salary_range='30,000 - 45,000 ETB',
@@ -1270,11 +1231,11 @@ def init_db_safe():
                     title='Senior Accountant',
                     department_id=dept_fin.id if dept_fin else None,
                     location_id=loc_hawassa.id if loc_hawassa else None,
-                    short_description='Manage daily financial reporting, auditing, and ledger operations.',
-                    full_description='We are seeking a Senior Accountant to handle the financial operations of the hotel, including reporting, auditing, and compliance.',
-                    responsibilities='Prepare monthly financial statements and reports.\nManage accounts payable and receivable.\nConduct internal audits and ensure compliance with regulations.\nAssist in budget preparation and variance analysis.\nSupervise accounting staff.',
-                    requirements='Bachelor\'s degree in Accounting or Finance.\nMinimum 3 years of experience in accounting, preferably in hospitality.\nStrong knowledge of IFRS and tax regulations.\nProficiency in accounting software (e.g., QuickBooks, SunSystems).',
-                    what_we_offer='Competitive salary package.\nOpportunities for professional development.\nHealth insurance and other benefits.',
+                    short_description='Manage financial reporting.',
+                    full_description='We are seeking a Senior Accountant.',
+                    responsibilities='Prepare financial statements.\nManage AP/AR.\nConduct audits.',
+                    requirements='Bachelor\'s in Accounting.\n3+ years experience.',
+                    what_we_offer='Competitive package.\nDevelopment.\nHealth insurance.',
                     employment_type='Full-time',
                     experience_level='3+ Years',
                     salary_range='40,000 - 60,000 ETB',
@@ -1306,4 +1267,4 @@ with app.app_context():
         app.logger.error(f"⚠️ DB Init Exception: {e}")
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)
