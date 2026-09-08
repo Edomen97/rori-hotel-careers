@@ -1,98 +1,64 @@
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% extends "base.html" %}
 
-<style>
-:root {
-    --primary-bg: #0B132B;
-    --card-bg: #1C2541;
-    --accent-gold: #C5A059;
-    --gold-light: #D8B875;
-    --text-main: #EDF2F4;
-    --text-muted: #A0AAB2;
-}
+{% block title %}Rori Hotel Careers | Welcome{% endblock %}
 
-/* ነጭ ማበራቱን ለመግታት የሰውነትና የጀርባ ቀለም */
-html, body {
-    background-color: var(--primary-bg) !important;
-    color: var(--text-main) !important;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    min-height: 100vh;
-    margin: 0;
-}
+{% block content %}
+<div class="container py-4">
+    <!-- Hero Banner Section -->
+    <div class="p-5 mb-5 rounded-4 text-center" style="background: linear-gradient(rgba(11, 19, 43, 0.85), rgba(11, 19, 43, 0.85)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80') center/cover; border: 1px solid rgba(197, 160, 89, 0.3);">
+        <div class="container-fluid py-3">
+            <span class="text-warning text-uppercase tracking-wide fw-bold d-block mb-2">Rori Hotel Hawassa</span>
+            <h1 class="display-4 fw-bold text-white mb-3">Where Service and Culture Meet</h1>
+            <p class="col-md-8 mx-auto fs-5 text-light opacity-90 mb-4">
+                በሮሪ ሆቴል ሀዋሳ ሙያዎን ያሳድጉ! ክፍት የሥራ ቦታዎችን በመመልከት ማመልከቻዎን በቀላሉ ያስገቡ።
+            </p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="{{ url_for('jobs') }}" class="btn btn-gold btn-lg px-4 fw-bold">
+                    <i class="bi bi-briefcase me-2"></i>የስራ ቦታዎችን ይመልከቱ
+                </a>
+                <a href="{{ url_for('track_status') }}" class="btn btn-outline-light btn-lg px-4">
+                    <i class="bi bi-search me-2"></i>ማመልከቻ ይከታተሉ
+                </a>
+            </div>
+        </div>
+    </div>
 
-/* የላይኛው ማውጫ (Navbar) */
-.navbar {
-    background-color: #070B19 !important;
-    border-bottom: 2px solid var(--accent-gold);
-}
+    <!-- Featured Career Areas -->
+    <div class="row my-5">
+        <div class="col-12 text-center mb-4">
+            <h2 class="fw-bold text-white">የስራ ዘርፎች (Career Areas)</h2>
+            <p class="text-muted">በሆቴላችን ውስጥ የሚገኙ ዋና ዋና ክፍሎች</p>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 p-4 text-center">
+                <div class="mb-3">
+                    <i class="bi bi-person-workspace text-warning fs-1"></i>
+                </div>
+                <h4 class="card-title fw-bold">Front Office</h4>
+                <p class="card-text text-muted">የእንግዶች አቀባበል እና የክፍል ምዝገባ አገልግሎቶች።</p>
+            </div>
+        </div>
 
-.navbar-brand {
-    color: #ffffff !important;
-}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 p-4 text-center">
+                <div class="mb-3">
+                    <i class="bi bi-cup-hot text-warning fs-1"></i>
+                </div>
+                <h4 class="card-title fw-bold">Food & Beverage</h4>
+                <p class="card-text text-muted">የምግብ እና የመጠጥ ዝግጅት እንዲሁም የፍላጎት ማስተናገድ።</p>
+            </div>
+        </div>
 
-.nav-link {
-    color: var(--text-main) !important;
-    transition: all 0.25s ease;
-}
-
-.nav-link:hover {
-    color: var(--gold-light) !important;
-}
-
-/* የካርድና የፎርሞች ዲዛይን */
-.card, .modal-content {
-    background-color: var(--card-bg) !important;
-    color: var(--text-main) !important;
-    border: 1px solid rgba(197, 160, 89, 0.2);
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-.card-title, .h1, .h2, .h3, .h4, .h5, .h6 {
-    color: #ffffff !important;
-}
-
-p, span, label {
-    color: var(--text-main);
-}
-
-.text-muted {
-    color: var(--text-muted) !important;
-}
-
-/* Input Fields (የጽሁፍ መሙያዎች) */
-.form-control, .form-select {
-    background-color: #0F172A !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(197, 160, 89, 0.3) !important;
-}
-
-.form-control:focus, .form-select:focus {
-    background-color: #0F172A !important;
-    color: #ffffff !important;
-    border-color: var(--accent-gold) !important;
-    box-shadow: 0 0 0 0.25rem rgba(197, 160, 89, 0.25) !important;
-}
-
-/* Buttons */
-.btn-gold {
-    background-color: var(--accent-gold);
-    color: #0B132B !important;
-    border: none;
-    font-weight: 600;
-    border-radius: 7px;
-    transition: all 0.25s ease;
-}
-
-.btn-gold:hover {
-    background-color: var(--gold-light);
-    color: #0B132B !important;
-    transform: translateY(-1px);
-}
-
-/* Footer */
-footer {
-    background-color: #070B19 !important;
-    border-top: 1px solid rgba(197, 160, 89, 0.2);
-    color: var(--text-muted);
-}
-</style>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 p-4 text-center">
+                <div class="mb-3">
+                    <i class="bi bi-shield-check text-warning fs-1"></i>
+                </div>
+                <h4 class="card-title fw-bold">IT & Maintenance</h4>
+                <p class="card-text text-muted">የቴክኖሎጂ፣ ኔትወርክ፣ የሲሲቲቪ እና የሆቴል ጥገና ስራዎች።</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
