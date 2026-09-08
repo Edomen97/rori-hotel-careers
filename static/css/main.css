@@ -1,88 +1,94 @@
-/* ===== CAREERS PAGE ENHANCEMENTS ===== */
+/* የተሻሻለ ዲዛይን ስርዓት - ወደ main.css መጨመር */
 
-/* Glass card hover animation */
-.glass-card {
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 24px;
-    padding: 2rem;
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    height: 100%;
-    position: relative;
-    overflow: hidden;
-}
-.glass-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(197, 160, 89, 0.05), transparent 50%);
-    opacity: 0;
-    transition: opacity 0.5s ease;
-}
-.glass-card:hover::before {
-    opacity: 1;
-}
-.glass-card:hover {
-    transform: translateY(-8px);
-    border-color: rgba(197, 160, 89, 0.3);
-    box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+:root {
+    --primary-navy: #232a5d;   /* ጥልቅ ሰማያዊ የጀርባ ቀለም */
+    --accent-cyan: #2bb5e8;    /* የአይኮኖቹ ለጋ ሰማያዊ ቀለም */
+    --brand-gold: #e5be3a;     /* የወርቃማ/ቢጫ መስመሮች ቀለም */
+    --bg-white: #ffffff;       /* የኔቭባር ነጭ ጀርባ */
 }
 
-/* Smooth scroll behavior */
-html {
-    scroll-behavior: smooth;
+/* 1. የላይኛው አሰሳ (Navbar) ነጭ ጀርባ */
+.navbar {
+    background-color: var(--bg-white) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 15px 20px;
 }
 
-/* Fade-in animation for sections */
-.fade-in {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
+/* የሜኑ ቁልፍ (Hamburger Icon) ሰማያዊ */
+.navbar-toggler {
+    border: none;
+    color: var(--primary-navy) !important;
 }
 
-/* Gold shimmer line */
-.gold-shimmer {
-    width: 60px;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+/* የኔቭባር ሊንኮች ቀለም */
+.navbar .nav-link {
+    color: var(--primary-navy) !important;
+    font-weight: 500;
+}
+.navbar .nav-link:hover {
+    color: var(--brand-gold) !important;
+}
+
+/* 2. የዋናው ክፍል (Dark Navy Section) */
+.hero-info-section {
+    background-color: var(--primary-navy) !important;
+    color: #ffffff !important;
+    padding: 50px 20px;
+}
+
+/* 3. የጽሑፍ እና የአይኮኖች አቀማመጥ */
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 25px;
+}
+
+.info-item i, .info-icon {
+    color: var(--accent-cyan) !important;
+    font-size: 2rem;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.info-text h5 {
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.info-text p {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* የወርቅ መስመር (Gold Divider) */
+.gold-divider {
+    width: 80px;
+    height: 3px;
+    background: var(--brand-gold);
+    border-radius: 2px;
     margin: 1rem auto;
-    animation: shimmerLine 3s infinite;
-}
-@keyframes shimmerLine {
-    0% { opacity: 0.3; transform: scaleX(0.8); }
-    50% { opacity: 1; transform: scaleX(1.2); }
-    100% { opacity: 0.3; transform: scaleX(0.8); }
 }
 
-/* Loading skeleton animation for cards */
-.skeleton-loading {
-    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
-    background-size: 200% 100%;
-    animation: skeleton 1.5s infinite;
+/* የአዝራሮች ቀለም */
+.btn-gold {
+    background-color: var(--brand-gold) !important;
+    color: var(--primary-navy) !important;
+    border: none;
 }
-@keyframes skeleton {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+.btn-gold:hover {
+    background-color: #d4a82e !important;
+    color: var(--primary-navy) !important;
 }
 
-/* Mobile-first responsive adjustments */
-@media (max-width: 576px) {
-    .glass-card {
-        padding: 1.5rem;
-        border-radius: 18px;
-    }
-    .glass-card .icon-wrap {
-        width: 48px;
-        height: 48px;
-        font-size: 1.4rem;
-    }
+.btn-outline-cyan {
+    border: 2px solid var(--accent-cyan);
+    color: var(--accent-cyan);
+    background: transparent;
+}
+.btn-outline-cyan:hover {
+    background: var(--accent-cyan);
+    color: #fff;
 }
