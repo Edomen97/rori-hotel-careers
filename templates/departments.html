@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Departments - Rori Hotel Careers{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/careers.css') }}" rel="stylesheet" />
+<style>
+    .dept-hero {
+        background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0B132B 100%);
+        padding: 4rem 0 3rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .dept-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(ellipse at center, rgba(197,160,89,0.03), transparent 60%);
+        animation: shimmer 20s infinite alternate;
+    }
+    @keyframes shimmer {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(10%, 10%); }
+    }
+    .dept-hero .container {
+        position: relative;
+        z-index: 1;
+    }
+    .dept-hero .gold-line {
+        width: 80px;
+        height: 2px;
+        background: linear-gradient(90deg, var(--gold), transparent);
+        margin: 0 auto 1rem;
+    }
+    .dept-hero h1 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.02em;
+    }
+    .dept-hero h1 .gold-text {
+        color: var(--gold);
+        font-style: italic;
+    }
+    .dept-hero p {
+        color: rgba(255,255,255,0.6);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0.5rem auto 0;
+        line-height: 1.8;
+    }
+
+    .dept-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 1.8rem;
+        padding: 3rem 0;
+    }
+
+    .dept-card-link {
+        text-decoration: none;
+        display: block;
+        height: 100%;
+    }
+
+    .dept-card-link .dept-card {
+        background: rgba(255,255,255,0.04);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 20px;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        height: 100%;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dept-card-link .dept-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(197,160,89,0.06), transparent 60%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .dept-card-link .dept-card:hover::before {
+        opacity: 1;
+    }
+
+    .dept-card-link .dept-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(197,160,89,0.25);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .dept-card-link .dept-icon {
+        font-size: 2.8rem;
+        color: var(--gold);
+        display: block;
+        margin-bottom: 1rem;
+        transition: transform 0.4s ease;
+    }
+
+    .dept-card-link .dept-card:hover .dept-icon {
+        transform: scale(1.1);
+    }
+
+    .dept-card-link .dept-name {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 0.4rem;
+    }
+
+    .dept-card-link .dept-count {
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 0.6rem;
+    }
+
+    .dept-card-link .dept-desc {
+        font-size: 0.9rem;
+        color: rgba(255,255,255,0.5);
+        line-height: 1.6;
+        margin-bottom: 0;
+    }
+
+    .dept-card-link .dept-arrow {
+        display: inline-block;
+        margin-top: 1rem;
+        color: var(--gold);
+        font-size: 0.9rem;
+        font-weight: 600;
+        opacity: 0;
+        transform: translateX(-8px);
+        transition: all 0.4s ease;
+    }
+
+    .dept-card-link .dept-card:hover .dept-arrow {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .dept-empty {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: rgba(255,255,255,0.4);
+    }
+    .dept-empty i {
+        font-size: 4rem;
+        color: rgba(197,160,89,0.2);
+        display: block;
+        margin-bottom: 1rem;
+    }
+    .dept-empty h4 {
+        font-family: 'Cormorant Garamond', serif;
+        color: rgba(255,255,255,0.5);
+        font-size: 1.8rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .dept-hero h1 {
+            font-size: 2.5rem;
+        }
+        .dept-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.2rem;
+            padding: 2rem 0;
+        }
+        .dept-card-link .dept-card {
+            padding: 1.5rem 1rem;
+        }
+        .dept-card-link .dept-icon {
+            font-size: 2.2rem;
+        }
+        .dept-card-link .dept-name {
+            font-size: 1.2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dept-hero {
+            padding: 3rem 0 2rem;
+        }
+        .dept-hero h1 {
+            font-size: 2rem;
+        }
+        .dept-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            padding: 1.5rem 0;
+        }
+        .dept-card-link .dept-card {
+            padding: 1.2rem 0.8rem;
+            border-radius: 16px;
+        }
+        .dept-card-link .dept-icon {
+            font-size: 1.8rem;
+        }
+        .dept-card-link .dept-name {
+            font-size: 1rem;
+        }
+        .dept-card-link .dept-desc {
+            font-size: 0.75rem;
+        }
+        .dept-card-link .dept-count {
+            font-size: 0.7rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="dept-hero">
+    <div class="container">
+        <div class="gold-line"></div>
+        <h1>Explore <span class="gold-text">Departments</span></h1>
+        <p>Find where your talents can make the greatest impact at Rori Hotel Hawassa.</p>
+    </div>
+</section>
+
+<!-- Department Grid -->
+<section style="background: #0B132B;">
+    <div class="container">
+        {% if departments %}
+        <div class="dept-grid">
+            {% for dept in departments %}
+            <a href="{{ url_for('department_detail', dept_id=dept.id) }}" class="dept-card-link">
+                <div class="dept-card">
+                    <i class="bi {{ dept.icon or 'bi-building' }} dept-icon"></i>
+                    <h3 class="dept-name">{{ dept.name }}</h3>
+                    <p class="dept-count">{{ dept.jobs|length }} open position{% if dept.jobs|length != 1 %}s{% endif %}</p>
+                    {% if dept.description %}
+                    <p class="dept-desc">{{ dept.description[:80] }}{% if dept.description|length > 80 %}…{% endif %}</p>
+                    {% endif %}
+                    <span class="dept-arrow">View Jobs →</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="dept-empty">
+            <i class="bi bi-building"></i>
+            <h4>No departments available</h4>
+            <p class="text-muted">Check back later for opportunities.</p>
+        </div>
+        {% endif %}
+
+        <!-- Call to action -->
+        <div class="text-center pb-4">
+            <a href="{{ url_for('jobs') }}" class="btn btn-gold btn-lg px-5 py-3 text-uppercase fw-bold shadow">
+                <i class="bi bi-briefcase me-2"></i> View All Jobs
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
