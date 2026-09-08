@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+
+{% block title %}Join Talent Pool - Rori Hotel Careers{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+    .talent-hero {
+        background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 40%, #0B132B 100%);
+        padding: 4rem 0 3rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .talent-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(ellipse at center, rgba(197,160,89,0.03), transparent 60%);
+        animation: shimmer 20s infinite alternate;
+    }
+    @keyframes shimmer {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(10%, 10%); }
+    }
+    .talent-hero .container {
+        position: relative;
+        z-index: 1;
+    }
+    .talent-hero .gold-line {
+        width: 80px;
+        height: 2px;
+        background: linear-gradient(90deg, var(--gold, #C5A059), transparent);
+        margin: 0 auto 1rem;
+    }
+    .talent-hero h1 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.02em;
+    }
+    .talent-hero h1 .gold-text {
+        color: var(--gold, #C5A059);
+        font-style: italic;
+    }
+    .talent-hero p {
+        color: rgba(255,255,255,0.6);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0.5rem auto 0;
+        line-height: 1.8;
+    }
+
+    .talent-form-wrapper {
+        background: #0B132B;
+        padding: 3rem 0 4rem;
+    }
+    .talent-form-wrapper .form-card {
+        background: rgba(255,255,255,0.04);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 24px;
+        padding: 2.5rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .talent-form-wrapper .form-card .form-label {
+        color: rgba(255,255,255,0.8);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .talent-form-wrapper .form-card .form-control,
+    .talent-form-wrapper .form-card .form-select {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        color: #fff;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    .talent-form-wrapper .form-card .form-control:focus,
+    .talent-form-wrapper .form-card .form-select:focus {
+        border-color: var(--gold, #C5A059);
+        box-shadow: 0 0 0 4px rgba(197,160,89,0.15);
+        background: rgba(255,255,255,0.08);
+    }
+    .talent-form-wrapper .form-card .form-control::placeholder {
+        color: rgba(255,255,255,0.3);
+    }
+    .talent-form-wrapper .form-card .form-select option {
+        background: #1a1a2e;
+        color: #fff;
+    }
+    .talent-form-wrapper .form-card .form-text {
+        color: rgba(255,255,255,0.4);
+        font-size: 0.8rem;
+    }
+    .talent-form-wrapper .form-card .btn-gold {
+        background: var(--gold, #C5A059);
+        color: #0B132B;
+        border: none;
+        border-radius: 50px;
+        padding: 0.9rem 2.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        width: 100%;
+    }
+    .talent-form-wrapper .form-card .btn-gold:hover {
+        background: #d4b06a;
+        transform: translateY(-3px);
+        box-shadow: 0 20px 40px rgba(197,160,89,0.25);
+    }
+
+    .upload-area {
+        border: 2px dashed rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: rgba(255,255,255,0.02);
+    }
+    .upload-area:hover {
+        border-color: rgba(197,160,89,0.3);
+        background: rgba(197,160,89,0.04);
+    }
+    .upload-area i {
+        font-size: 3rem;
+        color: var(--gold, #C5A059);
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+    .upload-area p {
+        color: rgba(255,255,255,0.5);
+        margin-bottom: 0.3rem;
+    }
+    .upload-area .file-name {
+        color: rgba(255,255,255,0.6);
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .talent-hero h1 {
+            font-size: 2.5rem;
+        }
+        .talent-form-wrapper .form-card {
+            padding: 1.5rem;
+            border-radius: 18px;
+        }
+        .talent-form-wrapper .form-card .btn-gold {
+            font-size: 0.9rem;
+            padding: 0.8rem 1.5rem;
+        }
+    }
+    @media (max-width: 480px) {
+        .talent-hero {
+            padding: 3rem 0 2rem;
+        }
+        .talent-hero h1 {
+            font-size: 2rem;
+        }
+        .talent-form-wrapper .form-card {
+            padding: 1.2rem;
+            border-radius: 16px;
+        }
+        .upload-area {
+            padding: 1.5rem 1rem;
+        }
+        .upload-area i {
+            font-size: 2.2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="talent-hero">
+    <div class="container">
+        <div class="gold-line"></div>
+        <h1>Join Our <span class="gold-text">Talent Pool</span></h1>
+        <p>
+            Don't see your ideal position today? Submit your profile and we'll
+            reach out when a relevant opportunity arises.
+        </p>
+    </div>
+</section>
+
+<!-- Talent Pool Form -->
+<section class="talent-form-wrapper">
+    <div class="container">
+        <div class="form-card">
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() if form else '' }}
+
+                <!-- Personal Information -->
+                <h5 class="fw-bold text-gold mb-3" style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem;">
+                    <i class="bi bi-person me-2"></i> Personal Information
+                </h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" name="full_name" class="form-control" placeholder="e.g. Abebe Bikila" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email Address <span class="text-danger">*</span></label>
+                        <input type="email" name="email" class="form-control" placeholder="name@example.com" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+                        <input type="tel" name="phone" class="form-control" placeholder="+251 9XX XXX XXX" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Current Location</label>
+                        <input type="text" name="location" class="form-control" placeholder="e.g. Hawassa, Ethiopia">
+                    </div>
+                </div>
+
+                <!-- Professional Profile -->
+                <h5 class="fw-bold text-gold mb-3" style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem;">
+                    <i class="bi bi-briefcase me-2"></i> Professional Profile
+                </h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Highest Education Level</label>
+                        <select name="education" class="form-select">
+                            <option value="">Select...</option>
+                            <option value="High School">High School Diploma</option>
+                            <option value="Technical Diploma">TVET / Advanced Diploma</option>
+                            <option value="Bachelor Degree">Bachelor's Degree</option>
+                            <option value="Master Degree">Master's Degree / Doctorate</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Years of Experience</label>
+                        <input type="text" name="years_of_experience" class="form-control" placeholder="e.g. 3 Years">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Key Skills (comma separated)</label>
+                        <input type="text" name="skills" class="form-control" placeholder="e.g. Hospitality Management, Opera PMS, Customer Service">
+                        <div class="form-text">Separate skills with commas.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Languages Spoken</label>
+                        <input type="text" name="languages" class="form-control" placeholder="e.g. Amharic (Native), English (Fluent)">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Professional Certifications</label>
+                        <input type="text" name="certifications" class="form-control" placeholder="e.g. Food Safety Certificate">
+                    </div>
+                </div>
+
+                <!-- Application Details -->
+                <h5 class="fw-bold text-gold mb-3" style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem;">
+                    <i class="bi bi-file-text me-2"></i> Application Details
+                </h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">Earliest Availability Date</label>
+                        <input type="date" name="availability_date" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Willing to Relocate?</label>
+                        <select name="willing_to_relocate" class="form-select">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Expected Monthly Salary (ETB)</label>
+                        <input type="text" name="expected_salary" class="form-control" placeholder="e.g. 25,000 or Negotiable">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Cover Letter / Brief Pitch</label>
+                        <textarea name="cover_letter" class="form-control" rows="4" placeholder="Tell us about yourself, your experience, and why you want to join Rori Hotel..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Document Upload -->
+                <h5 class="fw-bold text-gold mb-3" style="font-family: 'Cormorant Garamond', serif; font-size: 1.4rem;">
+                    <i class="bi bi-file-earmark-pdf me-2"></i> Documents
+                </h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <div class="upload-area" id="uploadArea">
+                            <i class="bi bi-cloud-arrow-up"></i>
+                            <p class="fw-bold">Upload Resume / CV</p>
+                            <p class="text-muted small">Accepted formats: PDF, DOC, DOCX (Max 10MB)</p>
+                            <input type="file" name="cv_file" class="d-none" id="cvFileInput" accept=".pdf,.doc,.docx">
+                            <button type="button" class="btn btn-outline-gold btn-sm mt-2" id="uploadBtn" style="border-color: rgba(197,160,89,0.3); color: var(--gold, #C5A059); border-radius: 30px; padding: 0.4rem 1.5rem;">
+                                Choose File
+                            </button>
+                            <span class="file-name ms-2" id="fileName">No file chosen</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="d-grid gap-2 mt-3">
+                    <button type="submit" class="btn-gold">
+                        <i class="bi bi-person-plus-fill me-2"></i> Submit to Talent Pool
+                    </button>
+                </div>
+                <p class="text-muted small text-center mt-3" style="color: rgba(255,255,255,0.3);">
+                    <i class="bi bi-shield-check me-1"></i> Your information is secure and will only be used for recruitment purposes.
+                </p>
+            </form>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('cvFileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileName = document.getElementById('fileName');
+
+        if (uploadArea && fileInput) {
+            uploadArea.addEventListener('click', function(e) {
+                if (e.target === uploadBtn || e.target.closest('#uploadBtn')) return;
+                fileInput.click();
+            });
+            uploadBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                fileInput.click();
+            });
+            fileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    fileName.textContent = this.files[0].name;
+                } else {
+                    fileName.textContent = 'No file chosen';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
