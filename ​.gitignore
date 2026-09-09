@@ -3,337 +3,92 @@
 # ============================================
 
 # ============================================
-# PYTHON
+# ENVIRONMENT & SECRETS
 # ============================================
+.env
+.env.local
+.env.*.local
+*.env
+secret_key.txt
+config.local.py
 
-# Byte-compiled / optimized / DLL files
+# DO NOT IGNORE .env.example (Required for repository setup)
+!.env.example
+
+# ============================================
+# PYTHON & FLASK
+# ============================================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-.pybuilder/
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# poetry
-poetry.lock
-
-# pdm
-.pdm.toml
-
-# PEP 582
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
 env/
 venv/
 ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
+.venv/
+instance/
+flask_session/
+csrf_tokens/
+.webassets-cache
 
 # ============================================
 # DATABASE
 # ============================================
-
-# SQLite
 *.db
 *.sqlite
 *.sqlite3
 instance/*.db
 instance/*.sqlite
 instance/*.sqlite3
-
-# PostgreSQL
 *.pgdata
 *.pgsql
-
-# MySQL
 *.mysql
 
 # ============================================
-# UPLOADS / MEDIA
+# UPLOADS / MEDIA STORAGE
 # ============================================
+# Ignore user uploaded CVs/Resumes and Job images
+static/uploads/*
+uploads/*
 
-# Resume uploads
-uploads/resumes/*
-!uploads/resumes/.gitkeep
-
-# Job banner images
-static/uploads/jobs/*
+# Keep upload directories in Git structure using .gitkeep
+!static/uploads/.gitkeep
+!static/uploads/cvs/
+!static/uploads/cvs/.gitkeep
+!static/uploads/jobs/
 !static/uploads/jobs/.gitkeep
 
 # ============================================
-# ENVIRONMENT & CONFIG
+# LOGS & TEMP FILES
 # ============================================
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-.env.example
-*.env
-
-# Config files with sensitive data
-config.local.py
-config.pyc
-settings.local.py
-
-# ============================================
-# IDE / EDITOR
-# ============================================
-
-# Visual Studio Code
-.vscode/
-*.code-workspace
-.vscode-test/
-
-# PyCharm
-.idea/
-*.iml
-*.iws
-*.ipr
-.idea_modules/
-
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
-.sublime/
-
-# Vim
-*.swp
-*.swo
-*~
-.*.swp
-.*.swo
-
-# Emacs
-*~
-\#*\#
-.\#*
-
-# Eclipse
-.project
-.classpath
-.settings/
-*.pydevproject
-
-# ============================================
-# OPERATING SYSTEM
-# ============================================
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# Linux
-*~
-
-# ============================================
-# LOGS & TEMP
-# ============================================
-
-# Logs
 logs/
 *.log
 *.log.*
-log/
-
-# Temporary files
 tmp/
 temp/
 *.tmp
-*.temp
 *.bak
-*.backup
 
 # ============================================
-# GIT
+# IDE / EDITOR / OS
 # ============================================
+# VS Code & PyCharm
+.vscode/
+.idea/
+*.swp
+*~
 
-# Git hooks
-.git/hooks/*
-!.git/hooks/README.sample
-
-# ============================================
-# DEPLOYMENT
-# ============================================
-
-# Docker
-*.pid
-*.pid.lock
-
-# Render
-*.pid
+# Operating System Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
 # ============================================
-# MISCELLANEOUS
+# TESTING & COVERAGE
 # ============================================
-
-# Backup files
-*.backup
-*.bak
-*-backup
-
-# Cache
-.cache/
-*.cache
-
-# Data files
-*.dat
-*.data
-
-# ============================================
-# TESTING
-# ============================================
-
-# pytest
 .pytest_cache/
-
-# unittest
-*.testlog
-
-# ============================================
-# PROJECT SPECIFIC
-# ============================================
-
-# Instance folder (database and config)
-instance/
-
-# Uploaded resumes
-uploads/resumes/
-
-# Static uploads
-static/uploads/
-
-# Secret key file
-secret_key.txt
-
-# Session storage
-flask_session/
-
-# CSRF tokens
-csrf_tokens/
-
-# ============================================
-# NOTE: Keep this file updated as the project grows
-# ============================================
+.coverage
+htmlcov/
+.tox/
