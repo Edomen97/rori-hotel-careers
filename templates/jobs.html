@@ -3,291 +3,513 @@
 {% block title %}Open Positions - Rori Hotel Careers{% endblock %}
 
 {% block extra_css %}
-<link href="{{ url_for('static', filename='css/jobs.css') }}" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+    /* ===== LUXURY DARK THEME JOBS LISTING ===== */
+    .jobs-wrapper {
+        padding: 3rem 0 5rem 0;
+        background: var(--primary-navy);
+        min-height: 85vh;
+    }
+
+    /* ===== FILTER CARD ===== */
+    .filter-glass-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-gold);
+        border-radius: 24px;
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .filter-glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent-gold), transparent);
+    }
+
+    .section-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        color: var(--accent-gold);
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+    }
+
+    .page-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 3rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    /* ===== FORM CONTROLS ===== */
+    .dark-input-group {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-gold);
+        border-radius: 50px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+
+    .dark-input-group:focus-within {
+        border-color: var(--accent-gold);
+        box-shadow: 0 0 15px rgba(197, 160, 89, 0.2);
+    }
+
+    .dark-input-group .input-icon {
+        background: transparent;
+        border: none;
+        padding-left: 1.2rem;
+        color: var(--accent-gold);
+    }
+
+    .dark-input-group .form-control {
+        background: transparent !important;
+        border: none !important;
+        color: #fff !important;
+        padding: 0.7rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    .dark-input-group .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .dark-select {
+        background-color: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid var(--border-gold) !important;
+        color: #fff !important;
+        border-radius: 50px !important;
+        padding: 0.7rem 1.2rem !important;
+        font-size: 0.9rem !important;
+        transition: all 0.3s ease;
+    }
+
+    .dark-select:focus {
+        border-color: var(--accent-gold) !important;
+        box-shadow: 0 0 15px rgba(197, 160, 89, 0.2) !important;
+    }
+
+    .dark-select option {
+        background: #0b132b;
+        color: #fff;
+    }
+
+    .btn-luxury-search {
+        background: var(--accent-gold);
+        color: var(--primary-navy) !important;
+        border: none;
+        padding: 0.7rem 1.8rem;
+        border-radius: 50px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .btn-luxury-search:hover {
+        background: var(--gold-light);
+        transform: scale(1.02);
+    }
+
+    .btn-luxury-reset {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-gold);
+        color: var(--text-muted) !important;
+        border-radius: 50px;
+        padding: 0.7rem 1.2rem;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        text-align: center;
+        display: block;
+        text-decoration: none;
+        width: 100%;
+    }
+
+    .btn-luxury-reset:hover {
+        color: #fff !important;
+        border-color: var(--accent-gold);
+        background: rgba(197, 160, 89, 0.1);
+    }
+
+    /* ===== JOB CARDS ===== */
+    .glass-job-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-gold);
+        border-radius: 20px;
+        padding: 2rem;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-job-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--accent-gold);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        background: rgba(197, 160, 89, 0.04);
+    }
+
+    .badge-dept {
+        background: rgba(197, 160, 89, 0.15);
+        color: var(--accent-gold);
+        border: 1px solid var(--border-gold);
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+    }
+
+    .badge-location {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-muted);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.75rem;
+    }
+
+    .job-card-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+
+    .job-card-desc {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .job-meta-tag {
+        color: var(--text-main);
+        font-size: 0.88rem;
+    }
+
+    .job-meta-tag i {
+        color: var(--accent-gold);
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn-luxury-primary {
+        background: var(--accent-gold);
+        color: var(--primary-navy) !important;
+        border: none;
+        padding: 0.65rem 1.8rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-luxury-primary:hover {
+        background: var(--gold-light);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(197, 160, 89, 0.25);
+    }
+
+    .btn-outline-gold {
+        border: 1px solid var(--border-gold);
+        color: var(--accent-gold) !important;
+        border-radius: 50px;
+        padding: 0.65rem 1.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-outline-gold:hover {
+        background: rgba(197, 160, 89, 0.15);
+        border-color: var(--accent-gold);
+        color: #fff !important;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-glass-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-gold);
+        border-radius: 24px;
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+
+    .empty-glass-card i {
+        color: var(--accent-gold);
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .empty-glass-card h4 {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.2rem;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-glass-card p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 992px) {
+        .page-title { font-size: 2.5rem; }
+    }
+
+    @media (max-width: 768px) {
+        .page-title { font-size: 2.2rem; }
+        .filter-glass-card, .glass-job-card { padding: 1.5rem; }
+        .job-card-title { font-size: 1.6rem; }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
+<div class="jobs-wrapper">
+    <div class="container" style="max-width: 1050px;">
 
-<div class="container my-5">
-
-    <!-- Header & Filters -->
-    <div class="card card-premium p-4 p-md-5 mb-4">
-
-        <div class="text-center mb-4">
-            <h2 class="fw-bold text-navy mb-1 display-6">
-                OPEN POSITIONS
-            </h2>
-
-            <p class="text-muted small mb-0">
-                Discover exceptional career opportunities at Rori Hotel
-            </p>
-        </div>
-
-        <form method="GET" action="{{ url_for('jobs') }}" id="filterForm">
-
-            <div class="row g-3 mb-2">
-
-                <!-- Search -->
-                <div class="col-md-5">
-                    <div class="input-group shadow-sm rounded-pill overflow-hidden border">
-
-                        <span class="input-group-text bg-white border-0 ps-4 text-muted">
-                            <i class="bi bi-search text-gold"></i>
-                        </span>
-
-                        <input
-                            type="text"
-                            name="q"
-                            class="form-control border-0 py-2 shadow-none"
-                            placeholder="Search jobs..."
-                            value="{{ request.args.get('q', '') }}"
-                        >
-
-                        <button class="btn btn-gold px-4" type="submit">
-                            Search
-                        </button>
-
-                    </div>
-                </div>
-
-                <!-- Department -->
-                <div class="col-md-2">
-                    <select
-                        name="department"
-                        class="form-select custom-select-navy py-2"
-                        onchange="this.form.submit()"
-                    >
-                        <option value="">All Departments</option>
-
-                        {% for dept in departments %}
-                        <option
-                            value="{{ dept.id }}"
-                            {% if request.args.get('department')|int == dept.id %}
-                            selected
-                            {% endif %}
-                        >
-                            {{ dept.name }}
-                        </option>
-                        {% endfor %}
-
-                    </select>
-                </div>
-
-                <!-- Location -->
-                <div class="col-md-2">
-                    <select
-                        name="location"
-                        class="form-select custom-select-navy py-2"
-                        onchange="this.form.submit()"
-                    >
-                        <option value="">All Locations</option>
-
-                        {% for loc in locations %}
-                        <option
-                            value="{{ loc.id }}"
-                            {% if request.args.get('location')|int == loc.id %}
-                            selected
-                            {% endif %}
-                        >
-                            {{ loc.name }}
-                        </option>
-                        {% endfor %}
-
-                    </select>
-                </div>
-
-                <!-- Employment Type -->
-                <div class="col-md-2">
-                    <select
-                        name="type"
-                        class="form-select custom-select-navy py-2"
-                        onchange="this.form.submit()"
-                    >
-                        <option value="">All Types</option>
-
-                        <option
-                            value="Full-time"
-                            {% if request.args.get('type') == 'Full-time' %}
-                            selected
-                            {% endif %}
-                        >
-                            Full-time
-                        </option>
-
-                        <option
-                            value="Part-time"
-                            {% if request.args.get('type') == 'Part-time' %}
-                            selected
-                            {% endif %}
-                        >
-                            Part-time
-                        </option>
-
-                        <option
-                            value="Contract"
-                            {% if request.args.get('type') == 'Contract' %}
-                            selected
-                            {% endif %}
-                        >
-                            Contract
-                        </option>
-
-                    </select>
-                </div>
-
-                <!-- Reset -->
-                <div class="col-md-1">
-                    <a
-                        href="{{ url_for('jobs') }}"
-                        class="btn btn-outline-navy w-100"
-                    >
-                        Reset
-                    </a>
-                </div>
-
+        <!-- Header & Filters Card -->
+        <div class="filter-glass-card">
+            <div class="text-center mb-4">
+                <p class="section-label">Careers</p>
+                <h1 class="page-title">OPEN POSITIONS</h1>
+                <p class="page-subtitle mb-0">Discover exceptional career opportunities at Rori Hotel Hawassa</p>
             </div>
 
-        </form>
+            <form method="GET" action="{{ url_for('jobs') }}" id="filterForm">
+                <div class="row g-3">
+                    <!-- Search -->
+                    <div class="col-lg-5 col-md-12">
+                        <div class="dark-input-group">
+                            <span class="input-icon">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input
+                                type="text"
+                                name="q"
+                                class="form-control shadow-none"
+                                placeholder="Search jobs by title or keyword..."
+                                value="{{ request.args.get('q', '') }}"
+                            >
+                            <button class="btn-luxury-search me-1" type="submit">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Department -->
+                    <div class="col-lg-2 col-md-4">
+                        <select
+                            name="department"
+                            class="form-select dark-select shadow-none"
+                            onchange="this.form.submit()"
+                        >
+                            <option value="">All Departments</option>
+                            {% for dept in departments %}
+                            <option
+                                value="{{ dept.id }}"
+                                {% if request.args.get('department')|int == dept.id %}
+                                selected
+                                {% endif %}
+                            >
+                                {{ dept.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="col-lg-2 col-md-4">
+                        <select
+                            name="location"
+                            class="form-select dark-select shadow-none"
+                            onchange="this.form.submit()"
+                        >
+                            <option value="">All Locations</option>
+                            {% for loc in locations %}
+                            <option
+                                value="{{ loc.id }}"
+                                {% if request.args.get('location')|int == loc.id %}
+                                selected
+                                {% endif %}
+                            >
+                                {{ loc.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Employment Type -->
+                    <div class="col-lg-2 col-md-4">
+                        <select
+                            name="type"
+                            class="form-select dark-select shadow-none"
+                            onchange="this.form.submit()"
+                        >
+                            <option value="">All Types</option>
+                            <option
+                                value="Full-time"
+                                {% if request.args.get('type') == 'Full-time' %}
+                                selected
+                                {% endif %}
+                            >
+                                Full-time
+                            </option>
+                            <option
+                                value="Part-time"
+                                {% if request.args.get('type') == 'Part-time' %}
+                                selected
+                                {% endif %}
+                            >
+                                Part-time
+                            </option>
+                            <option
+                                value="Contract"
+                                {% if request.args.get('type') == 'Contract' %}
+                                selected
+                                {% endif %}
+                            >
+                                Contract
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Reset -->
+                    <div class="col-lg-1 col-md-12">
+                        <a href="{{ url_for('jobs') }}" class="btn-luxury-reset">
+                            Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Job Listings -->
+        <div class="d-flex flex-column gap-3">
+            {% for job in jobs %}
+            <div class="glass-job-card">
+                <div class="row align-items-center g-3">
+                    <div class="col-lg-8">
+                        <!-- Job Badges Meta -->
+                        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                            <span class="badge badge-dept px-3 py-2 rounded-pill">
+                                {{ job.department_name or 'General' }}
+                            </span>
+
+                            <span class="badge badge-location px-3 py-2 rounded-pill">
+                                <i class="bi bi-geo-alt-fill text-gold me-1"></i>
+                                {{ job.location_name or 'Hawassa' }}
+                            </span>
+
+                            {% if job.is_featured %}
+                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                                ⭐ Featured
+                            </span>
+                            {% endif %}
+
+                            {% if job.is_expired %}
+                            <span class="badge bg-danger px-3 py-2 rounded-pill">
+                                Application Closed
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Job Title -->
+                        <h3 class="job-card-title">
+                            {{ job.title }}
+                        </h3>
+
+                        <!-- Short Description -->
+                        <p class="job-card-desc mb-3">
+                            {{ job.short_description }}
+                        </p>
+
+                        <!-- Extra Metadata -->
+                        <div class="d-flex flex-wrap gap-4 job-meta-tag fw-medium">
+                            <span>
+                                <i class="bi bi-briefcase-fill me-1"></i>
+                                {{ job.employment_type }}
+                            </span>
+
+                            <span>
+                                <i class="bi bi-clock-history me-1"></i>
+                                {{ job.experience_level or 'Not specified' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="col-lg-4">
+                        <div class="d-flex gap-2 justify-content-lg-end align-items-center mt-3 mt-lg-0 flex-wrap">
+                            <a
+                                href="{{ url_for('job_detail', job_id=job.id) }}"
+                                class="btn-outline-gold flex-fill flex-lg-grow-0"
+                            >
+                                View Details
+                            </a>
+
+                            {% if not job.is_expired %}
+                            <a
+                                href="{{ url_for('apply', job_id=job.id) }}"
+                                class="btn-luxury-primary flex-fill flex-lg-grow-0"
+                            >
+                                Apply Now
+                            </a>
+                            {% else %}
+                            <span class="badge bg-danger px-3 py-2 rounded-pill">
+                                Applications Closed
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% else %}
+
+            <!-- No Jobs State -->
+            <div class="empty-glass-card">
+                <i class="bi bi-briefcase"></i>
+                <h4>No Open Positions</h4>
+                <p>There are currently no vacancies matching your search parameters.</p>
+                <a href="{{ url_for('jobs') }}" class="btn-outline-gold">
+                    View All Positions
+                </a>
+            </div>
+            {% endfor %}
+        </div>
 
     </div>
-
-
-    <!-- Job Listings -->
-
-    <div class="d-flex flex-column gap-3">
-
-        {% for job in jobs %}
-
-        <div class="card card-premium p-4">
-
-            <div class="row align-items-center g-3">
-
-                <div class="col-lg-8">
-
-                    <!-- Job Meta -->
-                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-
-                        <span class="badge bg-gold text-white px-3 py-1 rounded-pill">
-                            {{ job.department_name or 'General' }}
-                        </span>
-
-                        <span class="badge bg-light text-navy border px-3 py-1 rounded-pill">
-                            <i class="bi bi-geo-alt-fill text-gold me-1"></i>
-                            {{ job.location_name or 'Hawassa' }}
-                        </span>
-
-                        {% if job.is_featured %}
-                        <span class="badge bg-warning text-dark">
-                            ⭐ Featured
-                        </span>
-                        {% endif %}
-
-                        {% if job.is_expired %}
-                        <span class="badge bg-danger">
-                            Application Closed
-                        </span>
-                        {% endif %}
-
-                    </div>
-
-
-                    <!-- Job Title -->
-                    <h3 class="fw-bold text-navy mb-2 fs-3">
-                        {{ job.title }}
-                    </h3>
-
-
-                    <!-- Description -->
-                    <p class="text-muted small mb-3">
-                        {{ job.short_description }}
-                    </p>
-
-
-                    <!-- Public Job Information -->
-                    <div class="d-flex flex-wrap gap-3 text-muted small fw-semibold">
-
-                        <span>
-                            <i class="bi bi-briefcase-fill text-gold me-1"></i>
-                            {{ job.employment_type }}
-                        </span>
-
-                        <span>
-                            <i class="bi bi-clock-history text-gold me-1"></i>
-                            {{ job.experience_level or 'Not specified' }}
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <!-- Actions -->
-                <div class="col-lg-4">
-
-                    <div class="d-flex gap-2 justify-content-lg-end mt-3 mt-lg-0">
-
-                        <a
-                            href="{{ url_for('job_detail', job_id=job.id) }}"
-                            class="btn btn-outline-navy py-2 px-3 flex-fill flex-lg-grow-0"
-                        >
-                            View Details
-                        </a>
-
-                        {% if not job.is_expired %}
-
-                        <a
-                            href="{{ url_for('apply', job_id=job.id) }}"
-                            class="btn btn-gold py-2 px-4 fw-bold flex-fill flex-lg-grow-0"
-                        >
-                            Apply Now
-                        </a>
-
-                        {% else %}
-
-                        <span class="badge bg-secondary align-self-center">
-                            Applications Closed
-                        </span>
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        {% else %}
-
-        <!-- No Jobs -->
-        <div class="card card-premium text-center py-5">
-
-            <div class="mb-3">
-                <i class="bi bi-briefcase text-gold fs-1"></i>
-            </div>
-
-            <h4 class="fw-bold text-navy">
-                No Open Positions
-            </h4>
-
-            <p class="text-muted mb-3">
-                There are currently no vacancies matching your search.
-            </p>
-
-            <a
-                href="{{ url_for('jobs') }}"
-                class="btn btn-outline-navy"
-            >
-                View All Positions
-            </a>
-
-        </div>
-
-        {% endfor %}
-
-    </div>
-
 </div>
-
 {% endblock %}
