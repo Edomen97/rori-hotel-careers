@@ -2,27 +2,26 @@
 
 {% block title %}Admin Dashboard{% endblock %}
 
-{% block content %}
-<div class="container my-4">
-    <h2 class="mb-4">HR / Admin Dashboard</h2>
-    
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+{% block admin_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">HR / Admin Dashboard</h1>
+</div>
 
-    <div class="row mt-4">
-        <div class="col-md-4 mb-3">
-            <div class="card bg-primary text-white p-3 shadow-sm">
-                <h5>አጠቃላይ ማመልከቻዎች</h5>
-                <h3>{{ total_applications if total_applications is defined else 0 }}</h3>
-            </div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="row mt-4">
+    <div class="col-md-4 mb-3">
+        <div class="card bg-primary text-white p-3 shadow-sm">
+            <h5>አጠቃላይ ማመልከቻዎች</h5>
+            <h3>{{ total_applications if total_applications is defined else 0 }}</h3>
         </div>
     </div>
 </div>
