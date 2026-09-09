@@ -1,94 +1,162 @@
-/* የተሻሻለ ዲዛይን ስርዓት - ወደ main.css መጨመር */
+/* ============================================
+   DESIGN SYSTEM EXTENSIONS - main.css
+   Rori Hotel Careers Portal
+   ============================================ */
 
 :root {
     --primary-navy: #232a5d;   /* ጥልቅ ሰማያዊ የጀርባ ቀለም */
-    --accent-cyan: #2bb5e8;    /* የአይኮኖቹ ለጋ ሰማያዊ ቀለም */
-    --brand-gold: #e5be3a;     /* የወርቃማ/ቢጫ መስመሮች ቀለም */
+    --accent-cyan: #2bb5e8;    /* የአይኮኖችና የሃይላይት ሰማያዊ ቀለም */
+    --brand-gold: #e5be3a;     /* የወርቃማ አክሰንት ቀለም */
+    --brand-gold-hover: #d4a82e; /* የወርቃማ ሆቨር ቀለም */
     --bg-white: #ffffff;       /* የኔቭባር ነጭ ጀርባ */
+    --transition-fast: all 0.25s ease-in-out;
 }
 
-/* 1. የላይኛው አሰሳ (Navbar) ነጭ ጀርባ */
+/* ===== 1. LIGHT NAVIGATION BAR ===== */
 .navbar {
     background-color: var(--bg-white) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    padding: 15px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    padding: 0.85rem 1.5rem;
+    transition: var(--transition-fast);
 }
 
-/* የሜኑ ቁልፍ (Hamburger Icon) ሰማያዊ */
+/* Hamburger Toggler Icon */
 .navbar-toggler {
-    border: none;
+    border: 1px solid rgba(35, 42, 93, 0.2);
     color: var(--primary-navy) !important;
+    padding: 0.4rem 0.65rem;
+    border-radius: 8px;
+    transition: var(--transition-fast);
 }
 
-/* የኔቭባር ሊንኮች ቀለም */
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 3px rgba(43, 181, 232, 0.25);
+    outline: none;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2835, 42, 93, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Navbar Navigation Links */
 .navbar .nav-link {
     color: var(--primary-navy) !important;
     font-weight: 500;
-}
-.navbar .nav-link:hover {
-    color: var(--brand-gold) !important;
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: var(--transition-fast);
 }
 
-/* 2. የዋናው ክፍል (Dark Navy Section) */
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--brand-gold) !important;
+    background-color: rgba(229, 190, 58, 0.08);
+}
+
+/* ===== 2. HERO & INFORMATION SECTION ===== */
 .hero-info-section {
     background-color: var(--primary-navy) !important;
     color: #ffffff !important;
-    padding: 50px 20px;
+    padding: 3.5rem 1.5rem;
+    position: relative;
+    overflow: hidden;
 }
 
-/* 3. የጽሑፍ እና የአይኮኖች አቀማመጥ */
+/* ===== 3. INFO ITEMS & ICONS ===== */
 .info-item {
     display: flex;
     align-items: flex-start;
-    margin-bottom: 25px;
+    margin-bottom: 1.75rem;
+    gap: 1rem;
 }
 
-.info-item i, .info-icon {
+.info-item i, 
+.info-icon {
     color: var(--accent-cyan) !important;
-    font-size: 2rem;
-    margin-right: 15px;
+    font-size: 1.8rem;
     flex-shrink: 0;
+    margin-top: 0.2rem;
+    transition: transform 0.3s ease;
+}
+
+.info-item:hover .info-icon,
+.info-item:hover i {
+    transform: translateY(-2px) scale(1.05);
 }
 
 .info-text h5 {
     color: #ffffff;
     font-size: 1.1rem;
-    font-weight: 500;
-    margin-bottom: 4px;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.2px;
 }
 
 .info-text p {
-    color: rgba(255, 255, 255, 0.75);
-    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.92rem;
+    line-height: 1.5;
     margin: 0;
 }
 
-/* የወርቅ መስመር (Gold Divider) */
+/* ===== 4. GOLD DIVIDER ===== */
 .gold-divider {
-    width: 80px;
+    width: 70px;
     height: 3px;
     background: var(--brand-gold);
-    border-radius: 2px;
-    margin: 1rem auto;
+    border-radius: 3px;
+    margin: 1.25rem auto;
 }
 
-/* የአዝራሮች ቀለም */
+/* ===== 5. BUTTON STYLES ===== */
 .btn-gold {
     background-color: var(--brand-gold) !important;
     color: var(--primary-navy) !important;
     border: none;
+    font-weight: 600;
+    padding: 0.65rem 1.5rem;
+    border-radius: 10px;
+    transition: var(--transition-fast);
 }
-.btn-gold:hover {
-    background-color: #d4a82e !important;
+
+.btn-gold:hover,
+.btn-gold:focus {
+    background-color: var(--brand-gold-hover) !important;
     color: var(--primary-navy) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(229, 190, 58, 0.3);
 }
 
 .btn-outline-cyan {
     border: 2px solid var(--accent-cyan);
     color: var(--accent-cyan);
     background: transparent;
+    font-weight: 600;
+    padding: 0.65rem 1.5rem;
+    border-radius: 10px;
+    transition: var(--transition-fast);
 }
-.btn-outline-cyan:hover {
+
+.btn-outline-cyan:hover,
+.btn-outline-cyan:focus {
     background: var(--accent-cyan);
-    color: #fff;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(43, 181, 232, 0.3);
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+@media (max-width: 768px) {
+    .hero-info-section {
+        padding: 2.5rem 1rem;
+    }
+    
+    .navbar {
+        padding: 0.75rem 1rem;
+    }
+
+    .info-item {
+        margin-bottom: 1.25rem;
+    }
 }
