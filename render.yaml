@@ -2,18 +2,29 @@ services:
   - type: web
     name: rori-hotel-careers
     runtime: python
+    region: frankfurt
+    plan: starter
+    autoDeploy: true
 
+    # Build and Start Commands
     buildCommand: |
+      pip install --upgrade pip
       pip install -r requirements.txt
+    startCommand: gunicorn --workers 4 --threads 2 --bind 0.0.0.0:$PORT app:app
 
-    startCommand: gunicorn app:app
+    # Health Check
+    healthCheckPath: /
 
+    # Environment Variables
     envVars:
-      - key: SECRET_KEY
-        generateValue: true
-
       - key: PYTHON_VERSION
         value: 3.10.0
+
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+      - key: SECRET_KEY
+        generateValue: true
 
       - key: HR_USERNAME
         value: admin
@@ -21,10 +32,21 @@ services:
       - key: HR_PASSWORD
         sync: false
 
+      # Database Connection String from PostgreSQL
       - key: DATABASE_URL
         fromDatabase:
           name: rori_db
           property: connectionString
+
+      # Email SMTP Configurations
+      - key: MAIL_SERVER
+        value: smtp.gmail.com
+
+      - key: MAIL_PORT
+        value: "587"
+
+      - key: MAIL_USE_TLS
+        value: "true"
 
       - key: MAIL_USERNAME
         sync: false
@@ -35,29 +57,17 @@ services:
       - key: MAIL_DEFAULT_SENDER
         value: noreply@rorihotel.com
 
-      - key: MAIL_SERVER
-        value: smtp.gmail.com
-
-      - key: MAIL_PORT
-        value: 587
-
-      - key: MAIL_USE_TLS
-        value: true
-
-    healthCheckPath: /
-    plan: starter
-    autoDeploy: true
-    region: frankfurt
-
 databases:
+  # Primary Database
   - name: rori_db
-    plan: starter
-    region: frankfurt
     databaseName: rori_hotel_db
     user: rori_admin
-
-  - name: rori_db_backup
     plan: starter
     region: frankfurt
+
+  # Secondary / Backup Database Container
+  - name: rori_db_backup
     databaseName: rori_hotel_db_backup
     user: rori_admin_backup
+    plan: starter
+    region: frankfurt
