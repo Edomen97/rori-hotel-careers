@@ -1,21 +1,69 @@
 {
   "name": "Rori Hotel Careers",
   "short_name": "Rori Careers",
-  "description": "Premium hospitality careers at Rori Hotel",
+  "description": "Explore and apply for luxury hospitality career opportunities at Rori Hotel.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#0B132B",
   "theme_color": "#C5A059",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": [
+    "business",
+    "jobs"
+  ],
   "icons": [
     {
       "src": "/static/images/logo-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/static/images/logo-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/logo-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/static/images/logo-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "View Openings",
+      "short_name": "Jobs",
+      "description": "Browse active job openings at Rori Hotel",
+      "url": "/jobs",
+      "icons": [
+        {
+          "src": "/static/images/logo-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Track Status",
+      "short_name": "Track",
+      "description": "Check your application status",
+      "url": "/track",
+      "icons": [
+        {
+          "src": "/static/images/logo-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
