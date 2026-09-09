@@ -1,40 +1,278 @@
 {% extends "base.html" %}
 
-{% block title %}HR Login - Rori Hotel{% endblock %}
+{% block title %}HR & Admin Portal - Rori Hotel Hawassa{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+    /* ===== LUXURY DARK THEME ADMIN LOGIN ===== */
+    .login-wrapper {
+        min-height: 85vh;
+        background: var(--primary-navy);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Ambient Background Glow */
+    .login-wrapper::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(197, 160, 89, 0.08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    /* Glass Card */
+    .glass-login-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid var(--border-gold);
+        border-radius: 28px;
+        padding: 3rem 2.5rem;
+        width: 100%;
+        max-width: 480px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        position: relative;
+        z-index: 1;
+        overflow: hidden;
+    }
+
+    /* Gold Top Border Accent Line */
+    .glass-login-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+    }
+
+    /* Shield / Key Icon Container */
+    .login-icon-box {
+        width: 70px;
+        height: 70px;
+        background: rgba(197, 160, 89, 0.12);
+        border: 1px solid var(--border-gold);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        color: var(--accent-gold);
+        font-size: 2rem;
+        box-shadow: 0 0 20px rgba(197, 160, 89, 0.15);
+    }
+
+    .section-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        color: var(--accent-gold);
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+        text-align: center;
+    }
+
+    .login-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #fff;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-subtitle {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    /* Custom Form Controls */
+    .form-label-custom {
+        color: var(--text-main);
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.5px;
+    }
+
+    .dark-input-group {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-gold);
+        border-radius: 14px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+
+    .dark-input-group:focus-within {
+        border-color: var(--accent-gold);
+        box-shadow: 0 0 15px rgba(197, 160, 89, 0.25);
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .dark-input-group .input-icon {
+        background: transparent;
+        border: none;
+        padding-left: 1.2rem;
+        color: var(--accent-gold);
+        font-size: 1.1rem;
+    }
+
+    .dark-input-group .form-control {
+        background: transparent !important;
+        border: none !important;
+        color: #fff !important;
+        padding: 0.8rem 1rem;
+        font-size: 0.95rem;
+        box-shadow: none !important;
+    }
+
+    .dark-input-group .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Flash Message Alerts */
+    .custom-alert {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-gold);
+        border-radius: 12px;
+        color: #fff;
+        font-size: 0.88rem;
+        padding: 0.8rem 1.2rem;
+        margin-bottom: 1.5rem;
+    }
+    .custom-alert-danger {
+        border-color: rgba(220, 53, 69, 0.5);
+        background: rgba(220, 53, 69, 0.12);
+        color: #ff8e99;
+    }
+    .custom-alert-success {
+        border-color: rgba(25, 135, 84, 0.5);
+        background: rgba(25, 135, 84, 0.12);
+        color: #75b798;
+    }
+
+    /* Login Button */
+    .btn-luxury-primary {
+        background: var(--accent-gold);
+        color: var(--primary-navy) !important;
+        border: none;
+        padding: 0.9rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        width: 100%;
+        display: block;
+        box-shadow: 0 10px 20px rgba(197, 160, 89, 0.2);
+    }
+
+    .btn-luxury-primary:hover {
+        background: var(--gold-light);
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px rgba(197, 160, 89, 0.35);
+    }
+
+    @media (max-width: 576px) {
+        .glass-login-card {
+            padding: 2rem 1.5rem;
+            border-radius: 20px;
+        }
+        .login-title {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow-lg border-0 rounded-lg">
-                <div class="card-header bg-navy text-white text-center py-3">
-                    <h4 class="mb-0">HR / Admin Login</h4>
-                </div>
-                <div class="card-body p-4">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                      {% if messages %}
-                        {% for category, message in messages %}
-                          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                          </div>
-                        {% endfor %}
-                      {% endif %}
-                    {% endwith %}
+<div class="login-wrapper">
+    <div class="glass-login-card">
+        
+        <!-- Header Icon & Titles -->
+        <div class="login-icon-box">
+            <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <p class="section-label">Management Portal</p>
+        <h1 class="login-title">HR & Admin Login</h1>
+        <p class="login-subtitle">Rori Hotel Hawassa Recruitment System</p>
 
-                    <form method="POST" action="{{ url_for('admin_login') }}">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required placeholder="admin">
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••">
-                        </div>
-                        <button type="submit" class="btn btn-gold w-100 py-2">ግባ (Login)</button>
-                    </form>
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="custom-alert custom-alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- Login Form -->
+        <form method="POST" action="{{ url_for('admin_login') }}">
+            
+            <!-- Username Input -->
+            <div class="mb-4">
+                <label for="username" class="form-label-custom">Username</label>
+                <div class="dark-input-group">
+                    <span class="input-icon">
+                        <i class="bi bi-person-fill"></i>
+                    </span>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        id="username" 
+                        name="username" 
+                        required 
+                        placeholder="Enter your username"
+                        autocomplete="username"
+                    >
                 </div>
             </div>
-        </div>
+
+            <!-- Password Input -->
+            <div class="mb-4">
+                <label for="password" class="form-label-custom">Password</label>
+                <div class="dark-input-group">
+                    <span class="input-icon">
+                        <i class="bi bi-lock-fill"></i>
+                    </span>
+                    <input 
+                        type="password" 
+                        class="form-control" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        placeholder="••••••••"
+                        autocomplete="current-password"
+                    >
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-luxury-primary mt-2">
+                <i class="bi bi-box-arrow-in-right me-2"></i> ግባ (Login)
+            </button>
+
+        </form>
+
     </div>
 </div>
 {% endblock %}
