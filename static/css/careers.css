@@ -1,88 +1,148 @@
-/* ===== CAREERS PAGE ENHANCEMENTS ===== */
+/* ============================================
+   RORI HOTEL CAREERS - FRONTEND ENHANCEMENTS
+   ============================================ */
 
-/* Glass card hover animation */
+:root {
+  --gold: #C5A059;
+  --gold-glow: rgba(197, 160, 89, 0.35);
+  --navy-dark: #0B132B;
+  --navy-card: rgba(17, 28, 56, 0.6);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ===== GLASS CARD & HOVER ANIMATION ===== */
 .glass-card {
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 24px;
-    padding: 2rem;
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    height: 100%;
-    position: relative;
-    overflow: hidden;
+  background: var(--navy-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  padding: 2rem;
+  transition: transform 0.5s var(--ease-out-expo), 
+              border-color 0.5s var(--ease-out-expo), 
+              box-shadow 0.5s var(--ease-out-expo);
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  will-change: transform, border-color, box-shadow;
+  z-index: 1;
 }
+
 .glass-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(197, 160, 89, 0.05), transparent 50%);
-    opacity: 0;
-    transition: opacity 0.5s ease;
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(197, 160, 89, 0.08), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: -1;
+  pointer-events: none;
 }
+
 .glass-card:hover::before {
-    opacity: 1;
+  opacity: 1;
 }
+
 .glass-card:hover {
-    transform: translateY(-8px);
-    border-color: rgba(197, 160, 89, 0.3);
-    box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+  transform: translateY(-8px) scale(1.01);
+  border-color: rgba(197, 160, 89, 0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+              0 0 20px var(--gold-glow);
 }
 
-/* Smooth scroll behavior */
+/* ===== SMOOTH SCROLL ===== */
 html {
-    scroll-behavior: smooth;
+  scroll-behavior: smooth;
 }
 
-/* Fade-in animation for sections */
+/* ===== SCROLL FADE-IN ANIMATIONS ===== */
 .fade-in {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s var(--ease-out-expo), 
+              transform 0.8s var(--ease-out-expo);
+  will-change: opacity, transform;
 }
+
 .fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
+  opacity: 1;
+  transform: translateY(0);
 }
 
-/* Gold shimmer line */
+/* Staggered Delay for Cards Grid */
+.fade-in-delay-1 { transition-delay: 0.15s; }
+.fade-in-delay-2 { transition-delay: 0.30s; }
+.fade-in-delay-3 { transition-delay: 0.45s; }
+
+/* ===== GOLD SHIMMER LINE ===== */
 .gold-shimmer {
-    width: 60px;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    margin: 1rem auto;
-    animation: shimmerLine 3s infinite;
+  width: 70px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 1.2rem auto;
+  border-radius: 2px;
+  animation: shimmerLine 3s infinite var(--ease-out-expo);
 }
+
 @keyframes shimmerLine {
-    0% { opacity: 0.3; transform: scaleX(0.8); }
-    50% { opacity: 1; transform: scaleX(1.2); }
-    100% { opacity: 0.3; transform: scaleX(0.8); }
+  0% { opacity: 0.2; transform: scaleX(0.7); }
+  50% { opacity: 1; transform: scaleX(1.3); }
+  100% { opacity: 0.2; transform: scaleX(0.7); }
 }
 
-/* Loading skeleton animation for cards */
+/* ===== SKELETON LOADING STATE ===== */
 .skeleton-loading {
-    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
-    background-size: 200% 100%;
-    animation: skeleton 1.5s infinite;
-}
-@keyframes skeleton {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+  background: linear-gradient(
+    90deg, 
+    rgba(255, 255, 255, 0.03) 25%, 
+    rgba(255, 255, 255, 0.09) 50%, 
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton 1.5s infinite linear;
+  border-radius: 8px;
+  pointer-events: none;
 }
 
-/* Mobile-first responsive adjustments */
+@keyframes skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ===== MOBILE-FIRST RESPONSIVE ADJUSTMENTS ===== */
 @media (max-width: 576px) {
-    .glass-card {
-        padding: 1.5rem;
-        border-radius: 18px;
-    }
-    .glass-card .icon-wrap {
-        width: 48px;
-        height: 48px;
-        font-size: 1.4rem;
-    }
+  .glass-card {
+    padding: 1.5rem;
+    border-radius: 18px;
+  }
+  
+  .glass-card .icon-wrap {
+    width: 48px;
+    height: 48px;
+    font-size: 1.3rem;
+  }
+}
+
+/* ===== ACCESSIBILITY (PREFERS REDUCED MOTION) ===== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  
+  .glass-card, 
+  .fade-in, 
+  .gold-shimmer, 
+  .skeleton-loading {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .fade-in {
+    opacity: 1;
+    transform: none;
+  }
 }
