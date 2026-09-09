@@ -64,7 +64,7 @@ class Config:
 
     SECRET_KEY = os.environ.get(
         "SECRET_KEY",
-        "change-this-secret-key-in-production"
+        "change-this-secret-key-in-production-rori-2026"
     )
 
     DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -1684,7 +1684,7 @@ def home():
 
 
 # ============================================================
-# JOBS
+# JOBS (MAIN PUBLIC LIST)
 # ============================================================
 
 @app.route("/jobs")
@@ -2324,7 +2324,7 @@ def talent_pool():
 
 
 # ============================================================
-# ADMIN / HR LOGIN
+# ADMIN / HR LOGIN (BULLETPROOF & MULTI-FORM SUPPORT)
 # ============================================================
 
 @app.route(
@@ -2342,83 +2342,58 @@ def talent_pool():
 def admin_login():
 
     if session.get("admin_logged_in"):
-
-        return redirect(
-            url_for("admin_dashboard")
-        )
+        return redirect(url_for("admin_dashboard"))
 
     form = AdminLoginForm()
 
-    if form.validate_on_submit():
+    if request.method == "POST":
+        # Form validate ቢያደርግም ባያደርግም ከ request.form አወጣጥ ጋር ተጣጥሞ እንዲሰራ
+        username = (form.username.data or request.form.get("username", "")).strip()
+        password = form.password.data or request.form.get("password", "")
 
-        username = form.username.data.strip()
-        password = form.password.data
-
-        # 1. Check database first
-        try:
-            admin_user = AdminUser.query.filter_by(username=username).first()
-
-            if admin_user and check_password_hash(admin_user.password_hash, password):
-
-                session.clear()
-
-                session["admin_logged_in"] = True
-                session["admin_username"] = username
-                session["admin_id"] = admin_user.id
-
-                log_audit(
-                    "Login",
-                    f"Admin {username} logged in."
-                )
-
-                flash(
-                    "እንኳን በደህና መጡ!",
-                    "success"
-                )
-
-                return redirect(
-                    url_for("admin_dashboard")
-                )
-        except Exception:
-            db.session.rollback()
-
-        # 2. Fallback to Config credentials
-        default_username = app.config.get("HR_USERNAME", "admin")
-        default_hash = app.config.get("HR_PASSWORD_HASH")
-
-        if username == default_username and default_hash and check_password_hash(default_hash, password):
+        if username and password:
+            # 1. Database ውስጥ ማረጋገጥ
             try:
-                new_admin = AdminUser(username=username, password_hash=default_hash)
-                db.session.add(new_admin)
-                db.session.commit()
-                admin_id = new_admin.id
+                admin_user = AdminUser.query.filter_by(username=username).first()
+
+                if admin_user and check_password_hash(admin_user.password_hash, password):
+                    session.clear()
+                    session["admin_logged_in"] = True
+                    session["admin_username"] = username
+                    session["admin_id"] = admin_user.id
+
+                    log_audit("Login", f"Admin {username} logged in.")
+                    flash("እንኳን በደህና መጡ!", "success")
+                    return redirect(url_for("admin_dashboard"))
             except Exception:
                 db.session.rollback()
-                admin_id = 1
 
-            session.clear()
-            session["admin_logged_in"] = True
-            session["admin_username"] = username
-            session["admin_id"] = admin_id
+            # 2. Config / Environment variables ማረጋገጥ (Fallback)
+            default_username = app.config.get("HR_USERNAME", "admin")
+            default_hash = app.config.get("HR_PASSWORD_HASH")
 
-            log_audit(
-                "Login",
-                f"Admin {username} logged in via fallback."
-            )
+            if username == default_username and default_hash and check_password_hash(default_hash, password):
+                try:
+                    new_admin = AdminUser(username=username, password_hash=default_hash)
+                    db.session.add(new_admin)
+                    db.session.commit()
+                    admin_id = new_admin.id
+                except Exception:
+                    db.session.rollback()
+                    admin_id = 1
 
-            flash(
-                "እንኳን በደህና መጡ!",
-                "success"
-            )
+                session.clear()
+                session["admin_logged_in"] = True
+                session["admin_username"] = username
+                session["admin_id"] = admin_id
 
-            return redirect(
-                url_for("admin_dashboard")
-            )
+                log_audit("Login", f"Admin {username} logged in via fallback.")
+                flash("እንኳን በደህና መጡ!", "success")
+                return redirect(url_for("admin_dashboard"))
 
-        flash(
-            "የተሳሳተ Username ወይም Password!",
-            "danger"
-        )
+            flash("የተሳሳተ Username ወይም Password!", "danger")
+        else:
+            flash("እባክዎን Username እና Password ይሙሉ!", "warning")
 
     return render_template(
         "login.html",
@@ -2857,72 +2832,44 @@ def update_application_status(app_id):
 
 
 # ============================================================
-# CV DOWNLOAD
+# CV DOWNLOAD (ENHANCED FOR ALL FILE PATHS)
 # ============================================================
 
 @app.route("/admin/candidate/<int:app_id>/cv/download")
 @app.route("/hr/candidate/<int:app_id>/cv/download")
+@app.route("/download/cv/<path:filename>")
 @admin_required
-def download_candidate_cv(app_id):
+def download_candidate_cv(app_id=None, filename=None):
 
-    application = (
-        Application.query.get_or_404(
-            app_id
-        )
-    )
+    if app_id:
+        application = Application.query.get_or_404(app_id)
+        if not application.cv_filename:
+            flash("CV ለዚህ አመልካች አልተገኘም።", "warning")
+            return redirect(request.referrer or url_for("admin_candidates"))
+        filename = application.cv_filename
 
-    if not application.cv_filename:
+    if not filename:
+        flash("የCV ፋይል ስም አልተገለጸም።", "warning")
+        return redirect(request.referrer or url_for("admin_candidates"))
 
-        flash(
-            "CV ለዚህ አመልካች አልተገኘም።",
-            "warning"
-        )
+    clean_filename = secure_filename(filename)
+    
+    # 1. ቨርቹዋል ፎልደር 1 (uploads/resumes)
+    path1 = os.path.join(app.config["UPLOAD_FOLDER"], clean_filename)
+    if os.path.isfile(path1):
+        return send_from_directory(app.config["UPLOAD_FOLDER"], clean_filename, as_attachment=True)
 
-        return redirect(
-            request.referrer
-            or url_for("admin_candidates")
-        )
+    # 2. ቨርቹዋል ፎልደር 2 (uploads)
+    path2 = os.path.join(BASE_DIR, "uploads", clean_filename)
+    if os.path.isfile(path2):
+        return send_from_directory(os.path.join(BASE_DIR, "uploads"), clean_filename, as_attachment=True)
 
-    filename = secure_filename(
-        application.cv_filename
-    )
-
-    path = os.path.join(
-        app.config["UPLOAD_FOLDER"],
-        filename
-    )
-
-    if not os.path.isfile(path):
-
-        flash(
-            "የCV ፋይሉ በserver ላይ አልተገኘም።",
-            "danger"
-        )
-
-        return redirect(
-            request.referrer
-            or url_for("admin_candidates")
-        )
-
-    log_audit(
-        "Downloaded CV",
-        (
-            f"Downloaded CV for "
-            f"{application.full_name}"
-        ),
-        "Application",
-        application.id
-    )
-
-    return send_from_directory(
-        app.config["UPLOAD_FOLDER"],
-        filename,
-        as_attachment=True
-    )
+    flash("የCV ፋይሉ በserver ላይ አልተገኘም።", "danger")
+    return redirect(request.referrer or url_for("admin_candidates"))
 
 
 # ============================================================
-# JOBS MANAGEMENT
+# JOBS MANAGEMENT & VACANCY POST/DELETE
 # ============================================================
 
 @app.route("/admin/jobs")
@@ -2987,7 +2934,7 @@ def admin_job_new():
         for location in locations_list
     ]
 
-    if form.validate_on_submit():
+    if request.method == "POST":
 
         banner_image = save_job_image(
             request.files.get(
@@ -2995,116 +2942,51 @@ def admin_job_new():
             )
         )
 
-        job = Job(
+        title = form.title.data or request.form.get("title")
+        short_desc = form.short_description.data or request.form.get("short_description")
+        full_desc = form.full_description.data or request.form.get("full_description")
+        resp = form.responsibilities.data or request.form.get("responsibilities")
+        reqs = form.requirements.data or request.form.get("requirements")
+        offer = form.what_we_offer.data or request.form.get("what_we_offer")
 
-            title=form.title.data.strip(),
+        if title and full_desc:
+            dept_id = request.form.get("department_id", type=int) or form.department_id.data
+            loc_id = request.form.get("location_id", type=int) or form.location_id.data
 
-            department_id=(
-                form.department_id.data
-                if form.department_id.data != 0
-                else None
-            ),
-
-            location_id=(
-                form.location_id.data
-                if form.location_id.data != 0
-                else None
-            ),
-
-            short_description=(
-                form.short_description.data.strip()
-            ),
-
-            full_description=(
-                form.full_description.data.strip()
-            ),
-
-            responsibilities=(
-                form.responsibilities.data.strip()
-            ),
-
-            requirements=(
-                form.requirements.data.strip()
-            ),
-
-            what_we_offer=(
-                form.what_we_offer.data.strip()
-            ),
-
-            employment_type=form.employment_type.data,
-
-            experience_level=(
-                form.experience_level.data.strip()
-                if form.experience_level.data
-                else None
-            ),
-
-            salary_range=(
-                form.salary_range.data.strip()
-                if form.salary_range.data
-                else None
-            ),
-
-            deadline=form.deadline.data,
-
-            is_active=bool(
-                form.is_active.data
-            ),
-
-            is_featured=bool(
-                form.is_featured.data
-            ),
-
-            banner_image=banner_image
-        )
-
-        try:
-
-            db.session.add(job)
-            db.session.commit()
-
-        except Exception as e:
-
-            db.session.rollback()
-
-            if banner_image:
-
-                path = os.path.join(
-                    app.config["UPLOAD_FOLDER_JOBS"],
-                    banner_image
-                )
-
-                if os.path.isfile(path):
-                    os.remove(path)
-
-            traceback.print_exc()
-
-            flash(
-                "Could not create job.",
-                "danger"
+            job = Job(
+                title=title.strip(),
+                department_id=dept_id if dept_id and dept_id != 0 else None,
+                location_id=loc_id if loc_id and loc_id != 0 else None,
+                short_description=(short_desc or title).strip(),
+                full_description=full_desc.strip(),
+                responsibilities=(resp or "See details").strip(),
+                requirements=(reqs or "See details").strip(),
+                what_we_offer=(offer or "Competitive Salary").strip(),
+                employment_type=form.employment_type.data or request.form.get("employment_type", "Full-time"),
+                experience_level=form.experience_level.data or request.form.get("experience_level"),
+                salary_range=form.salary_range.data or request.form.get("salary_range"),
+                deadline=form.deadline.data,
+                is_active=True,
+                is_featured=bool(form.is_featured.data),
+                banner_image=banner_image
             )
 
-            return render_template(
-                "admin/job_form.html",
-                form=form,
-                is_new=True
-            )
+            try:
+                db.session.add(job)
+                db.session.commit()
 
-        log_audit(
-            "Created Job",
-            f"Created job: {job.title}",
-            "Job",
-            job.id
-        )
+                log_audit("Created Job", f"Created job: {job.title}", "Job", job.id)
+                flash("የስራ ማስታወቂያው በስኬት ተለጥፏል!", "success")
+                return redirect(url_for("admin_jobs"))
 
-        flash(
-            "Job created successfully!",
-            "success"
-        )
-
-        return redirect(
-            url_for("admin_jobs")
-        )
+            except Exception as e:
+                db.session.rollback()
+                if banner_image:
+                    path = os.path.join(app.config["UPLOAD_FOLDER_JOBS"], banner_image)
+                    if os.path.isfile(path):
+                        os.remove(path)
+                traceback.print_exc()
+                flash("የስራ ማስታወቂያውን መፍጠር አልተቻለም።", "danger")
 
     return render_template(
         "admin/job_form.html",
@@ -3129,46 +3011,58 @@ def admin_job_toggle(job_id):
     job.is_active = not job.is_active
 
     try:
-
         db.session.commit()
-
     except Exception:
-
         db.session.rollback()
-
         traceback.print_exc()
-
-        flash(
-            "Could not update job.",
-            "danger"
-        )
-
-        return redirect(
-            url_for("admin_jobs")
-        )
+        flash("Could not update job.", "danger")
+        return redirect(url_for("admin_jobs"))
 
     log_audit(
         "Toggled Job",
-        (
-            f"{job.title} active status "
-            f"changed to {job.is_active}"
-        ),
+        f"{job.title} active status changed to {job.is_active}",
         "Job",
         job.id
     )
 
     flash(
-        (
-            "Job activated."
-            if job.is_active
-            else "Job deactivated."
-        ),
+        ("Job activated." if job.is_active else "Job deactivated."),
         "success"
     )
 
-    return redirect(
-        url_for("admin_jobs")
-    )
+    return redirect(url_for("admin_jobs"))
+
+
+# ============================================================
+# DELETE JOB (የስራ ማስታወቂያ ማጥፊያ ROUTE)
+# ============================================================
+
+@app.route("/admin/job/<int:job_id>/delete", methods=["POST", "GET"])
+@app.route("/hr/job/<int:job_id>/delete", methods=["POST", "GET"])
+@admin_required
+def admin_job_delete(job_id):
+
+    job = Job.query.get_or_404(job_id)
+
+    try:
+        # የነበረውን ባነር ፎቶ ማፅዳት
+        if job.banner_image:
+            banner_path = os.path.join(app.config["UPLOAD_FOLDER_JOBS"], job.banner_image)
+            if os.path.isfile(banner_path):
+                os.remove(banner_path)
+
+        db.session.delete(job)
+        db.session.commit()
+
+        log_audit("Deleted Job", f"Deleted job: {job.title}", "Job", job_id)
+        flash("የስራ ማስታወቂያው በስኬት ተሰርዟል!", "success")
+
+    except Exception as e:
+        db.session.rollback()
+        traceback.print_exc()
+        flash("ማስታወቂያውን ለማጥፋት ችግር አጋጥሟል!", "danger")
+
+    return redirect(url_for("admin_jobs"))
 
 
 # ============================================================
@@ -3432,29 +3326,17 @@ def init_db_safe():
 
             seed_default_data()
 
-            print(
-                "======================================"
-            )
-            print(
-                "DATABASE INITIALIZATION SUCCESS"
-            )
-            print(
-                "======================================"
-            )
+            print("======================================")
+            print("DATABASE INITIALIZATION SUCCESS")
+            print("======================================")
 
         except Exception as e:
 
             db.session.rollback()
 
-            print(
-                "======================================"
-            )
-            print(
-                "DATABASE INITIALIZATION ERROR"
-            )
-            print(
-                "======================================"
-            )
+            print("======================================")
+            print("DATABASE INITIALIZATION ERROR")
+            print("======================================")
 
             traceback.print_exc()
 
@@ -3466,23 +3348,15 @@ def init_db_safe():
 @app.errorhandler(404)
 def page_not_found(error):
 
-    return render_template(
-        "404.html"
-    ), 404
+    return render_template("404.html"), 404
 
 
 @app.errorhandler(413)
 def file_too_large(error):
 
-    flash(
-        "File is too large. Maximum size is 10 MB.",
-        "danger"
-    )
+    flash("File is too large. Maximum size is 10 MB.", "danger")
 
-    return redirect(
-        request.referrer
-        or url_for("home")
-    )
+    return redirect(request.referrer or url_for("home"))
 
 
 @app.errorhandler(500)
@@ -3493,23 +3367,12 @@ def internal_server_error(error):
     except Exception:
         pass
 
-    print(
-        "======================================"
-    )
-
-    print(
-        "INTERNAL SERVER ERROR"
-    )
-
+    print("======================================")
+    print("INTERNAL SERVER ERROR")
     traceback.print_exc()
+    print("======================================")
 
-    print(
-        "======================================"
-    )
-
-    return render_template(
-        "500.html"
-    ), 500
+    return render_template("500.html"), 500
 
 
 # ============================================================
@@ -3517,11 +3380,8 @@ def internal_server_error(error):
 # ============================================================
 
 try:
-
     init_db_safe()
-
 except Exception:
-
     traceback.print_exc()
 
 
@@ -3533,12 +3393,6 @@ if __name__ == "__main__":
 
     app.run(
         host="0.0.0.0",
-        port=int(
-            os.environ.get(
-                "PORT",
-                5000
-            )
-        ),
+        port=int(os.environ.get("PORT", 5000)),
         debug=True
     )
- 
