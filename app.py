@@ -131,25 +131,24 @@ class Config:
     }
 
     # ========================================================
-    # HR LOGIN
+    # HR LOGIN (SUPPORT BOTH ADMIN_PASSWORD AND HR_PASSWORD)
     # ========================================================
 
-    HR_USERNAME = os.environ.get(
-        "HR_USERNAME",
-        "admin"
+    HR_USERNAME = (
+        os.environ.get("HR_USERNAME")
+        or os.environ.get("ADMIN_USERNAME")
+        or "admin"
     )
 
-    HR_PASSWORD_HASH = os.environ.get(
-        "HR_PASSWORD_HASH"
-    )
+    HR_PASSWORD_HASH = os.environ.get("HR_PASSWORD_HASH")
 
     if not HR_PASSWORD_HASH:
-        HR_PASSWORD_HASH = generate_password_hash(
-            os.environ.get(
-                "HR_PASSWORD",
-                "RoriHR2026"
-            )
+        raw_password = (
+            os.environ.get("HR_PASSWORD")
+            or os.environ.get("ADMIN_PASSWORD")
+            or "RoriHR2026"
         )
+        HR_PASSWORD_HASH = generate_password_hash(raw_password)
 
     # ========================================================
     # MAIL
@@ -386,7 +385,6 @@ class Job(db.Model):
         nullable=True
     )
 
-    # PRIVATE HR FIELD
     salary_range = db.Column(
         db.String(100),
         nullable=True
@@ -568,7 +566,6 @@ class Application(db.Model):
         nullable=True
     )
 
-    # PRIVATE HR FIELD
     expected_salary = db.Column(
         db.String(50),
         nullable=True
@@ -701,7 +698,6 @@ class TalentPool(db.Model):
         nullable=True
     )
 
-    # PRIVATE HR FIELD
     expected_salary = db.Column(
         db.String(50),
         nullable=True
@@ -1105,7 +1101,6 @@ class JobForm(FlaskForm):
         ]
     )
 
-    # HR ONLY
     salary_range = StringField(
         "Salary Range",
         validators=[
@@ -1907,7 +1902,6 @@ def apply(job_id):
 
     job = Job.query.get_or_404(job_id)
 
-    # Position closed
     if not job.is_active:
 
         flash(
@@ -1922,7 +1916,6 @@ def apply(job_id):
             )
         )
 
-    # Deadline passed
     if job.is_expired:
 
         flash(
@@ -1941,10 +1934,6 @@ def apply(job_id):
 
     if form.validate_on_submit():
 
-        # ----------------------------------------------------
-        # CV
-        # ----------------------------------------------------
-
         cv_filename = save_uploaded_file(
             form.cv_file.data
         )
@@ -1961,10 +1950,6 @@ def apply(job_id):
                 form=form,
                 job=job
             )
-
-        # ----------------------------------------------------
-        # Unique reference number
-        # ----------------------------------------------------
 
         reference_no = None
 
@@ -2002,10 +1987,6 @@ def apply(job_id):
                 form=form,
                 job=job
             )
-
-        # ----------------------------------------------------
-        # Application
-        # ----------------------------------------------------
 
         application = Application(
 
@@ -2057,7 +2038,6 @@ def apply(job_id):
                 form.willing_to_relocate.data
             ),
 
-            # Private HR field
             expected_salary=(
                 form.expected_salary.data.strip()
                 if form.expected_salary.data
@@ -2076,10 +2056,6 @@ def apply(job_id):
         )
 
         try:
-
-            # ------------------------------------------------
-            # ONE TRANSACTION
-            # ------------------------------------------------
 
             db.session.add(application)
 
@@ -2114,16 +2090,6 @@ def apply(job_id):
 
             delete_uploaded_file(cv_filename)
 
-            print(
-                "========================================"
-            )
-            print(
-                "APPLICATION SUBMISSION ERROR"
-            )
-            print(
-                "========================================"
-            )
-
             traceback.print_exc()
 
             flash(
@@ -2137,10 +2103,6 @@ def apply(job_id):
                 form=form,
                 job=job
             )
-
-        # ----------------------------------------------------
-        # Audit
-        # ----------------------------------------------------
 
         log_audit(
             "New Application",
@@ -2360,7 +2322,7 @@ def talent_pool():
 
 
 # ============================================================
-# ADMIN LOGIN
+# ADMIN LOGIN (UPDATED WITH FALLBACK & DUAL ENV VARIABLES)
 # ============================================================
 
 @app.route(
@@ -2386,20 +2348,56 @@ def admin_login():
         username = form.username.data.strip()
         password = form.password.data
 
-        # ከ AdminUser Database እንፈልጋለን
-        admin_user = AdminUser.query.filter_by(username=username).first()
+        # 1. Check database first
+        try:
+            admin_user = AdminUser.query.filter_by(username=username).first()
 
-        if admin_user and check_password_hash(admin_user.password_hash, password):
+            if admin_user and check_password_hash(admin_user.password_hash, password):
+
+                session.clear()
+
+                session["admin_logged_in"] = True
+                session["admin_username"] = username
+                session["admin_id"] = admin_user.id
+
+                log_audit(
+                    "Login",
+                    f"Admin {username} logged in."
+                )
+
+                flash(
+                    "እንኳን በደህና መጡ!",
+                    "success"
+                )
+
+                return redirect(
+                    url_for("admin_dashboard")
+                )
+        except Exception:
+            db.session.rollback()
+
+        # 2. Fallback to Config credentials (ADMIN_PASSWORD or HR_PASSWORD)
+        default_username = app.config.get("HR_USERNAME", "admin")
+        default_hash = app.config.get("HR_PASSWORD_HASH")
+
+        if username == default_username and default_hash and check_password_hash(default_hash, password):
+            try:
+                new_admin = AdminUser(username=username, password_hash=default_hash)
+                db.session.add(new_admin)
+                db.session.commit()
+                admin_id = new_admin.id
+            except Exception:
+                db.session.rollback()
+                admin_id = 1
 
             session.clear()
-
             session["admin_logged_in"] = True
             session["admin_username"] = username
-            session["admin_id"] = admin_user.id
+            session["admin_id"] = admin_id
 
             log_audit(
                 "Login",
-                f"Admin {username} logged in."
+                f"Admin {username} logged in via fallback."
             )
 
             flash(
@@ -2423,7 +2421,7 @@ def admin_login():
 
 
 # ============================================================
-# CHANGE PASSWORD (NEW)
+# CHANGE PASSWORD
 # ============================================================
 
 @app.route(
@@ -2440,7 +2438,6 @@ def admin_change_password():
         
         if admin_user and check_password_hash(admin_user.password_hash, form.current_password.data):
             
-            # አዲሱን ፓስወርድ Hash አድርገን እንቀይራለን
             admin_user.password_hash = generate_password_hash(form.new_password.data)
             db.session.commit()
             
@@ -3021,7 +3018,6 @@ def admin_job_new():
                 else None
             ),
 
-            # HR ONLY
             salary_range=(
                 form.salary_range.data.strip()
                 if form.salary_range.data
@@ -3227,14 +3223,6 @@ def admin_audit_log():
 
 def get_column_type(column):
 
-    """
-    Converts SQLAlchemy column type to a database-compatible
-    SQL type.
-
-    This avoids using PostgreSQL-invalid DATETIME.
-    SQLAlchemy will produce TIMESTAMP for PostgreSQL.
-    """
-
     try:
 
         dialect = db.engine.dialect
@@ -3297,14 +3285,6 @@ def safe_add_column(
 
 def migrate_existing_database():
 
-    """
-    Adds missing nullable/optional columns to existing
-    databases.
-
-    Important:
-    db.create_all() does NOT modify an existing table.
-    """
-
     inspector = inspect(
         db.engine
     )
@@ -3312,10 +3292,6 @@ def migrate_existing_database():
     existing_tables = set(
         inspector.get_table_names()
     )
-
-    # --------------------------------------------------------
-    # Create tables first
-    # --------------------------------------------------------
 
     db.create_all()
 
@@ -3326,10 +3302,6 @@ def migrate_existing_database():
     existing_tables = set(
         inspector.get_table_names()
     )
-
-    # --------------------------------------------------------
-    # Add columns based on current SQLAlchemy models
-    # --------------------------------------------------------
 
     models = [
         AdminUser,
@@ -3362,8 +3334,6 @@ def migrate_existing_database():
             if column.name in existing_columns:
                 continue
 
-            # Do not attempt to add primary keys or
-            # required columns to populated old tables.
             if column.primary_key:
                 continue
 
@@ -3392,9 +3362,6 @@ def migrate_existing_database():
 
 def seed_default_data():
 
-    # --------------------------------------------------------
-    # Admin User Seed
-    # --------------------------------------------------------
     admin = AdminUser.query.filter_by(username=app.config["HR_USERNAME"]).first()
     if not admin:
         db.session.add(
@@ -3403,10 +3370,6 @@ def seed_default_data():
                 password_hash=app.config["HR_PASSWORD_HASH"]
             )
         )
-
-    # --------------------------------------------------------
-    # Departments
-    # --------------------------------------------------------
 
     departments = [
         "Front Office",
@@ -3437,10 +3400,6 @@ def seed_default_data():
                     name=name
                 )
             )
-
-    # --------------------------------------------------------
-    # Hawassa
-    # --------------------------------------------------------
 
     location = (
         Location.query
