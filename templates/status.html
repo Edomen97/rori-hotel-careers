@@ -3,829 +3,685 @@
 {% block title %}Application Status - Rori Hotel Careers{% endblock %}
 
 {% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
 <style>
-.status-tracker {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    position: relative;
-    padding-left: 0.5rem;
-}
-
-.status-tracker::before {
-    content: '';
-    position: absolute;
-    left: 1.35rem;
-    top: 15px;
-    bottom: 15px;
-    width: 2px;
-    background-color: var(--border-color);
-    z-index: 1;
-}
-
-.status-step {
-    display: flex;
-    align-items: flex-start;
-    gap: 1.25rem;
-    position: relative;
-    z-index: 2;
-}
-
-.step-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    flex-shrink: 0;
-    transition: var(--transition-smooth);
-}
-
-.status-step.completed .step-icon {
-    background-color: var(--gold);
-    color: var(--white);
-    box-shadow: 0 4px 12px rgba(197, 160, 89, 0.35);
-}
-
-.status-step.active .step-icon {
-    background-color: var(--navy);
-    color: var(--gold);
-    border: 2px solid var(--gold);
-    box-shadow: 0 4px 12px rgba(11, 19, 43, 0.25);
-    animation: pulse 2s infinite;
-}
-
-.status-step.pending .step-icon {
-    background-color: var(--white);
-    border: 2px solid var(--border-color);
-    color: #adb5bd;
-}
-
-.step-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.step-title {
-    font-weight: 600;
-    color: var(--navy);
-    font-size: 0.95rem;
-}
-
-.status-step.pending .step-title {
-    color: var(--text-muted);
-}
-
-.step-date {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-}
-
-.application-summary {
-    background: #f8f9fa;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1rem 1.25rem;
-}
-
-.application-summary-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    color: var(--text-muted);
-}
-
-.application-summary-value {
-    font-weight: 600;
-    color: var(--navy);
-}
-
-.current-status-box {
-    border-radius: 14px;
-    padding: 1.25rem;
-    border: 1px solid var(--border-color);
-    background: #fff;
-}
-
-.current-status-box.rejected {
-    background: #fff5f5;
-    border-color: #f1b0b7;
-}
-
-.current-status-box.hired {
-    background: #f1fbf5;
-    border-color: #a8dfbd;
-}
-
-.current-status-box.selected {
-    background: #fffaf0;
-    border-color: #e7d39c;
-}
-
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding: 0.55rem 1rem;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 0.85rem;
-}
-
-.status-badge.default {
-    background: var(--navy);
-    color: var(--gold);
-}
-
-.status-badge.rejected {
-    background: #dc3545;
-    color: #fff;
-}
-
-.status-badge.hired {
-    background: #198754;
-    color: #fff;
-}
-
-.status-badge.selected {
-    background: var(--gold);
-    color: #fff;
-}
-
-.status-update {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-}
-
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(197, 160, 89, 0.4);
+    /* ===== LUXURY DARK THEME APPLICATION STATUS ===== */
+    .status-wrapper {
+        padding: 3rem 0 5rem 0;
+        background: var(--primary-navy);
+        min-height: 85vh;
     }
 
-    70% {
-        box-shadow: 0 0 0 8px rgba(197, 160, 89, 0);
+    .glass-status-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid var(--border-gold);
+        border-radius: 24px;
+        padding: 3rem 2.5rem;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
+        position: relative;
+        overflow: hidden;
     }
 
-    100% {
-        box-shadow: 0 0 0 0 rgba(197, 160, 89, 0);
+    .glass-status-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent-gold), transparent);
     }
-}
 
-@media (min-width: 768px) {
+    /* Reference & Job Header */
+    .badge-ref {
+        background: rgba(197, 160, 89, 0.15);
+        color: var(--accent-gold);
+        border: 1px solid var(--border-gold);
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+
+    .job-header-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.2;
+    }
+
+    .meta-submitted-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--accent-gold);
+    }
+
+    .meta-submitted-val {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    /* Summary Panel */
+    .application-summary-dark {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-gold);
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .application-summary-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--accent-gold);
+        margin-bottom: 0.2rem;
+    }
+
+    .application-summary-value {
+        font-weight: 600;
+        color: #fff;
+        font-size: 1.05rem;
+    }
+
+    /* ===== STEPPER TRACKER ===== */
     .status-tracker {
-        flex-direction: row;
-        justify-content: space-between;
-        padding-left: 0;
-        align-items: flex-start;
+        display: flex;
+        flex-direction: column;
+        gap: 1.8rem;
+        position: relative;
+        padding-left: 0.5rem;
+        margin: 3rem 0;
     }
 
     .status-tracker::before {
-        left: 40px;
-        right: 40px;
-        top: 19px;
-        bottom: auto;
-        width: auto;
-        height: 2px;
+        content: '';
+        position: absolute;
+        left: 1.35rem;
+        top: 20px;
+        bottom: 20px;
+        width: 2px;
+        background: rgba(255, 255, 255, 0.1);
+        z-index: 1;
     }
 
     .status-step {
-        flex-direction: column;
+        display: flex;
+        align-items: flex-start;
+        gap: 1.25rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
         align-items: center;
-        text-align: center;
-        flex: 1;
-        gap: 0.75rem;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+
+    /* Completed Step */
+    .status-step.completed .step-icon {
+        background: var(--accent-gold);
+        color: var(--primary-navy);
+        box-shadow: 0 0 15px rgba(197, 160, 89, 0.4);
+    }
+
+    /* Active Step */
+    .status-step.active .step-icon {
+        background: var(--primary-navy);
+        color: var(--accent-gold);
+        border: 2px solid var(--accent-gold);
+        box-shadow: 0 0 20px rgba(197, 160, 89, 0.5);
+        animation: pulse-gold 2s infinite;
+    }
+
+    /* Pending Step */
+    .status-step.pending .step-icon {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: rgba(255, 255, 255, 0.3);
     }
 
     .step-content {
-        align-items: center;
-    }
-}
-
-@media (max-width: 575px) {
-    .card-premium {
-        border-radius: 12px;
-    }
-
-    .status-tracker {
-        gap: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
     }
 
     .step-title {
-        font-size: 0.9rem;
+        font-weight: 600;
+        color: #fff;
+        font-size: 1rem;
     }
-}
+
+    .status-step.pending .step-title {
+        color: var(--text-muted);
+    }
+
+    .step-date {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+    }
+
+    /* ===== STATUS SUMMARY BOX ===== */
+    .current-status-box {
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid var(--border-gold);
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .current-status-box.rejected {
+        background: rgba(220, 53, 69, 0.08);
+        border-color: rgba(220, 53, 69, 0.4);
+    }
+
+    .current-status-box.hired {
+        background: rgba(25, 135, 84, 0.1);
+        border-color: rgba(25, 135, 84, 0.4);
+    }
+
+    .current-status-box.selected {
+        background: rgba(197, 160, 89, 0.12);
+        border-color: var(--accent-gold);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.4rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+    }
+
+    .status-badge.default {
+        background: rgba(197, 160, 89, 0.2);
+        color: var(--accent-gold);
+        border: 1px solid var(--border-gold);
+    }
+
+    .status-badge.rejected {
+        background: rgba(220, 53, 69, 0.2);
+        color: #ff8e99;
+        border: 1px solid rgba(220, 53, 69, 0.4);
+    }
+
+    .status-badge.hired {
+        background: rgba(25, 135, 84, 0.25);
+        color: #75b798;
+        border: 1px solid rgba(25, 135, 84, 0.4);
+    }
+
+    .status-badge.selected {
+        background: var(--accent-gold);
+        color: var(--primary-navy);
+    }
+
+    .status-update {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn-luxury-primary {
+        background: var(--accent-gold);
+        color: var(--primary-navy) !important;
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-luxury-primary:hover {
+        background: var(--gold-light);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(197, 160, 89, 0.3);
+    }
+
+    .btn-outline-gold {
+        border: 1px solid var(--border-gold);
+        color: var(--accent-gold) !important;
+        border-radius: 50px;
+        padding: 0.8rem 2rem;
+        font-size: 0.88rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .btn-outline-gold:hover {
+        background: rgba(197, 160, 89, 0.15);
+        color: #fff !important;
+        border-color: var(--accent-gold);
+    }
+
+    @keyframes pulse-gold {
+        0% { box-shadow: 0 0 0 0 rgba(197, 160, 89, 0.5); }
+        70% { box-shadow: 0 0 0 10px rgba(197, 160, 89, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(197, 160, 89, 0); }
+    }
+
+    /* Horizontal Stepper for Desktop */
+    @media (min-width: 768px) {
+        .status-tracker {
+            flex-direction: row;
+            justify-content: space-between;
+            padding-left: 0;
+            align-items: flex-start;
+        }
+
+        .status-tracker::before {
+            left: 40px;
+            right: 40px;
+            top: 20px;
+            bottom: auto;
+            width: auto;
+            height: 2px;
+        }
+
+        .status-step {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+            gap: 0.8rem;
+        }
+
+        .step-content {
+            align-items: center;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .glass-status-card { padding: 1.8rem 1.2rem; }
+        .job-header-title { font-size: 2rem; }
+    }
 </style>
 {% endblock %}
 
 
 {% block content %}
+<div class="status-wrapper">
+    <div class="container" style="max-width: 960px;">
 
-<div class="container my-5">
+        <div class="glass-status-card">
 
-    <div class="card card-premium p-4 p-md-5">
-
-        <!-- HEADER -->
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 border-bottom pb-3">
-
-            <div>
-
-                <span class="badge bg-gold text-white mb-2 px-3 py-2 rounded-pill fw-semibold">
-                    APPLICATION
-                    {% if application.reference_no %}
-                        #{{ application.reference_no }}
-                    {% else %}
-                        #RORI-{{ '%04d' % application.id }}
-                    {% endif %}
-                </span>
-
-                <h2 class="fw-bold text-navy mb-0">
-                    {{ job.title }}
-                </h2>
-
-            </div>
-
-            <div class="text-md-end">
-
-                <small class="text-muted d-block text-uppercase fw-bold"
-                       style="font-size:0.75rem; letter-spacing:0.5px;">
-                    Submitted
-                </small>
-
-                <span class="fw-semibold text-navy fs-6">
-
-                    {% if application.submitted_at %}
-
-                        {{ application.submitted_at.strftime('%B %d, %Y') }}
-
-                    {% else %}
-
-                        Not available
-
-                    {% endif %}
-
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <!-- APPLICATION SUMMARY -->
-        <div class="application-summary mb-4">
-
-            <div class="row g-3">
-
-                <div class="col-md-4">
-
-                    <div class="application-summary-label">
-                        Position
-                    </div>
-
-                    <div class="application-summary-value">
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 border-bottom border-secondary pb-4">
+                <div>
+                    <span class="badge badge-ref px-3 py-2 rounded-pill fw-semibold mb-2">
+                        APPLICATION 
+                        {% if application.reference_no %}
+                            #{{ application.reference_no }}
+                        {% else %}
+                            #RORI-{{ '%04d' % application.id }}
+                        {% endif %}
+                    </span>
+                    <h2 class="job-header-title mb-0">
                         {{ job.title }}
-                    </div>
-
+                    </h2>
                 </div>
 
-
-                {% if job.department_name %}
-
-                <div class="col-md-4">
-
-                    <div class="application-summary-label">
-                        Department
-                    </div>
-
-                    <div class="application-summary-value">
-                        {{ job.department_name }}
-                    </div>
-
-                </div>
-
-                {% endif %}
-
-
-                {% if job.location_name %}
-
-                <div class="col-md-4">
-
-                    <div class="application-summary-label">
-                        Location
-                    </div>
-
-                    <div class="application-summary-value">
-                        {{ job.location_name }}
-                    </div>
-
-                </div>
-
-                {% endif %}
-
-            </div>
-
-        </div>
-
-
-        <!-- STATUS LOGIC -->
-
-        {% set statuses = [
-            'NEW',
-            'UNDER REVIEW',
-            'SHORTLISTED',
-            'INTERVIEW',
-            'SELECTED',
-            'HIRED'
-        ] %}
-
-        {% set current_status = application.status or 'NEW' %}
-
-        {% if current_status in statuses %}
-
-            {% set current_idx = statuses.index(current_status) %}
-
-        {% else %}
-
-            {% set current_idx = 0 %}
-
-        {% endif %}
-
-
-        <!-- REJECTED APPLICATION -->
-
-        {% if current_status == 'REJECTED' %}
-
-        <div class="current-status-box rejected text-center mb-5">
-
-            <div class="mb-3">
-
-                <span class="status-badge rejected">
-
-                    <i class="bi bi-x-circle-fill"></i>
-
-                    Application Not Selected
-
-                </span>
-
-            </div>
-
-            <h4 class="fw-bold text-danger mb-2">
-                Thank you for your interest
-            </h4>
-
-            <p class="text-muted mb-0">
-                After careful consideration, your application was not selected
-                for this position at this time.
-            </p>
-
-            {% if application.status_updated_at %}
-
-            <div class="status-update mt-3">
-
-                Last updated:
-                {{ application.status_updated_at.strftime('%B %d, %Y') }}
-
-            </div>
-
-            {% endif %}
-
-        </div>
-
-
-        {% else %}
-
-
-        <!-- NORMAL STATUS TRACKER -->
-
-        <div class="status-tracker my-5">
-
-
-            <!-- APPLICATION SUBMITTED -->
-
-            <div class="status-step completed">
-
-                <div class="step-icon">
-
-                    <i class="bi bi-check-lg"></i>
-
-                </div>
-
-                <div class="step-content">
-
-                    <span class="step-title">
-                        Application Submitted
-                    </span>
-
-                    <span class="step-date">
-
+                <div class="text-md-end">
+                    <small class="meta-submitted-label d-block fw-bold">Submitted</small>
+                    <span class="meta-submitted-val fs-6">
                         {% if application.submitted_at %}
-
-                            {{ application.submitted_at.strftime('%b %d, %Y') }}
-
+                            {{ application.submitted_at.strftime('%B %d, %Y') }}
                         {% else %}
-
-                            Submitted
-
+                            Not available
                         {% endif %}
-
                     </span>
-
                 </div>
-
             </div>
 
+            <!-- APPLICATION SUMMARY -->
+            <div class="application-summary-dark mb-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="application-summary-label">Position</div>
+                        <div class="application-summary-value">{{ job.title }}</div>
+                    </div>
 
-            <!-- HR REVIEW -->
-
-            <div class="status-step
-                {% if current_idx >= 1 %}
-                    completed
-                {% elif current_idx == 0 %}
-                    active
-                {% else %}
-                    pending
-                {% endif %}
-            ">
-
-                <div class="step-icon">
-
-                    {% if current_idx >= 1 %}
-
-                        <i class="bi bi-check-lg"></i>
-
-                    {% elif current_idx == 0 %}
-
-                        <i class="bi bi-hourglass-split"></i>
-
-                    {% else %}
-
-                        <i class="bi bi-circle"></i>
-
+                    {% if job.department_name %}
+                    <div class="col-md-4">
+                        <div class="application-summary-label">Department</div>
+                        <div class="application-summary-value">{{ job.department_name }}</div>
+                    </div>
                     {% endif %}
 
-                </div>
-
-                <div class="step-content">
-
-                    <span class="step-title">
-                        Under HR Review
-                    </span>
-
-                    <span class="step-date">
-
-                        {% if current_idx >= 1 %}
-
-                            Completed
-
-                        {% elif current_idx == 0 %}
-
-                            In Progress
-
-                        {% else %}
-
-                            Pending
-
-                        {% endif %}
-
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <!-- SHORTLISTED -->
-
-            <div class="status-step
-                {% if current_idx >= 2 %}
-                    completed
-                {% elif current_idx == 1 %}
-                    active
-                {% else %}
-                    pending
-                {% endif %}
-            ">
-
-                <div class="step-icon">
-
-                    {% if current_idx >= 2 %}
-
-                        <i class="bi bi-check-lg"></i>
-
-                    {% elif current_idx == 1 %}
-
-                        <i class="bi bi-hourglass-split"></i>
-
-                    {% else %}
-
-                        <i class="bi bi-circle"></i>
-
+                    {% if job.location_name %}
+                    <div class="col-md-4">
+                        <div class="application-summary-label">Location</div>
+                        <div class="application-summary-value">{{ job.location_name }}</div>
+                    </div>
                     {% endif %}
-
                 </div>
-
-                <div class="step-content">
-
-                    <span class="step-title">
-                        Shortlisted
-                    </span>
-
-                    <span class="step-date">
-
-                        {% if current_idx >= 2 %}
-
-                            Completed
-
-                        {% elif current_idx == 1 %}
-
-                            In Progress
-
-                        {% else %}
-
-                            Pending
-
-                        {% endif %}
-
-                    </span>
-
-                </div>
-
             </div>
 
+            <!-- STATUS LOGIC SETUP -->
+            {% set statuses = [
+                'NEW',
+                'UNDER REVIEW',
+                'SHORTLISTED',
+                'INTERVIEW',
+                'SELECTED',
+                'HIRED'
+            ] %}
 
-            <!-- INTERVIEW -->
+            {% set current_status = application.status or 'NEW' %}
 
-            <div class="status-step
-                {% if current_idx >= 3 %}
-                    completed
-                {% elif current_idx == 2 %}
-                    active
-                {% else %}
-                    pending
-                {% endif %}
-            ">
-
-                <div class="step-icon">
-
-                    {% if current_idx >= 3 %}
-
-                        <i class="bi bi-check-lg"></i>
-
-                    {% elif current_idx == 2 %}
-
-                        <i class="bi bi-hourglass-split"></i>
-
-                    {% else %}
-
-                        <i class="bi bi-circle"></i>
-
-                    {% endif %}
-
-                </div>
-
-                <div class="step-content">
-
-                    <span class="step-title">
-                        Interview
-                    </span>
-
-                    <span class="step-date">
-
-                        {% if current_idx >= 3 %}
-
-                            Completed
-
-                        {% elif current_idx == 2 %}
-
-                            In Progress
-
-                        {% else %}
-
-                            Pending
-
-                        {% endif %}
-
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <!-- FINAL DECISION -->
-
-            <div class="status-step
-                {% if current_idx >= 4 %}
-                    completed
-                {% elif current_idx == 3 %}
-                    active
-                {% else %}
-                    pending
-                {% endif %}
-            ">
-
-                <div class="step-icon">
-
-                    {% if current_idx >= 4 %}
-
-                        <i class="bi bi-check-lg"></i>
-
-                    {% elif current_idx == 3 %}
-
-                        <i class="bi bi-hourglass-split"></i>
-
-                    {% else %}
-
-                        <i class="bi bi-circle"></i>
-
-                    {% endif %}
-
-                </div>
-
-                <div class="step-content">
-
-                    <span class="step-title">
-                        Final Decision
-                    </span>
-
-                    <span class="step-date">
-
-                        {% if current_idx >= 4 %}
-
-                            Completed
-
-                        {% elif current_idx == 3 %}
-
-                            In Progress
-
-                        {% else %}
-
-                            Pending
-
-                        {% endif %}
-
-                    </span>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- CURRENT STATUS -->
-
-        <div class="current-status-box
-            {% if current_status == 'HIRED' %}
-                hired
-            {% elif current_status == 'SELECTED' %}
-                selected
+            {% if current_status in statuses %}
+                {% set current_idx = statuses.index(current_status) %}
+            {% else %}
+                {% set current_idx = 0 %}
             {% endif %}
-            text-center mt-4 pt-4 border-top">
 
-            <div class="mb-3">
 
-                {% if current_status == 'HIRED' %}
+            <!-- REJECTED APPLICATION BRANCH -->
+            {% if current_status == 'REJECTED' %}
 
-                    <span class="status-badge hired">
-                        <i class="bi bi-check-circle-fill"></i>
-                        HIRED
+            <div class="current-status-box rejected text-center my-5">
+                <div class="mb-3">
+                    <span class="status-badge rejected">
+                        <i class="bi bi-x-circle-fill"></i>
+                        Application Not Selected
                     </span>
+                </div>
 
-                {% elif current_status == 'SELECTED' %}
+                <h4 class="fw-bold text-danger mb-2" style="font-family: 'Cormorant Garamond', serif; font-size: 2rem;">
+                    Thank you for your interest
+                </h4>
 
-                    <span class="status-badge selected">
-                        <i class="bi bi-star-fill"></i>
-                        SELECTED
-                    </span>
+                <p class="text-muted mb-0" style="max-width: 600px; margin: 0 auto;">
+                    After careful consideration, your application was not selected for this position at this time. We encourage you to apply for future vacancies that match your profile.
+                </p>
 
-                {% else %}
-
-                    <span class="status-badge default">
-                        <i class="bi bi-hourglass-split"></i>
-                        {{ current_status }}
-                    </span>
-
+                {% if application.status_updated_at %}
+                <div class="status-update mt-3">
+                    Last updated: {{ application.status_updated_at.strftime('%B %d, %Y') }}
+                </div>
                 {% endif %}
-
             </div>
-
-
-            {% if current_status == 'HIRED' %}
-
-                <h4 class="fw-bold text-success mb-2">
-                    Congratulations! 🎉
-                </h4>
-
-                <p class="text-muted mb-0">
-                    We are pleased to confirm that you have been selected
-                    to join the Rori Hotel team.
-                </p>
-
-            {% elif current_status == 'SELECTED' %}
-
-                <h4 class="fw-bold text-gold mb-2">
-                    You have been selected
-                </h4>
-
-                <p class="text-muted mb-0">
-                    Your application has successfully passed the selection stage.
-                    Our HR team will contact you with the next steps.
-                </p>
-
-            {% elif current_status == 'INTERVIEW' %}
-
-                <h4 class="fw-bold text-navy mb-2">
-                    Interview Stage
-                </h4>
-
-                <p class="text-muted mb-0">
-                    Your application has progressed to the interview stage.
-                    Please check your email or phone for interview details.
-                </p>
-
-            {% elif current_status == 'SHORTLISTED' %}
-
-                <h4 class="fw-bold text-navy mb-2">
-                    You have been shortlisted
-                </h4>
-
-                <p class="text-muted mb-0">
-                    Congratulations! Your application has been shortlisted.
-                    Our HR team will contact you regarding the next step.
-                </p>
-
-            {% elif current_status == 'UNDER REVIEW' %}
-
-                <h4 class="fw-bold text-navy mb-2">
-                    Your application is under review
-                </h4>
-
-                <p class="text-muted mb-0">
-                    Our HR team is currently reviewing your application.
-                    We appreciate your patience.
-                </p>
 
             {% else %}
 
-                <h4 class="fw-bold text-navy mb-2">
-                    Application Received
-                </h4>
+            <!-- NORMAL STATUS TRACKER -->
+            <div class="status-tracker">
 
-                <p class="text-muted mb-0">
-                    Your application has been successfully received.
-                    Our HR team will review it shortly.
-                </p>
+                <!-- STEP 1: APPLICATION SUBMITTED -->
+                <div class="status-step completed">
+                    <div class="step-icon">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+                    <div class="step-content">
+                        <span class="step-title">Application Submitted</span>
+                        <span class="step-date">
+                            {% if application.submitted_at %}
+                                {{ application.submitted_at.strftime('%b %d, %Y') }}
+                            {% else %}
+                                Submitted
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
 
-            {% endif %}
+                <!-- STEP 2: HR REVIEW -->
+                <div class="status-step
+                    {% if current_idx >= 1 %}
+                        completed
+                    {% elif current_idx == 0 %}
+                        active
+                    {% else %}
+                        pending
+                    {% endif %}
+                ">
+                    <div class="step-icon">
+                        {% if current_idx >= 1 %}
+                            <i class="bi bi-check-lg"></i>
+                        {% elif current_idx == 0 %}
+                            <i class="bi bi-hourglass-split"></i>
+                        {% else %}
+                            <i class="bi bi-circle"></i>
+                        {% endif %}
+                    </div>
+                    <div class="step-content">
+                        <span class="step-title">Under HR Review</span>
+                        <span class="step-date">
+                            {% if current_idx >= 1 %}
+                                Completed
+                            {% elif current_idx == 0 %}
+                                In Progress
+                            {% else %}
+                                Pending
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- STEP 3: SHORTLISTED -->
+                <div class="status-step
+                    {% if current_idx >= 2 %}
+                        completed
+                    {% elif current_idx == 1 %}
+                        active
+                    {% else %}
+                        pending
+                    {% endif %}
+                ">
+                    <div class="step-icon">
+                        {% if current_idx >= 2 %}
+                            <i class="bi bi-check-lg"></i>
+                        {% elif current_idx == 1 %}
+                            <i class="bi bi-hourglass-split"></i>
+                        {% else %}
+                            <i class="bi bi-circle"></i>
+                        {% endif %}
+                    </div>
+                    <div class="step-content">
+                        <span class="step-title">Shortlisted</span>
+                        <span class="step-date">
+                            {% if current_idx >= 2 %}
+                                Completed
+                            {% elif current_idx == 1 %}
+                                In Progress
+                            {% else %}
+                                Pending
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- STEP 4: INTERVIEW -->
+                <div class="status-step
+                    {% if current_idx >= 3 %}
+                        completed
+                    {% elif current_idx == 2 %}
+                        active
+                    {% else %}
+                        pending
+                    {% endif %}
+                ">
+                    <div class="step-icon">
+                        {% if current_idx >= 3 %}
+                            <i class="bi bi-check-lg"></i>
+                        {% elif current_idx == 2 %}
+                            <i class="bi bi-hourglass-split"></i>
+                        {% else %}
+                            <i class="bi bi-circle"></i>
+                        {% endif %}
+                    </div>
+                    <div class="step-content">
+                        <span class="step-title">Interview</span>
+                        <span class="step-date">
+                            {% if current_idx >= 3 %}
+                                Completed
+                            {% elif current_idx == 2 %}
+                                In Progress
+                            {% else %}
+                                Pending
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- STEP 5: FINAL DECISION -->
+                <div class="status-step
+                    {% if current_idx >= 4 %}
+                        completed
+                    {% elif current_idx == 3 %}
+                        active
+                    {% else %}
+                        pending
+                    {% endif %}
+                ">
+                    <div class="step-icon">
+                        {% if current_idx >= 4 %}
+                            <i class="bi bi-check-lg"></i>
+                        {% elif current_idx == 3 %}
+                            <i class="bi bi-hourglass-split"></i>
+                        {% else %}
+                            <i class="bi bi-circle"></i>
+                        {% endif %}
+                    </div>
+                    <div class="step-content">
+                        <span class="step-title">Final Decision</span>
+                        <span class="step-date">
+                            {% if current_idx >= 4 %}
+                                Completed
+                            {% elif current_idx == 3 %}
+                                In Progress
+                            {% else %}
+                                Pending
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+            </div>
 
 
-            {% if application.status_updated_at %}
+            <!-- CURRENT STATUS BANNER CARD -->
+            <div class="current-status-box
+                {% if current_status == 'HIRED' %}
+                    hired
+                {% elif current_status == 'SELECTED' %}
+                    selected
+                {% endif %}
+                text-center mt-4 pt-4 border-top border-secondary">
 
-            <div class="status-update mt-3">
+                <div class="mb-3">
+                    {% if current_status == 'HIRED' %}
+                        <span class="status-badge hired">
+                            <i class="bi bi-check-circle-fill"></i>
+                            HIRED
+                        </span>
+                    {% elif current_status == 'SELECTED' %}
+                        <span class="status-badge selected">
+                            <i class="bi bi-star-fill"></i>
+                            SELECTED
+                        </span>
+                    {% else %}
+                        <span class="status-badge default">
+                            <i class="bi bi-hourglass-split"></i>
+                            {{ current_status }}
+                        </span>
+                    {% endif %}
+                </div>
 
-                Last updated:
-                {{ application.status_updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                {% if current_status == 'HIRED' %}
+                    <h4 class="fw-bold text-success mb-2" style="font-family: 'Cormorant Garamond', serif; font-size: 2.2rem;">
+                        Congratulations! 🎉
+                    </h4>
+                    <p class="text-muted mb-0">
+                        We are pleased to confirm that you have been selected to join the Rori Hotel Hawassa team.
+                    </p>
+
+                {% elif current_status == 'SELECTED' %}
+                    <h4 class="fw-bold mb-2" style="color: var(--accent-gold); font-family: 'Cormorant Garamond', serif; font-size: 2.2rem;">
+                        You have been selected
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Your application has successfully passed the selection stage. Our HR team will contact you with the next steps.
+                    </p>
+
+                {% elif current_status == 'INTERVIEW' %}
+                    <h4 class="fw-bold text-white mb-2" style="font-family: 'Cormorant Garamond', serif; font-size: 2rem;">
+                        Interview Stage
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Your application has progressed to the interview stage. Please check your email or phone for detailed interview instructions.
+                    </p>
+
+                {% elif current_status == 'SHORTLISTED' %}
+                    <h4 class="fw-bold text-white mb-2" style="font-family: 'Cormorant Garamond', serif; font-size: 2rem;">
+                        You have been shortlisted
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Congratulations! Your application has been shortlisted. Our HR team will contact you regarding the schedule.
+                    </p>
+
+                {% elif current_status == 'UNDER REVIEW' %}
+                    <h4 class="fw-bold text-white mb-2" style="font-family: 'Cormorant Garamond', serif; font-size: 2rem;">
+                        Your application is under review
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Our HR team is currently reviewing your profile and credentials. We appreciate your patience.
+                    </p>
+
+                {% else %}
+                    <h4 class="fw-bold text-white mb-2" style="font-family: 'Cormorant Garamond', serif; font-size: 2rem;">
+                        Application Received
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Your application has been successfully received by our talent acquisition team.
+                    </p>
+                {% endif %}
+
+                {% if application.status_updated_at %}
+                <div class="status-update mt-3">
+                    Last updated: {{ application.status_updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                </div>
+                {% endif %}
 
             </div>
 
             {% endif %}
 
-        </div>
 
-        {% endif %}
+            <!-- ACTION BUTTONS -->
+            <div class="d-flex justify-content-center gap-3 flex-wrap mt-4">
+                <a href="{{ url_for('home') }}" class="btn-outline-gold">
+                    <i class="bi bi-house me-1"></i>
+                    Return Home
+                </a>
 
-
-        <!-- ACTION BUTTONS -->
-
-        <div class="d-flex justify-content-center gap-3 flex-wrap mt-4">
-
-            <a href="{{ url_for('home') }}"
-               class="btn btn-outline-navy">
-
-                <i class="bi bi-house me-1"></i>
-
-                Return Home
-
-            </a>
-
-
-            <a href="{{ url_for('jobs') }}"
-               class="btn btn-gold">
-
-                <i class="bi bi-briefcase me-1"></i>
-
-                View Other Jobs
-
-            </a>
+                <a href="{{ url_for('jobs') }}" class="btn-luxury-primary">
+                    <i class="bi bi-briefcase me-1"></i>
+                    View Other Jobs
+                </a>
+            </div>
 
         </div>
 
     </div>
-
 </div>
-
 {% endblock %}
