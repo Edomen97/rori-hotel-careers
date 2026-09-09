@@ -1927,7 +1927,7 @@ def apply(job_id):
             )
 
             return render_template(
-                "application/apply.html",
+                "apply.html",
                 form=form,
                 job=job
             )
@@ -1968,7 +1968,7 @@ def apply(job_id):
             )
 
             return render_template(
-                "application/apply.html",
+                "apply.html",
                 form=form,
                 job=job
             )
@@ -2103,7 +2103,7 @@ def apply(job_id):
             )
 
             return render_template(
-                "application/apply.html",
+                "apply.html",
                 form=form,
                 job=job
             )
@@ -2135,7 +2135,7 @@ def apply(job_id):
         )
 
     return render_template(
-        "application/apply.html",
+        "apply.html",
         form=form,
         job=job
     )
@@ -2188,7 +2188,7 @@ def application_status(app_id):
             db.session.rollback()
 
     return render_template(
-        "application/application_status.html",
+        "application_status.html",
         application=application,
         job=application.job
     )
@@ -2395,7 +2395,7 @@ def admin_login():
         )
 
     return render_template(
-        "admin/login.html",
+        "login.html",
         form=form
     )
 
