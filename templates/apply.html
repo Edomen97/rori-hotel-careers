@@ -18,23 +18,34 @@
 
     .wizard-content.active {
         display: block;
-        animation: fadeIn .25s ease-in-out;
+        animation: fadeIn .3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     @keyframes fadeIn {
         from {
             opacity: 0;
-            transform: translateY(5px);
+            transform: translateY(8px);
         }
-
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
 
+    /* Progress Steps with Connector Line */
     .wizard-steps {
         position: relative;
+    }
+
+    .wizard-steps::before {
+        content: '';
+        position: absolute;
+        top: 19px;
+        left: 10%;
+        right: 10%;
+        height: 2px;
+        background: #e5e7eb;
+        z-index: 1;
     }
 
     .wizard-step {
@@ -42,6 +53,11 @@
         z-index: 2;
         text-align: center;
         flex: 1;
+        cursor: default;
+    }
+
+    .wizard-step.completed {
+        cursor: pointer;
     }
 
     .step-num {
@@ -54,12 +70,14 @@
         color: #fff;
         display: inline-block;
         font-weight: 700;
-        transition: all .2s ease;
+        transition: all .25s ease;
+        box-shadow: 0 0 0 4px #fff;
     }
 
     .wizard-step.active .step-num {
         background-color: #C5A059;
         color: #0B132B;
+        transform: scale(1.1);
     }
 
     .wizard-step.completed .step-num {
@@ -69,13 +87,16 @@
 
     .step-label {
         display: block;
-        margin-top: 7px;
+        margin-top: 8px;
+        font-size: 0.85rem;
         font-weight: 600;
         color: #6c757d;
+        transition: color .2s ease;
     }
 
     .wizard-step.active .step-label {
         color: #0B132B;
+        font-weight: 700;
     }
 
     .required::after {
@@ -90,42 +111,40 @@
         padding: 20px;
     }
 
+    /* Enhanced Upload Area */
     .upload-area {
         cursor: pointer;
-        transition: all .2s ease;
-    }
-
-    .upload-area:hover {
-        border-color: #C5A059 !important;
-        background: #fffdf7 !important;
-    }
-
-    .review-box {
+        transition: all .25s ease;
         background: #f8f9fa;
-        border-radius: 12px;
-        padding: 20px;
+        border: 2px dashed #cbd5e1 !important;
+    }
+
+    .upload-area:hover, .upload-area.dragover {
+        border-color: #C5A059 !important;
+        background: #fefcf3 !important;
     }
 
     .form-control:focus,
     .form-select:focus {
         border-color: #C5A059;
-        box-shadow: 0 0 0 .2rem rgba(197, 160, 89, .15);
+        box-shadow: 0 0 0 .25rem rgba(197, 160, 89, .18);
     }
 
     @media (max-width: 576px) {
-        .wizard-steps {
-            gap: 3px;
+        .wizard-steps::before {
+            top: 16px;
         }
 
         .step-num {
             width: 32px;
             height: 32px;
             line-height: 32px;
-            font-size: 13px;
+            font-size: 12px;
         }
 
         .step-label {
             font-size: 10px;
+            margin-top: 4px;
         }
     }
 </style>
@@ -136,7 +155,7 @@
 
 <div class="container my-4 my-md-5">
 
-    <div class="card card-premium p-3 p-md-5">
+    <div class="card card-premium p-3 p-md-5 border-0 shadow-sm rounded-4">
 
         <!-- HEADER -->
         <div class="text-center mb-4">
@@ -150,93 +169,65 @@
             </h2>
 
             <p class="text-muted mb-2">
-
                 {% if job %}
-                    Submit your application for
-                    <strong>{{ job.title }}</strong>
+                    Submit your application for <strong>{{ job.title }}</strong>
                 {% else %}
                     Submit your professional profile for future opportunities at Rori Hotel.
                 {% endif %}
-
             </p>
 
-            <div
-                class="gold-divider mx-auto"
-                style="width:80px;height:3px;background-color:#C5A059;">
-            </div>
+            <div class="gold-divider mx-auto" style="width:80px;height:3px;background-color:#C5A059;"></div>
 
         </div>
 
 
         <!-- JOB SUMMARY -->
         {% if job %}
-
         <div class="application-summary mb-4">
-
             <div class="row g-3">
-
                 <div class="col-md-6">
-                    <small class="text-muted d-block">
-                        Position
-                    </small>
-
-                    <strong class="text-navy">
-                        {{ job.title }}
-                    </strong>
+                    <small class="text-muted d-block">Position</small>
+                    <strong class="text-navy">{{ job.title }}</strong>
                 </div>
 
                 <div class="col-md-3">
-                    <small class="text-muted d-block">
-                        Department
-                    </small>
-
-                    <strong class="text-navy">
-                        {{ job.department_name or 'General' }}
-                    </strong>
+                    <small class="text-muted d-block">Department</small>
+                    <strong class="text-navy">{{ job.department_name or 'General' }}</strong>
                 </div>
 
                 <div class="col-md-3">
-                    <small class="text-muted d-block">
-                        Location
-                    </small>
-
-                    <strong class="text-navy">
-                        {{ job.location_name or 'Hawassa' }}
-                    </strong>
+                    <small class="text-muted d-block">Location</small>
+                    <strong class="text-navy">{{ job.location_name or 'Hawassa' }}</strong>
                 </div>
-
             </div>
-
         </div>
-
         {% endif %}
 
 
         <!-- WIZARD STEPS -->
-
         <div class="wizard-steps d-flex justify-content-between mb-5">
 
-            <div class="wizard-step active" id="p-step-1">
+            <div class="wizard-step active" id="p-step-1" onclick="navigateToStep(1)">
                 <div class="step-num">1</div>
                 <span class="step-label">Personal</span>
             </div>
 
-            <div class="wizard-step" id="p-step-2">
+            <div class="wizard-step" id="p-step-2" onclick="navigateToStep(2)">
                 <div class="step-num">2</div>
                 <span class="step-label">Profile</span>
             </div>
 
-            <div class="wizard-step" id="p-step-3">
+            <div class="wizard-step" id="p-step-3" onclick="navigateToStep(3)">
                 <div class="step-num">3</div>
                 <span class="step-label">Skills</span>
             </div>
 
-            <div class="wizard-step" id="p-step-4">
+            <div class="wizard-step" id="p-step-4" onclick="navigateToStep(4)">
                 <div class="step-num">4</div>
                 <span class="step-label">Application</span>
             </div>
 
-            <div class="wizard-step" id="p-step-5">
+            <div class="wizard-step" id="p-step-5" onclick="navigateToStep(5)">
                 <div class="step-num">5</div>
                 <span class="step-label">Documents</span>
             </div>
@@ -245,27 +236,15 @@
 
 
         <!-- FORM -->
-
-        <form
-            method="POST"
-            enctype="multipart/form-data"
-            id="applicationForm"
-            novalidate
-        >
+        <form method="POST" enctype="multipart/form-data" id="applicationForm" novalidate>
 
             {% if form %}
                 {{ form.hidden_tag() }}
             {% endif %}
 
 
-            <!-- ========================= -->
-            <!-- STEP 1 -->
-            <!-- ========================= -->
-
-            <div
-                class="wizard-content active"
-                id="wizard-step-1"
-            >
+            <!-- STEP 1: PERSONAL INFORMATION -->
+            <div class="wizard-content active" id="wizard-step-1">
 
                 <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">
                     STEP 1: PERSONAL INFORMATION
@@ -278,132 +257,43 @@
                 <div class="row g-3">
 
                     <div class="col-md-6">
-
                         {% if form %}
-                            {{ form.full_name.label(
-                                class="form-label fw-semibold required"
-                            ) }}
-
-                            {{ form.full_name(
-                                class="form-control",
-                                required=true,
-                                placeholder="Enter your full name"
-                            ) }}
-
+                            {{ form.full_name.label(class="form-label fw-semibold required") }}
+                            {{ form.full_name(class="form-control", required=true, placeholder="Enter your full name") }}
                         {% else %}
-
-                            <label class="form-label fw-semibold required">
-                                Full Name
-                            </label>
-
-                            <input
-                                type="text"
-                                name="full_name"
-                                class="form-control"
-                                required
-                                placeholder="Enter your full name"
-                            >
-
+                            <label class="form-label fw-semibold required">Full Name</label>
+                            <input type="text" name="full_name" class="form-control" required placeholder="Enter your full name">
                         {% endif %}
-
                     </div>
 
-
                     <div class="col-md-6">
-
                         {% if form %}
-
-                            {{ form.email.label(
-                                class="form-label fw-semibold required"
-                            ) }}
-
-                            {{ form.email(
-                                class="form-control",
-                                required=true,
-                                placeholder="name@example.com"
-                            ) }}
-
+                            {{ form.email.label(class="form-label fw-semibold required") }}
+                            {{ form.email(class="form-control", required=true, placeholder="name@example.com") }}
                         {% else %}
-
-                            <label class="form-label fw-semibold required">
-                                Email Address
-                            </label>
-
-                            <input
-                                type="email"
-                                name="email"
-                                class="form-control"
-                                required
-                                placeholder="name@example.com"
-                            >
-
+                            <label class="form-label fw-semibold required">Email Address</label>
+                            <input type="email" name="email" class="form-control" required placeholder="name@example.com">
                         {% endif %}
-
                     </div>
 
-
                     <div class="col-md-6">
-
                         {% if form %}
-
-                            {{ form.phone.label(
-                                class="form-label fw-semibold required"
-                            ) }}
-
-                            {{ form.phone(
-                                class="form-control",
-                                required=true,
-                                placeholder="+251 ..."
-                            ) }}
-
+                            {{ form.phone.label(class="form-label fw-semibold required") }}
+                            {{ form.phone(class="form-control", required=true, placeholder="+251 ...") }}
                         {% else %}
-
-                            <label class="form-label fw-semibold required">
-                                Phone Number
-                            </label>
-
-                            <input
-                                type="tel"
-                                name="phone"
-                                class="form-control"
-                                required
-                                placeholder="+251 ..."
-                            >
-
+                            <label class="form-label fw-semibold required">Phone Number</label>
+                            <input type="tel" name="phone" class="form-control" required placeholder="+251 ...">
                         {% endif %}
-
                     </div>
 
-
                     <div class="col-md-6">
-
                         {% if form %}
-
-                            {{ form.location.label(
-                                class="form-label fw-semibold"
-                            ) }}
-
-                            {{ form.location(
-                                class="form-control",
-                                placeholder="City / Town"
-                            ) }}
-
+                            {{ form.location.label(class="form-label fw-semibold") }}
+                            {{ form.location(class="form-control", placeholder="City / Town") }}
                         {% else %}
-
-                            <label class="form-label fw-semibold">
-                                Current Location
-                            </label>
-
-                            <input
-                                type="text"
-                                name="location"
-                                class="form-control"
-                                placeholder="City / Town"
-                                value="Hawassa"
-                            >
-
+                            <label class="form-label fw-semibold">Current Location</label>
+                            <input type="text" name="location" class="form-control" placeholder="City / Town" value="Hawassa">
                         {% endif %}
-
                     </div>
 
                 </div>
@@ -411,14 +301,8 @@
             </div>
 
 
-            <!-- ========================= -->
-            <!-- STEP 2 -->
-            <!-- ========================= -->
-
-            <div
-                class="wizard-content"
-                id="wizard-step-2"
-            >
+            <!-- STEP 2: PROFESSIONAL PROFILE -->
+            <div class="wizard-content" id="wizard-step-2">
 
                 <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">
                     STEP 2: PROFESSIONAL PROFILE
@@ -431,27 +315,12 @@
                 <div class="row g-3">
 
                     <div class="col-md-6">
-
                         {% if form %}
-
-                            {{ form.education.label(
-                                class="form-label fw-semibold"
-                            ) }}
-
-                            {{ form.education(
-                                class="form-select"
-                            ) }}
-
+                            {{ form.education.label(class="form-label fw-semibold") }}
+                            {{ form.education(class="form-select") }}
                         {% else %}
-
-                            <label class="form-label fw-semibold">
-                                Highest Education Level
-                            </label>
-
-                            <select
-                                name="education"
-                                class="form-select"
-                            >
+                            <label class="form-label fw-semibold">Highest Education Level</label>
+                            <select name="education" class="form-select">
                                 <option value="">Select education</option>
                                 <option>High School</option>
                                 <option>Certificate</option>
@@ -461,100 +330,37 @@
                                 <option>Master's Degree</option>
                                 <option>Other</option>
                             </select>
-
                         {% endif %}
-
                     </div>
 
-
                     <div class="col-md-6">
-
                         {% if form %}
-
-                            {{ form.years_of_experience.label(
-                                class="form-label fw-semibold"
-                            ) }}
-
-                            {{ form.years_of_experience(
-                                class="form-control",
-                                placeholder="e.g. 3 years"
-                            ) }}
-
+                            {{ form.years_of_experience.label(class="form-label fw-semibold") }}
+                            {{ form.years_of_experience(class="form-control", placeholder="e.g. 3 years") }}
                         {% else %}
-
-                            <label class="form-label fw-semibold">
-                                Years of Experience
-                            </label>
-
-                            <input
-                                type="text"
-                                name="years_of_experience"
-                                class="form-control"
-                                placeholder="e.g. 3 years"
-                            >
-
+                            <label class="form-label fw-semibold">Years of Experience</label>
+                            <input type="text" name="years_of_experience" class="form-control" placeholder="e.g. 3 years">
                         {% endif %}
-
                     </div>
 
-
                     <div class="col-md-6">
-
                         {% if form %}
-
-                            {{ form.current_position.label(
-                                class="form-label fw-semibold"
-                            ) }}
-
-                            {{ form.current_position(
-                                class="form-control",
-                                placeholder="Current / Most Recent Position"
-                            ) }}
-
+                            {{ form.current_position.label(class="form-label fw-semibold") }}
+                            {{ form.current_position(class="form-control", placeholder="Current / Most Recent Position") }}
                         {% else %}
-
-                            <label class="form-label fw-semibold">
-                                Current / Most Recent Position
-                            </label>
-
-                            <input
-                                type="text"
-                                name="current_position"
-                                class="form-control"
-                            >
-
+                            <label class="form-label fw-semibold">Current / Most Recent Position</label>
+                            <input type="text" name="current_position" class="form-control" placeholder="Current Position">
                         {% endif %}
-
                     </div>
 
-
                     <div class="col-md-6">
-
                         {% if form %}
-
-                            {{ form.previous_employer.label(
-                                class="form-label fw-semibold"
-                            ) }}
-
-                            {{ form.previous_employer(
-                                class="form-control",
-                                placeholder="Company / Organization"
-                            ) }}
-
+                            {{ form.previous_employer.label(class="form-label fw-semibold") }}
+                            {{ form.previous_employer(class="form-control", placeholder="Company / Organization") }}
                         {% else %}
-
-                            <label class="form-label fw-semibold">
-                                Previous Employer
-                            </label>
-
-                            <input
-                                type="text"
-                                name="previous_employer"
-                                class="form-control"
-                            >
-
+                            <label class="form-label fw-semibold">Previous Employer</label>
+                            <input type="text" name="previous_employer" class="form-control" placeholder="Company Name">
                         {% endif %}
-
                     </div>
 
                 </div>
@@ -562,14 +368,8 @@
             </div>
 
 
-            <!-- ========================= -->
-            <!-- STEP 3 -->
-            <!-- ========================= -->
-
-            <div
-                class="wizard-content"
-                id="wizard-step-3"
-            >
+            <!-- STEP 3: SKILLS & CERTIFICATIONS -->
+            <div class="wizard-content" id="wizard-step-3">
 
                 <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">
                     STEP 3: SKILLS &amp; CERTIFICATIONS
@@ -582,95 +382,33 @@
                 <div class="row g-3">
 
                     <div class="col-12">
-
                         {% if form %}
-
-                            {{ form.skills.label(
-                                class="form-label fw-semibold"
-                            ) }}
-
-                            {{ form.skills(
-                                class="form-control",
-                                placeholder="e.g. Customer Service, Accounting, IT Support..."
-                            ) }}
-
+                            {{ form.skills.label(class="form-label fw-semibold") }}
+                            {{ form.skills(class="form-control", placeholder="e.g. Customer Service, Accounting, IT Support...") }}
                         {% else %}
-
-                            <label class="form-label fw-semibold">
-                                Key Skills
-                            </label>
-
-                            <textarea
-                                name="skills"
-                                class="form-control"
-                                rows="3"
-                                placeholder="List your key skills..."
-                            ></textarea>
-
+                            <label class="form-label fw-semibold">Key Skills</label>
+                            <textarea name="skills" class="form-control" rows="3" placeholder="List your key skills..."></textarea>
                         {% endif %}
-
                     </div>
 
-
                     <div class="col-md-6">
-
                         {% if form %}
-
-                            {{ form.languages.label(
-                                class="form-label fw-semibold"
-                            ) }}
-
-                            {{ form.languages(
-                                class="form-control",
-                                placeholder="e.g. Amharic, English..."
-                            ) }}
-
+                            {{ form.languages.label(class="form-label fw-semibold") }}
+                            {{ form.languages(class="form-control", placeholder="e.g. Amharic, English...") }}
                         {% else %}
-
-                            <label class="form-label fw-semibold">
-                                Languages
-                            </label>
-
-                            <input
-                                type="text"
-                                name="languages"
-                                class="form-control"
-                                placeholder="e.g. Amharic, English"
-                            >
-
+                            <label class="form-label fw-semibold">Languages</label>
+                            <input type="text" name="languages" class="form-control" placeholder="e.g. Amharic, English">
                         {% endif %}
-
                     </div>
 
-
                     <div class="col-md-6">
-
                         {% if form %}
-
-                            {{ form.certifications.label(
-                                class="form-label fw-semibold"
-                            ) }}
-
-                            {{ form.certifications(
-                                class="form-control",
-                                placeholder="Certificates / Training"
-                            ) }}
-
+                            {{ form.certifications.label(class="form-label fw-semibold") }}
+                            {{ form.certifications(class="form-control", placeholder="Certificates / Training") }}
                         {% else %}
-
-                            <label class="form-label fw-semibold">
-                                Certifications
-                            </label>
-
-                            <input
-                                type="text"
-                                name="certifications"
-                                class="form-control"
-                                placeholder="Certificates / Training"
-                            >
-
+                            <label class="form-label fw-semibold">Certifications</label>
+                            <input type="text" name="certifications" class="form-control" placeholder="Certificates / Training">
                         {% endif %}
-
                     </div>
 
                 </div>
@@ -678,17 +416,11 @@
             </div>
 
 
-            <!-- ========================= -->
-            <!-- STEP 4 -->
-            <!-- ========================= -->
-
-            <div
-                class="wizard-content"
-                id="wizard-step-4"
-            >
+            <!-- STEP 4: APPLICATION -->
+            <div class="wizard-content" id="wizard-step-4">
 
                 <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">
-                    STEP 4: APPLICATION
+                    STEP 4: APPLICATION DETAILS
                 </h4>
 
                 <p class="text-muted small mb-4">
@@ -698,95 +430,37 @@
                 <div class="row g-3">
 
                     <div class="col-md-6">
-
                         {% if form %}
-
-                            {{ form.availability_date.label(
-                                class="form-label fw-semibold"
-                            ) }}
-
-                            {{ form.availability_date(
-                                class="form-control"
-                            ) }}
-
+                            {{ form.availability_date.label(class="form-label fw-semibold") }}
+                            {{ form.availability_date(class="form-control") }}
                         {% else %}
-
-                            <label class="form-label fw-semibold">
-                                Availability Date
-                            </label>
-
-                            <input
-                                type="date"
-                                name="availability_date"
-                                class="form-control"
-                            >
-
+                            <label class="form-label fw-semibold">Availability Date</label>
+                            <input type="date" name="availability_date" class="form-control">
                         {% endif %}
-
                     </div>
 
-
                     <div class="col-md-6">
-
                         {% if form %}
-
-                            {{ form.willing_to_relocate.label(
-                                class="form-label fw-semibold"
-                            ) }}
-
-                            {{ form.willing_to_relocate(
-                                class="form-select"
-                            ) }}
-
+                            {{ form.willing_to_relocate.label(class="form-label fw-semibold") }}
+                            {{ form.willing_to_relocate(class="form-select") }}
                         {% else %}
-
-                            <label class="form-label fw-semibold">
-                                Willing to Relocate?
-                            </label>
-
-                            <select
-                                name="willing_to_relocate"
-                                class="form-select"
-                            >
+                            <label class="form-label fw-semibold">Willing to Relocate?</label>
+                            <select name="willing_to_relocate" class="form-select">
                                 <option value="">Select</option>
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                             </select>
-
                         {% endif %}
-
                     </div>
 
-
                     <div class="col-12">
-
                         {% if form %}
-
-                            {{ form.cover_letter.label(
-                                class="form-label fw-semibold"
-                            ) }}
-
-                            {{ form.cover_letter(
-                                class="form-control",
-                                rows="6",
-                                placeholder="Tell us briefly about yourself, your experience and why you are interested in working at Rori Hotel."
-                            ) }}
-
+                            {{ form.cover_letter.label(class="form-label fw-semibold") }}
+                            {{ form.cover_letter(class="form-control", rows="5", placeholder="Tell us briefly about yourself, your experience and why you are interested in working at Rori Hotel.") }}
                         {% else %}
-
-                            <label class="form-label fw-semibold">
-                                Cover Letter / Short Introduction
-                            </label>
-
-                            <textarea
-                                name="cover_letter"
-                                class="form-control"
-                                rows="6"
-                                placeholder="Tell us briefly about yourself, your experience and why you are interested in working at Rori Hotel."
-                            ></textarea>
-
+                            <label class="form-label fw-semibold">Cover Letter / Short Introduction</label>
+                            <textarea name="cover_letter" class="form-control" rows="5" placeholder="Tell us briefly about yourself, your experience and why you are interested in working at Rori Hotel."></textarea>
                         {% endif %}
-
                     </div>
 
                 </div>
@@ -794,138 +468,69 @@
             </div>
 
 
-            <!-- ========================= -->
-            <!-- STEP 5 -->
-            <!-- ========================= -->
-
-            <div
-                class="wizard-content"
-                id="wizard-step-5"
-            >
+            <!-- STEP 5: DOCUMENTS -->
+            <div class="wizard-content" id="wizard-step-5">
 
                 <h4 class="fw-bold text-navy mb-3 border-bottom pb-2">
-                    STEP 5: DOCUMENTS
+                    STEP 5: UPLOAD DOCUMENTS
                 </h4>
 
                 <p class="text-muted small mb-4">
                     Upload your latest CV or Resume.
                 </p>
 
-
-                <div
-                    class="upload-area text-center p-4 p-md-5 border border-2 border-dashed rounded-3 bg-light"
-                    id="uploadArea"
-                >
+                <div class="upload-area text-center p-4 p-md-5 rounded-3" id="uploadArea">
 
                     <i class="bi bi-cloud-arrow-up text-gold display-4 d-block mb-3"></i>
 
-                    <label
-                        class="form-label fw-bold text-navy fs-5 d-block"
-                        id="uploadLabel"
-                    >
+                    <label class="form-label fw-bold text-navy fs-5 d-block" id="uploadLabel">
                         Upload Resume / CV
                     </label>
 
                     <p class="text-muted small mb-3">
-                        Accepted formats: PDF, DOC, DOCX
+                        Drag and drop your file here or click to browse.
                         <br>
-                        Maximum file size: 5MB
+                        <span class="text-secondary">(Accepted formats: PDF, DOC, DOCX — Max 5MB)</span>
                     </p>
 
-
                     {% if form and form.cv_file %}
-
-                        {{ form.cv_file(
-                            class="form-control w-100 w-md-75 mx-auto",
-                            id="cv_file",
-                            accept=".pdf,.doc,.docx"
-                        ) }}
-
+                        {{ form.cv_file(class="form-control w-100 w-md-75 mx-auto", id="cv_file", accept=".pdf,.doc,.docx") }}
                     {% else %}
-
-                        <input
-                            type="file"
-                            name="cv_file"
-                            id="cv_file"
-                            class="form-control w-100 w-md-75 mx-auto"
-                            accept=".pdf,.doc,.docx"
-                            required
-                        >
-
+                        <input type="file" name="cv_file" id="cv_file" class="form-control w-100 w-md-75 mx-auto" accept=".pdf,.doc,.docx" required>
                     {% endif %}
 
-
-                    <div
-                        id="fileError"
-                        class="text-danger small mt-2 d-none">
-                    </div>
+                    <div id="fileError" class="text-danger small mt-2 d-none"></div>
 
                 </div>
 
-
                 <!-- Confirmation -->
-
                 <div class="form-check mt-4">
-
-                    <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="confirmInformation"
-                        required
-                    >
-
-                    <label
-                        class="form-check-label small"
-                        for="confirmInformation"
-                    >
-                        I confirm that the information provided in this application
-                        is accurate and complete to the best of my knowledge.
+                    <input class="form-check-input" type="checkbox" id="confirmInformation" required>
+                    <label class="form-check-label small" for="confirmInformation">
+                        I confirm that the information provided in this application is accurate and complete to the best of my knowledge.
                     </label>
-
                 </div>
 
             </div>
 
 
-            <!-- NAVIGATION -->
+            <!-- NAVIGATION BUTTONS -->
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
 
-            <div
-                class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top"
-            >
-
-                <button
-                    type="button"
-                    class="btn btn-outline-navy px-4"
-                    id="prevBtn"
-                    disabled
-                >
-                    <i class="bi bi-arrow-left me-1"></i>
-                    Back
+                <button type="button" class="btn btn-outline-navy px-4" id="prevBtn" disabled>
+                    <i class="bi bi-arrow-left me-1"></i> Back
                 </button>
-
 
                 <div class="text-muted small d-none d-md-block">
                     Step <span id="currentStepText">1</span> of 5
                 </div>
 
-
-                <button
-                    type="button"
-                    class="btn btn-gold px-4"
-                    id="nextBtn"
-                >
-                    Next Step
-                    <i class="bi bi-arrow-right ms-1"></i>
+                <button type="button" class="btn btn-gold px-4" id="nextBtn">
+                    Next Step <i class="bi bi-arrow-right ms-1"></i>
                 </button>
 
-
-                <button
-                    type="submit"
-                    class="btn btn-gold px-4 px-md-5 d-none"
-                    id="submitBtn"
-                >
-                    <i class="bi bi-send me-1"></i>
-                    SUBMIT APPLICATION
+                <button type="submit" class="btn btn-gold px-4 px-md-5 d-none" id="submitBtn">
+                    <i class="bi bi-send me-1"></i> SUBMIT APPLICATION
                 </button>
 
             </div>
@@ -940,292 +545,207 @@
 
 
 {% block extra_js %}
-
 <script>
+
+let currentStep = 1;
+
+function navigateToStep(targetStep) {
+    // Only allow clicking to steps that are already completed or the current step
+    if (targetStep < currentStep) {
+        currentStep = targetStep;
+        showStep(currentStep);
+    }
+}
+
+function showStep(step) {
+    const totalSteps = 5;
+
+    document.querySelectorAll(".wizard-content").forEach(content => {
+        content.classList.remove("active");
+    });
+
+    document.querySelectorAll(".wizard-step").forEach(indicator => {
+        indicator.classList.remove("active");
+    });
+
+    const content = document.getElementById("wizard-step-" + step);
+    const indicator = document.getElementById("p-step-" + step);
+
+    if (content) content.classList.add("active");
+    if (indicator) indicator.classList.add("active");
+
+    // Mark previous steps as completed
+    document.querySelectorAll(".wizard-step").forEach((ind, index) => {
+        const stepNum = index + 1;
+        if (stepNum < step) {
+            ind.classList.add("completed");
+        } else {
+            ind.classList.remove("completed");
+        }
+    });
+
+    document.getElementById("prevBtn").disabled = (step === 1);
+
+    const nextBtn = document.getElementById("nextBtn");
+    const submitBtn = document.getElementById("submitBtn");
+
+    if (step === totalSteps) {
+        nextBtn.classList.add("d-none");
+        submitBtn.classList.remove("d-none");
+    } else {
+        nextBtn.classList.remove("d-none");
+        submitBtn.classList.add("d-none");
+    }
+
+    const currentStepText = document.getElementById("currentStepText");
+    if (currentStepText) currentStepText.textContent = step;
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
 document.addEventListener("DOMContentLoaded", function () {
 
     const totalSteps = 5;
-    let currentStep = 1;
-
     const form = document.getElementById("applicationForm");
     const prevBtn = document.getElementById("prevBtn");
     const nextBtn = document.getElementById("nextBtn");
     const submitBtn = document.getElementById("submitBtn");
-    const currentStepText = document.getElementById("currentStepText");
 
     const uploadArea = document.getElementById("uploadArea");
     const fileInput = document.getElementById("cv_file");
     const uploadLabel = document.getElementById("uploadLabel");
     const fileError = document.getElementById("fileError");
 
-
-    function getCurrentContent() {
-        return document.getElementById(
-            "wizard-step-" + currentStep
-        );
-    }
-
-
     function validateCurrentStep() {
+        const currentContent = document.getElementById("wizard-step-" + currentStep);
+        if (!currentContent) return true;
 
-        const currentContent = getCurrentContent();
-
-        if (!currentContent) {
-            return true;
-        }
-
-        const fields = currentContent.querySelectorAll(
-            "input, select, textarea"
-        );
+        const fields = currentContent.querySelectorAll("input, select, textarea");
 
         for (const field of fields) {
-
-            if (
-                field.type === "hidden" ||
-                field.type === "button" ||
-                field.type === "submit"
-            ) {
-                continue;
-            }
+            if (field.type === "hidden" || field.type === "button" || field.type === "submit") continue;
 
             if (!field.checkValidity()) {
-
                 field.reportValidity();
-
                 return false;
             }
         }
-
         return true;
     }
 
+    nextBtn.addEventListener("click", function () {
+        if (!validateCurrentStep()) return;
 
-    function showStep(step) {
-
-        document.querySelectorAll(".wizard-content")
-            .forEach(function (content) {
-                content.classList.remove("active");
-            });
-
-
-        document.querySelectorAll(".wizard-step")
-            .forEach(function (indicator) {
-                indicator.classList.remove("active");
-            });
-
-
-        const content = document.getElementById(
-            "wizard-step-" + step
-        );
-
-        const indicator = document.getElementById(
-            "p-step-" + step
-        );
-
-
-        if (content) {
-            content.classList.add("active");
+        if (currentStep < totalSteps) {
+            currentStep++;
+            showStep(currentStep);
         }
+    });
 
-        if (indicator) {
-            indicator.classList.add("active");
+    prevBtn.addEventListener("click", function () {
+        if (currentStep > 1) {
+            currentStep--;
+            showStep(currentStep);
         }
+    });
 
+    // Handle Upload Area Click & Drag/Drop
+    if (uploadArea && fileInput) {
 
-        // Mark previous steps as completed
-
-        document.querySelectorAll(".wizard-step")
-            .forEach(function (indicator, index) {
-
-                const stepNumber = index + 1;
-
-                if (stepNumber < step) {
-                    indicator.classList.add("completed");
-                } else {
-                    indicator.classList.remove("completed");
-                }
-
-            });
-
-
-        prevBtn.disabled = step === 1;
-
-
-        if (step === totalSteps) {
-
-            nextBtn.classList.add("d-none");
-            submitBtn.classList.remove("d-none");
-
-        } else {
-
-            nextBtn.classList.remove("d-none");
-            submitBtn.classList.add("d-none");
-
-        }
-
-
-        if (currentStepText) {
-            currentStepText.textContent = step;
-        }
-
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
+        uploadArea.addEventListener("click", function (e) {
+            if (e.target !== fileInput) {
+                fileInput.click();
+            }
         });
 
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            }, false);
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                validateAndShowFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener("change", function () {
+            if (this.files && this.files.length > 0) {
+                validateAndShowFile(this.files[0]);
+            } else {
+                uploadLabel.textContent = "Upload Resume / CV";
+            }
+        });
     }
 
+    function validateAndShowFile(file) {
+        fileError.classList.add("d-none");
+        fileError.textContent = "";
 
-    nextBtn.addEventListener("click", function () {
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const allowedExtensions = ["pdf", "doc", "docx"];
+        const extension = file.name.split(".").pop().toLowerCase();
 
-        if (!validateCurrentStep()) {
+        if (!allowedExtensions.includes(extension)) {
+            fileError.textContent = "Please upload a PDF, DOC, or DOCX file.";
+            fileError.classList.remove("d-none");
+            fileInput.value = "";
+            uploadLabel.textContent = "Upload Resume / CV";
             return;
         }
 
-        if (currentStep < totalSteps) {
-
-            currentStep++;
-
-            showStep(currentStep);
-
+        if (file.size > maxSize) {
+            fileError.textContent = "File size must not exceed 5MB.";
+            fileError.classList.remove("d-none");
+            fileInput.value = "";
+            uploadLabel.textContent = "Upload Resume / CV";
+            return;
         }
 
-    });
-
-
-    prevBtn.addEventListener("click", function () {
-
-        if (currentStep > 1) {
-
-            currentStep--;
-
-            showStep(currentStep);
-
-        }
-
-    });
-
-
-    // CV validation
-
-    if (fileInput) {
-
-        fileInput.addEventListener("change", function () {
-
-            fileError.classList.add("d-none");
-            fileError.textContent = "";
-
-            if (!this.files || this.files.length === 0) {
-
-                uploadLabel.textContent = "Upload Resume / CV";
-
-                return;
-            }
-
-
-            const file = this.files[0];
-
-            const maxSize = 5 * 1024 * 1024;
-
-            const allowedExtensions = [
-                "pdf",
-                "doc",
-                "docx"
-            ];
-
-
-            const extension = file.name
-                .split(".")
-                .pop()
-                .toLowerCase();
-
-
-            if (!allowedExtensions.includes(extension)) {
-
-                fileError.textContent =
-                    "Please upload a PDF, DOC, or DOCX file.";
-
-                fileError.classList.remove("d-none");
-
-                this.value = "";
-
-                uploadLabel.textContent =
-                    "Upload Resume / CV";
-
-                return;
-            }
-
-
-            if (file.size > maxSize) {
-
-                fileError.textContent =
-                    "File size must not exceed 5MB.";
-
-                fileError.classList.remove("d-none");
-
-                this.value = "";
-
-                uploadLabel.textContent =
-                    "Upload Resume / CV";
-
-                return;
-            }
-
-
-            uploadLabel.textContent =
-                "Selected: " + file.name;
-
-        });
-
+        uploadLabel.innerHTML = `<span class="text-success"><i class="bi bi-check-circle-fill me-1"></i> Selected: ${file.name}</span>`;
     }
 
-
-    // Submit validation
-
+    // Submit Validation & Loading UI
     form.addEventListener("submit", function (event) {
 
         if (!validateCurrentStep()) {
-
             event.preventDefault();
-
             return;
         }
 
-
-        const confirmation =
-            document.getElementById("confirmInformation");
-
-
+        const confirmation = document.getElementById("confirmInformation");
         if (confirmation && !confirmation.checked) {
-
             event.preventDefault();
-
             confirmation.reportValidity();
-
             return;
         }
-
 
         if (fileInput && fileInput.files.length === 0) {
-
             event.preventDefault();
-
-            fileError.textContent =
-                "Please upload your CV before submitting.";
-
+            fileError.textContent = "Please upload your CV before submitting.";
             fileError.classList.remove("d-none");
-
             return;
         }
 
+        // Show Loading State on Submit
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Submitting...`;
     });
 
-
     showStep(currentStep);
-
 });
 
 </script>
-
 {% endblock %}
