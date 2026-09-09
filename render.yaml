@@ -2,35 +2,48 @@ services:
   - type: web
     name: rori-hotel-careers
     runtime: python
+
     buildCommand: |
       pip install -r requirements.txt
-      echo "Build completed successfully."
+
     startCommand: gunicorn app:app
+
     envVars:
       - key: SECRET_KEY
         generateValue: true
+
       - key: PYTHON_VERSION
         value: 3.10.0
+
       - key: HR_USERNAME
         value: admin
+
       - key: HR_PASSWORD
-        value: RoriHR2026
+        sync: false
+
       - key: DATABASE_URL
         fromDatabase:
           name: rori_db
           property: connectionString
+
       - key: MAIL_USERNAME
         sync: false
+
       - key: MAIL_PASSWORD
         sync: false
+
       - key: MAIL_DEFAULT_SENDER
         value: noreply@rorihotel.com
+
       - key: MAIL_SERVER
         value: smtp.gmail.com
+
       - key: MAIL_PORT
         value: 587
+
       - key: MAIL_USE_TLS
         value: true
+
     healthCheckPath: /
     plan: starter
     autoDeploy: true
