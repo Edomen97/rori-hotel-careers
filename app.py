@@ -15,7 +15,6 @@ from flask import (
     url_for,
     flash,
     session,
-    jsonify,
     send_from_directory
 )
 
@@ -56,20 +55,34 @@ from sqlalchemy import inspect, text
 # CONFIGURATION
 # ============================================================
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = os.path.abspath(
+    os.path.dirname(__file__)
+)
 
 
 class Config:
+
+    # --------------------------------------------------------
+    # SECRET KEY
+    # --------------------------------------------------------
 
     SECRET_KEY = os.environ.get(
         "SECRET_KEY",
         "change-this-secret-key-in-production"
     )
 
-    DATABASE_URL = os.environ.get("DATABASE_URL")
+    # --------------------------------------------------------
+    # DATABASE
+    # --------------------------------------------------------
+
+    DATABASE_URL = os.environ.get(
+        "DATABASE_URL"
+    )
 
     if DATABASE_URL:
+
         if DATABASE_URL.startswith("postgres://"):
+
             DATABASE_URL = DATABASE_URL.replace(
                 "postgres://",
                 "postgresql://",
@@ -79,6 +92,7 @@ class Config:
         SQLALCHEMY_DATABASE_URI = DATABASE_URL
 
     else:
+
         SQLALCHEMY_DATABASE_URI = (
             "sqlite:///"
             + os.path.join(
@@ -90,15 +104,14 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # PostgreSQL and SQLite compatible
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
         "pool_recycle": 300
     }
 
-    # ========================================================
+    # --------------------------------------------------------
     # FILE UPLOADS
-    # ========================================================
+    # --------------------------------------------------------
 
     UPLOAD_FOLDER = os.path.join(
         BASE_DIR,
@@ -113,7 +126,9 @@ class Config:
         "jobs"
     )
 
-    MAX_CONTENT_LENGTH = 10 * 1024 * 1024
+    MAX_CONTENT_LENGTH = (
+        10 * 1024 * 1024
+    )
 
     ALLOWED_EXTENSIONS = {
         "pdf",
@@ -129,13 +144,14 @@ class Config:
         "webp"
     }
 
-    # ========================================================
+    # --------------------------------------------------------
     # HR LOGIN
-    # ========================================================
+    # --------------------------------------------------------
 
-    HR_USERNAME = os.environ.get(
-        "HR_USERNAME",
-        "admin"
+    HR_USERNAME = (
+        os.environ.get("HR_USERNAME")
+        or os.environ.get("ADMIN_USERNAME")
+        or "admin"
     )
 
     HR_PASSWORD_HASH = os.environ.get(
@@ -143,16 +159,20 @@ class Config:
     )
 
     if not HR_PASSWORD_HASH:
-        HR_PASSWORD_HASH = generate_password_hash(
-            os.environ.get(
-                "HR_PASSWORD",
-                "RoriHR2026"
-            )
+
+        raw_password = (
+            os.environ.get("HR_PASSWORD")
+            or os.environ.get("ADMIN_PASSWORD")
+            or "RoriHR2026"
         )
 
-    # ========================================================
+        HR_PASSWORD_HASH = generate_password_hash(
+            raw_password
+        )
+
+    # --------------------------------------------------------
     # MAIL
-    # ========================================================
+    # --------------------------------------------------------
 
     MAIL_SERVER = os.environ.get(
         "MAIL_SERVER",
@@ -171,7 +191,12 @@ class Config:
             "MAIL_USE_TLS",
             "true"
         ).lower()
-        in ["true", "1", "on"]
+        in [
+            "true",
+            "1",
+            "yes",
+            "on"
+        ]
     )
 
     MAIL_USE_SSL = (
@@ -179,7 +204,12 @@ class Config:
             "MAIL_USE_SSL",
             "false"
         ).lower()
-        in ["true", "1", "on"]
+        in [
+            "true",
+            "1",
+            "yes",
+            "on"
+        ]
     )
 
     MAIL_USERNAME = os.environ.get(
@@ -201,9 +231,13 @@ class Config:
 # ============================================================
 
 app = Flask(__name__)
-app.config.from_object(Config)
+
+app.config.from_object(
+    Config
+)
 
 db = SQLAlchemy(app)
+
 mail = Mail(app)
 
 
@@ -212,11 +246,35 @@ mail = Mail(app)
 # ============================================================
 
 template_dirs = [
-    os.path.join(app.root_path, "templates"),
-    os.path.join(app.root_path, "templates", "careers"),
-    os.path.join(app.root_path, "templates", "application"),
-    os.path.join(app.root_path, "templates", "auth"),
-    os.path.join(app.root_path, "templates", "admin")
+
+    os.path.join(
+        app.root_path,
+        "templates"
+    ),
+
+    os.path.join(
+        app.root_path,
+        "templates",
+        "careers"
+    ),
+
+    os.path.join(
+        app.root_path,
+        "templates",
+        "application"
+    ),
+
+    os.path.join(
+        app.root_path,
+        "templates",
+        "auth"
+    ),
+
+    os.path.join(
+        app.root_path,
+        "templates",
+        "admin"
+    )
 ]
 
 app.jinja_loader = jinja2.FileSystemLoader(
@@ -239,7 +297,10 @@ os.makedirs(
 )
 
 os.makedirs(
-    os.path.join(BASE_DIR, "instance"),
+    os.path.join(
+        BASE_DIR,
+        "instance"
+    ),
     exist_ok=True
 )
 
@@ -329,13 +390,17 @@ class Job(db.Model):
 
     department_id = db.Column(
         db.Integer,
-        db.ForeignKey("departments.id"),
+        db.ForeignKey(
+            "departments.id"
+        ),
         nullable=True
     )
 
     location_id = db.Column(
         db.Integer,
-        db.ForeignKey("locations.id"),
+        db.ForeignKey(
+            "locations.id"
+        ),
         nullable=True
     )
 
@@ -375,7 +440,6 @@ class Job(db.Model):
         nullable=True
     )
 
-    # PRIVATE HR FIELD
     salary_range = db.Column(
         db.String(100),
         nullable=True
@@ -423,28 +487,38 @@ class Job(db.Model):
     )
 
     def responsibilities_list(self):
+
         return [
             item.strip()
-            for item in (self.responsibilities or "").splitlines()
+            for item in (
+                self.responsibilities or ""
+            ).splitlines()
             if item.strip()
         ]
 
     def requirements_list(self):
+
         return [
             item.strip()
-            for item in (self.requirements or "").splitlines()
+            for item in (
+                self.requirements or ""
+            ).splitlines()
             if item.strip()
         ]
 
     def what_we_offer_list(self):
+
         return [
             item.strip()
-            for item in (self.what_we_offer or "").splitlines()
+            for item in (
+                self.what_we_offer or ""
+            ).splitlines()
             if item.strip()
         ]
 
     @property
     def department_name(self):
+
         return (
             self.department_ref.name
             if self.department_ref
@@ -453,6 +527,7 @@ class Job(db.Model):
 
     @property
     def location_name(self):
+
         return (
             self.location_ref.name
             if self.location_ref
@@ -465,7 +540,10 @@ class Job(db.Model):
         if not self.deadline:
             return False
 
-        return self.deadline < datetime.utcnow().date()
+        return (
+            self.deadline
+            < datetime.utcnow().date()
+        )
 
     def __repr__(self):
         return f"<Job {self.title}>"
@@ -557,7 +635,6 @@ class Application(db.Model):
         nullable=True
     )
 
-    # PRIVATE HR FIELD
     expected_salary = db.Column(
         db.String(50),
         nullable=True
@@ -690,7 +767,6 @@ class TalentPool(db.Model):
         nullable=True
     )
 
-    # PRIVATE HR FIELD
     expected_salary = db.Column(
         db.String(50),
         nullable=True
@@ -712,6 +788,9 @@ class TalentPool(db.Model):
         nullable=False
     )
 
+    def __repr__(self):
+        return f"<TalentPool {self.full_name}>"
+
 
 class Interview(db.Model):
 
@@ -724,7 +803,9 @@ class Interview(db.Model):
 
     application_id = db.Column(
         db.Integer,
-        db.ForeignKey("applications.id"),
+        db.ForeignKey(
+            "applications.id"
+        ),
         nullable=False
     )
 
@@ -929,12 +1010,26 @@ class ApplicationForm(FlaskForm):
     education = SelectField(
         "Highest Education Level",
         choices=[
-            ("High School", "High School Diploma"),
-            ("Technical Diploma", "TVET / Advanced Diploma"),
-            ("Bachelor Degree", "Bachelor's Degree"),
-            ("Master Degree", "Master's Degree / Doctorate")
+            (
+                "High School",
+                "High School Diploma"
+            ),
+            (
+                "Technical Diploma",
+                "TVET / Advanced Diploma"
+            ),
+            (
+                "Bachelor Degree",
+                "Bachelor's Degree"
+            ),
+            (
+                "Master Degree",
+                "Master's Degree / Doctorate"
+            )
         ],
-        validators=[DataRequired()]
+        validators=[
+            DataRequired()
+        ]
     )
 
     years_of_experience = StringField(
@@ -987,7 +1082,9 @@ class ApplicationForm(FlaskForm):
 
     availability_date = DateField(
         "Earliest Availability Date",
-        validators=[Optional()],
+        validators=[
+            Optional()
+        ],
         format="%Y-%m-%d"
     )
 
@@ -997,7 +1094,9 @@ class ApplicationForm(FlaskForm):
             ("Yes", "Yes"),
             ("No", "No")
         ],
-        validators=[DataRequired()]
+        validators=[
+            DataRequired()
+        ]
     )
 
     expected_salary = StringField(
@@ -1018,7 +1117,9 @@ class ApplicationForm(FlaskForm):
 
     cv_file = FileField(
         "Upload CV",
-        validators=[DataRequired()]
+        validators=[
+            DataRequired()
+        ]
     )
 
 
@@ -1039,13 +1140,17 @@ class JobForm(FlaskForm):
     department_id = SelectField(
         "Department",
         coerce=int,
-        validators=[Optional()]
+        validators=[
+            Optional()
+        ]
     )
 
     location_id = SelectField(
         "Location",
         coerce=int,
-        validators=[Optional()]
+        validators=[
+            Optional()
+        ]
     )
 
     short_description = StringField(
@@ -1058,22 +1163,30 @@ class JobForm(FlaskForm):
 
     full_description = TextAreaField(
         "Full Description",
-        validators=[DataRequired()]
+        validators=[
+            DataRequired()
+        ]
     )
 
     responsibilities = TextAreaField(
         "Responsibilities",
-        validators=[DataRequired()]
+        validators=[
+            DataRequired()
+        ]
     )
 
     requirements = TextAreaField(
         "Requirements",
-        validators=[DataRequired()]
+        validators=[
+            DataRequired()
+        ]
     )
 
     what_we_offer = TextAreaField(
         "What We Offer",
-        validators=[DataRequired()]
+        validators=[
+            DataRequired()
+        ]
     )
 
     employment_type = SelectField(
@@ -1083,7 +1196,9 @@ class JobForm(FlaskForm):
             ("Part-time", "Part-time"),
             ("Contract", "Contract")
         ],
-        validators=[DataRequired()]
+        validators=[
+            DataRequired()
+        ]
     )
 
     experience_level = StringField(
@@ -1094,7 +1209,6 @@ class JobForm(FlaskForm):
         ]
     )
 
-    # HR ONLY
     salary_range = StringField(
         "Salary Range",
         validators=[
@@ -1105,7 +1219,9 @@ class JobForm(FlaskForm):
 
     deadline = DateField(
         "Application Deadline",
-        validators=[Optional()],
+        validators=[
+            Optional()
+        ],
         format="%Y-%m-%d"
     )
 
@@ -1124,12 +1240,16 @@ class AdminLoginForm(FlaskForm):
 
     username = StringField(
         "Username",
-        validators=[DataRequired()]
+        validators=[
+            DataRequired()
+        ]
     )
 
     password = PasswordField(
         "Password",
-        validators=[DataRequired()]
+        validators=[
+            DataRequired()
+        ]
     )
 
 
@@ -1138,12 +1258,16 @@ class InterviewForm(FlaskForm):
     application_id = SelectField(
         "Candidate",
         coerce=int,
-        validators=[DataRequired()]
+        validators=[
+            DataRequired()
+        ]
     )
 
     scheduled_at = StringField(
         "Scheduled Date/Time",
-        validators=[DataRequired()]
+        validators=[
+            DataRequired()
+        ]
     )
 
     duration_minutes = IntegerField(
@@ -1160,9 +1284,18 @@ class InterviewForm(FlaskForm):
     interview_type = SelectField(
         "Type",
         choices=[
-            ("In-person", "In-person"),
-            ("Virtual", "Virtual"),
-            ("Phone", "Phone")
+            (
+                "In-person",
+                "In-person"
+            ),
+            (
+                "Virtual",
+                "Virtual"
+            ),
+            (
+                "Phone",
+                "Phone"
+            )
         ],
         default="In-person"
     )
@@ -1185,7 +1318,9 @@ class InterviewForm(FlaskForm):
 
     notes = TextAreaField(
         "Notes",
-        validators=[Optional()]
+        validators=[
+            Optional()
+        ]
     )
 
 
@@ -1199,8 +1334,13 @@ def allowed_file(filename):
         filename
         and "."
         in filename
-        and filename.rsplit(".", 1)[1].lower()
-        in app.config["ALLOWED_EXTENSIONS"]
+        and filename.rsplit(
+            ".",
+            1
+        )[1].lower()
+        in app.config[
+            "ALLOWED_EXTENSIONS"
+        ]
     )
 
 
@@ -1210,8 +1350,13 @@ def allowed_image_file(filename):
         filename
         and "."
         in filename
-        and filename.rsplit(".", 1)[1].lower()
-        in app.config["ALLOWED_IMAGE_EXTENSIONS"]
+        and filename.rsplit(
+            ".",
+            1
+        )[1].lower()
+        in app.config[
+            "ALLOWED_IMAGE_EXTENSIONS"
+        ]
     )
 
 
@@ -1220,21 +1365,29 @@ def save_uploaded_file(file):
     if not file or not file.filename:
         return None
 
-    if not allowed_file(file.filename):
+    if not allowed_file(
+        file.filename
+    ):
         return None
 
-    original = secure_filename(file.filename)
+    original = secure_filename(
+        file.filename
+    )
 
     if not original:
         return None
 
-    name, ext = os.path.splitext(original)
+    name, ext = os.path.splitext(
+        original
+    )
 
     timestamp = datetime.utcnow().strftime(
         "%Y%m%d%H%M%S%f"
     )
 
-    filename = f"{name}_{timestamp}{ext.lower()}"
+    filename = (
+        f"{name}_{timestamp}{ext.lower()}"
+    )
 
     path = os.path.join(
         app.config["UPLOAD_FOLDER"],
@@ -1242,6 +1395,7 @@ def save_uploaded_file(file):
     )
 
     try:
+
         os.makedirs(
             app.config["UPLOAD_FOLDER"],
             exist_ok=True
@@ -1255,7 +1409,9 @@ def save_uploaded_file(file):
         return filename
 
     except Exception:
+
         traceback.print_exc()
+
         return None
 
 
@@ -1264,21 +1420,29 @@ def save_job_image(file):
     if not file or not file.filename:
         return None
 
-    if not allowed_image_file(file.filename):
+    if not allowed_image_file(
+        file.filename
+    ):
         return None
 
-    original = secure_filename(file.filename)
+    original = secure_filename(
+        file.filename
+    )
 
     if not original:
         return None
 
-    name, ext = os.path.splitext(original)
+    name, ext = os.path.splitext(
+        original
+    )
 
     timestamp = datetime.utcnow().strftime(
         "%Y%m%d%H%M%S%f"
     )
 
-    filename = f"{name}_{timestamp}{ext.lower()}"
+    filename = (
+        f"{name}_{timestamp}{ext.lower()}"
+    )
 
     path = os.path.join(
         app.config["UPLOAD_FOLDER_JOBS"],
@@ -1294,10 +1458,15 @@ def save_job_image(file):
 
         file.save(path)
 
+        if not os.path.isfile(path):
+            return None
+
         return filename
 
     except Exception:
+
         traceback.print_exc()
+
         return None
 
 
@@ -1308,15 +1477,50 @@ def delete_uploaded_file(filename):
 
     try:
 
+        safe_name = secure_filename(
+            filename
+        )
+
+        if not safe_name:
+            return
+
         path = os.path.join(
             app.config["UPLOAD_FOLDER"],
-            secure_filename(filename)
+            safe_name
         )
 
         if os.path.isfile(path):
             os.remove(path)
 
     except Exception:
+
+        traceback.print_exc()
+
+
+def delete_job_image(filename):
+
+    if not filename:
+        return
+
+    try:
+
+        safe_name = secure_filename(
+            filename
+        )
+
+        if not safe_name:
+            return
+
+        path = os.path.join(
+            app.config["UPLOAD_FOLDER_JOBS"],
+            safe_name
+        )
+
+        if os.path.isfile(path):
+            os.remove(path)
+
+    except Exception:
+
         traceback.print_exc()
 
 
@@ -1329,7 +1533,9 @@ def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
 
-        if not session.get("admin_logged_in"):
+        if not session.get(
+            "admin_logged_in"
+        ):
 
             flash(
                 "እባክዎን አስቀድመው Login ያድርጉ።",
@@ -1337,16 +1543,21 @@ def admin_required(f):
             )
 
             return redirect(
-                url_for("admin_login")
+                url_for(
+                    "admin_login"
+                )
             )
 
-        return f(*args, **kwargs)
+        return f(
+            *args,
+            **kwargs
+        )
 
     return decorated
 
 
 # ============================================================
-# AUDIT
+# AUDIT LOG
 # ============================================================
 
 def log_audit(
@@ -1359,30 +1570,42 @@ def log_audit(
     try:
 
         audit = AuditLog(
-            user_id=session.get("admin_id"),
+
+            user_id=session.get(
+                "admin_id"
+            ),
+
             user_name=session.get(
                 "admin_username",
                 "system"
             ),
+
             action=action,
+
             description=description,
+
             target_type=target_type,
+
             target_id=target_id,
+
             ip_address=request.remote_addr,
+
             user_agent=request.headers.get(
                 "User-Agent"
             )
         )
 
         db.session.add(audit)
+
         db.session.commit()
 
     except Exception as e:
 
         db.session.rollback()
 
-        print(
-            f"AUDIT ERROR: {e}"
+        app.logger.error(
+            "AUDIT ERROR: %s",
+            e
         )
 
 
@@ -1395,11 +1618,16 @@ def send_async_email(message):
     try:
 
         with app.app_context():
-            mail.send(message)
+
+            mail.send(
+                message
+            )
 
     except Exception as e:
-        print(
-            f"EMAIL ERROR: {e}"
+
+        app.logger.error(
+            "EMAIL ERROR: %s",
+            e
         )
 
 
@@ -1410,7 +1638,9 @@ def send_application_status_email(
     notes=""
 ):
 
-    if not app.config.get("MAIL_USERNAME"):
+    if not app.config.get(
+        "MAIL_USERNAME"
+    ):
         return
 
     if not application.email:
@@ -1450,14 +1680,17 @@ def send_application_status_email(
             else "Rori Hotel Position"
         )
 
-        status_message = status_messages.get(
-            new_status,
-            "Your application status has been updated."
+        status_message = (
+            status_messages.get(
+                new_status,
+                "Your application status has been updated."
+            )
         )
 
         notes_html = ""
 
         if notes:
+
             notes_html = f"""
             <p>
                 <strong>HR Note:</strong><br>
@@ -1466,12 +1699,19 @@ def send_application_status_email(
             """
 
         message = Message(
+
             subject=(
                 "Rori Hotel - Application Status "
                 f"{reference}"
             ),
-            sender=app.config["MAIL_DEFAULT_SENDER"],
-            recipients=[application.email]
+
+            sender=app.config[
+                "MAIL_DEFAULT_SENDER"
+            ],
+
+            recipients=[
+                application.email
+            ]
         )
 
         message.html = f"""
@@ -1492,7 +1732,7 @@ def send_application_status_email(
         <div style="
             max-width:600px;
             margin:30px auto;
-            background:#fff;
+            background:#ffffff;
             padding:30px;
             border-radius:12px;
         ">
@@ -1532,13 +1772,20 @@ def send_application_status_email(
 
             <hr>
 
-            <p style="font-size:13px;color:#777;">
+            <p style="
+                font-size:13px;
+                color:#777;
+            ">
                 Please keep your reference number
                 for future application tracking.
             </p>
 
-            <p style="font-size:12px;color:#999;">
-                © 2026 Rori Hotel. All rights reserved.
+            <p style="
+                font-size:12px;
+                color:#999;
+            ">
+                © 2026 Rori Hotel.
+                All rights reserved.
             </p>
 
         </div>
@@ -1555,8 +1802,9 @@ def send_application_status_email(
 
     except Exception as e:
 
-        print(
-            f"EMAIL DISPATCH ERROR: {e}"
+        app.logger.error(
+            "EMAIL DISPATCH ERROR: %s",
+            e
         )
 
 
@@ -1564,7 +1812,10 @@ def send_application_status_email(
 # SIMILAR JOBS
 # ============================================================
 
-def get_similar_jobs(job, limit=3):
+def get_similar_jobs(
+    job,
+    limit=3
+):
 
     query = Job.query.filter(
         Job.is_active.is_(True),
@@ -1575,21 +1826,26 @@ def get_similar_jobs(job, limit=3):
 
         query = query.filter(
             db.or_(
-                Job.department_id == job.department_id,
-                Job.employment_type == job.employment_type
+                Job.department_id
+                == job.department_id,
+
+                Job.employment_type
+                == job.employment_type
             )
         )
 
     return (
         query
-        .order_by(Job.created_at.desc())
+        .order_by(
+            Job.created_at.desc()
+        )
         .limit(limit)
         .all()
     )
 
 
 # ============================================================
-# CONTEXT
+# CONTEXT PROCESSOR
 # ============================================================
 
 @app.context_processor
@@ -1598,20 +1854,34 @@ def inject_globals():
     try:
 
         return {
-            "now": datetime.utcnow,
-            "all_departments": Department.query.order_by(
-                Department.name
-            ).all(),
-            "all_locations": Location.query.order_by(
-                Location.name
-            ).all()
+
+            "now":
+                datetime.utcnow,
+
+            "all_departments":
+                Department.query
+                .order_by(
+                    Department.name
+                )
+                .all(),
+
+            "all_locations":
+                Location.query
+                .order_by(
+                    Location.name
+                )
+                .all()
         }
 
     except Exception:
 
         return {
-            "now": datetime.utcnow,
+
+            "now":
+                datetime.utcnow,
+
             "all_departments": [],
+
             "all_locations": []
         }
 
@@ -1693,28 +1963,38 @@ def jobs():
     )
 
     if department_id:
+
         query = query.filter(
-            Job.department_id == department_id
+            Job.department_id
+            == department_id
         )
 
     if location_id:
+
         query = query.filter(
-            Job.location_id == location_id
+            Job.location_id
+            == location_id
         )
 
     if type_filter:
+
         query = query.filter(
-            Job.employment_type == type_filter
+            Job.employment_type
+            == type_filter
         )
 
     if experience_filter:
+
         query = query.filter(
-            Job.experience_level == experience_filter
+            Job.experience_level
+            == experience_filter
         )
 
     if search_query:
 
-        search = f"%{search_query}%"
+        search = (
+            f"%{search_query}%"
+        )
 
         query = query.filter(
             db.or_(
@@ -1744,15 +2024,21 @@ def jobs():
 # JOB DETAIL
 # ============================================================
 
-@app.route("/job/<int:job_id>")
+@app.route(
+    "/job/<int:job_id>"
+)
 def job_detail(job_id):
 
-    job = Job.query.get_or_404(job_id)
+    job = Job.query.get_or_404(
+        job_id
+    )
 
     return render_template(
         "job_detail.html",
         job=job,
-        similar_jobs=get_similar_jobs(job)
+        similar_jobs=get_similar_jobs(
+            job
+        )
     )
 
 
@@ -1769,11 +2055,15 @@ def departments():
     )
 
 
-@app.route("/department/<int:dept_id>")
+@app.route(
+    "/department/<int:dept_id>"
+)
 def department_detail(dept_id):
 
-    department = Department.query.get_or_404(
-        dept_id
+    department = (
+        Department.query.get_or_404(
+            dept_id
+        )
     )
 
     jobs_list = (
@@ -1835,6 +2125,7 @@ def about_careers():
 def track_status():
 
     application = None
+
     searched = False
 
     if request.method == "POST":
@@ -1843,7 +2134,10 @@ def track_status():
 
         reference_no = (
             request.form
-            .get("reference_no", "")
+            .get(
+                "reference_no",
+                ""
+            )
             .strip()
             .upper()
         )
@@ -1875,9 +2169,10 @@ def track_status():
 )
 def apply(job_id):
 
-    job = Job.query.get_or_404(job_id)
+    job = Job.query.get_or_404(
+        job_id
+    )
 
-    # Position closed
     if not job.is_active:
 
         flash(
@@ -1892,7 +2187,6 @@ def apply(job_id):
             )
         )
 
-    # Deadline passed
     if job.is_expired:
 
         flash(
@@ -1911,10 +2205,6 @@ def apply(job_id):
 
     if form.validate_on_submit():
 
-        # ----------------------------------------------------
-        # CV
-        # ----------------------------------------------------
-
         cv_filename = save_uploaded_file(
             form.cv_file.data
         )
@@ -1932,35 +2222,39 @@ def apply(job_id):
                 job=job
             )
 
-        # ----------------------------------------------------
-        # Unique reference number
-        # ----------------------------------------------------
-
         reference_no = None
 
         for _ in range(10):
 
             candidate_reference = (
                 "RH-"
-                + secrets.token_hex(4).upper()
+                + secrets.token_hex(
+                    4
+                ).upper()
             )
 
             exists = (
                 Application.query
                 .filter_by(
-                    reference_no=candidate_reference
+                    reference_no=
+                    candidate_reference
                 )
                 .first()
             )
 
             if not exists:
 
-                reference_no = candidate_reference
+                reference_no = (
+                    candidate_reference
+                )
+
                 break
 
         if not reference_no:
 
-            delete_uploaded_file(cv_filename)
+            delete_uploaded_file(
+                cv_filename
+            )
 
             flash(
                 "Could not generate application reference number.",
@@ -1973,28 +2267,37 @@ def apply(job_id):
                 job=job
             )
 
-        # ----------------------------------------------------
-        # Application
-        # ----------------------------------------------------
-
         application = Application(
 
             job_id=job.id,
 
             reference_no=reference_no,
 
-            full_name=form.full_name.data.strip(),
+            full_name=(
+                form.full_name.data.strip()
+            ),
 
-            email=form.email.data.strip().lower(),
+            email=(
+                form.email.data
+                .strip()
+                .lower()
+            ),
 
-            phone=form.phone.data.strip(),
+            phone=(
+                form.phone.data.strip()
+            ),
 
-            location=form.location.data.strip(),
+            location=(
+                form.location.data.strip()
+            ),
 
-            education=form.education.data,
+            education=(
+                form.education.data
+            ),
 
             years_of_experience=(
-                form.years_of_experience.data.strip()
+                form.years_of_experience.data
+                .strip()
             ),
 
             current_position=(
@@ -2009,9 +2312,13 @@ def apply(job_id):
                 else None
             ),
 
-            skills=form.skills.data.strip(),
+            skills=(
+                form.skills.data.strip()
+            ),
 
-            languages=form.languages.data.strip(),
+            languages=(
+                form.languages.data.strip()
+            ),
 
             certifications=(
                 form.certifications.data.strip()
@@ -2027,14 +2334,15 @@ def apply(job_id):
                 form.willing_to_relocate.data
             ),
 
-            # Private HR field
             expected_salary=(
                 form.expected_salary.data.strip()
                 if form.expected_salary.data
                 else None
             ),
 
-            cover_letter=form.cover_letter.data.strip(),
+            cover_letter=(
+                form.cover_letter.data.strip()
+            ),
 
             cv_filename=cv_filename,
 
@@ -2047,19 +2355,15 @@ def apply(job_id):
 
         try:
 
-            # ------------------------------------------------
-            # ONE TRANSACTION
-            # ------------------------------------------------
-
-            db.session.add(application)
+            db.session.add(
+                application
+            )
 
             db.session.flush()
 
             notification = Notification(
 
-                title=(
-                    "New Application"
-                ),
+                title="New Application",
 
                 message=(
                     f"{application.full_name} "
@@ -2074,27 +2378,23 @@ def apply(job_id):
                 is_read=False
             )
 
-            db.session.add(notification)
+            db.session.add(
+                notification
+            )
 
             db.session.commit()
 
-        except Exception as e:
+        except Exception:
 
             db.session.rollback()
 
-            delete_uploaded_file(cv_filename)
-
-            print(
-                "========================================"
+            delete_uploaded_file(
+                cv_filename
             )
-            print(
+
+            app.logger.exception(
                 "APPLICATION SUBMISSION ERROR"
             )
-            print(
-                "========================================"
-            )
-
-            traceback.print_exc()
 
             flash(
                 "Application could not be submitted. "
@@ -2107,10 +2407,6 @@ def apply(job_id):
                 form=form,
                 job=job
             )
-
-        # ----------------------------------------------------
-        # Audit
-        # ----------------------------------------------------
 
         log_audit(
             "New Application",
@@ -2164,7 +2460,7 @@ def application_success(app_id):
 
 
 # ============================================================
-# APPLICATION STATUS PAGE
+# APPLICATION STATUS
 # ============================================================
 
 @app.route(
@@ -2180,11 +2476,16 @@ def application_status(app_id):
 
     if not application.viewed_at:
 
-        application.viewed_at = datetime.utcnow()
+        application.viewed_at = (
+            datetime.utcnow()
+        )
 
         try:
+
             db.session.commit()
+
         except Exception:
+
             db.session.rollback()
 
     return render_template(
@@ -2208,13 +2509,19 @@ def talent_pool():
 
     if form.validate_on_submit():
 
+        email = (
+            form.email.data
+            .strip()
+            .lower()
+        )
+
         existing = (
             TalentPool.query
             .filter(
                 db.func.lower(
                     TalentPool.email
                 )
-                == form.email.data.strip().lower()
+                == email
             )
             .first()
         )
@@ -2227,7 +2534,9 @@ def talent_pool():
             )
 
             return redirect(
-                url_for("talent_pool")
+                url_for(
+                    "talent_pool"
+                )
             )
 
         cv_filename = save_uploaded_file(
@@ -2248,23 +2557,35 @@ def talent_pool():
 
         talent = TalentPool(
 
-            full_name=form.full_name.data.strip(),
+            full_name=(
+                form.full_name.data.strip()
+            ),
 
-            email=form.email.data.strip().lower(),
+            email=email,
 
-            phone=form.phone.data.strip(),
+            phone=(
+                form.phone.data.strip()
+            ),
 
-            location=form.location.data.strip(),
+            location=(
+                form.location.data.strip()
+            ),
 
-            education=form.education.data,
+            education=(
+                form.education.data
+            ),
 
             years_of_experience=(
                 form.years_of_experience.data.strip()
             ),
 
-            skills=form.skills.data.strip(),
+            skills=(
+                form.skills.data.strip()
+            ),
 
-            languages=form.languages.data.strip(),
+            languages=(
+                form.languages.data.strip()
+            ),
 
             certifications=(
                 form.certifications.data.strip()
@@ -2286,23 +2607,32 @@ def talent_pool():
                 else None
             ),
 
-            cover_letter=form.cover_letter.data.strip(),
+            cover_letter=(
+                form.cover_letter.data.strip()
+            ),
 
             cv_filename=cv_filename
         )
 
         try:
 
-            db.session.add(talent)
+            db.session.add(
+                talent
+            )
+
             db.session.commit()
 
-        except Exception as e:
+        except Exception:
 
             db.session.rollback()
 
-            delete_uploaded_file(cv_filename)
+            delete_uploaded_file(
+                cv_filename
+            )
 
-            traceback.print_exc()
+            app.logger.exception(
+                "TALENT POOL SUBMISSION ERROR"
+            )
 
             flash(
                 "Could not join the talent pool.",
@@ -2320,7 +2650,9 @@ def talent_pool():
         )
 
         return redirect(
-            url_for("home")
+            url_for(
+                "home"
+            )
         )
 
     return render_template(
@@ -2343,36 +2675,69 @@ def talent_pool():
 )
 def admin_login():
 
-    if session.get("admin_logged_in"):
+    if session.get(
+        "admin_logged_in"
+    ):
 
         return redirect(
-            url_for("admin_dashboard")
+            url_for(
+                "admin_dashboard"
+            )
         )
 
     form = AdminLoginForm()
 
     if form.validate_on_submit():
 
-        username = form.username.data.strip()
-        password = form.password.data
+        username = (
+            form.username.data.strip()
+        )
+
+        password = (
+            form.password.data
+        )
 
         password_hash = app.config.get(
             "HR_PASSWORD_HASH"
         )
 
+        valid_login = False
+
         if (
-            username == app.config["HR_USERNAME"]
-            and password_hash
-            and check_password_hash(
-                password_hash,
-                password
+            username
+            == app.config.get(
+                "HR_USERNAME"
             )
+            and password_hash
         ):
+
+            try:
+
+                valid_login = (
+                    check_password_hash(
+                        password_hash,
+                        password
+                    )
+                )
+
+            except Exception:
+
+                valid_login = False
+
+                app.logger.exception(
+                    "PASSWORD HASH ERROR"
+                )
+
+        if valid_login:
 
             session.clear()
 
             session["admin_logged_in"] = True
-            session["admin_username"] = username
+
+            session["admin_username"] = (
+                username
+            )
+
             session["admin_id"] = 1
 
             log_audit(
@@ -2386,7 +2751,9 @@ def admin_login():
             )
 
             return redirect(
-                url_for("admin_dashboard")
+                url_for(
+                    "admin_dashboard"
+                )
             )
 
         flash(
@@ -2413,7 +2780,9 @@ def admin_logout():
         "Unknown"
     )
 
-    if session.get("admin_logged_in"):
+    if session.get(
+        "admin_logged_in"
+    ):
 
         log_audit(
             "Logout",
@@ -2428,7 +2797,9 @@ def admin_logout():
     )
 
     return redirect(
-        url_for("admin_login")
+        url_for(
+            "admin_login"
+        )
     )
 
 
@@ -2451,7 +2822,9 @@ def forgot_password():
         )
 
         return redirect(
-            url_for("admin_login")
+            url_for(
+                "admin_login"
+            )
         )
 
     return render_template(
@@ -2478,9 +2851,13 @@ def admin_dashboard():
         .count()
     )
 
-    total_applications = Application.query.count()
+    total_applications = (
+        Application.query.count()
+    )
 
-    total_interviews = Interview.query.count()
+    total_interviews = (
+        Interview.query.count()
+    )
 
     recent_applications = (
         Application.query
@@ -2539,33 +2916,51 @@ def admin_dashboard():
 # ADMIN CANDIDATES
 # ============================================================
 
-@app.route("/admin/candidates")
+@app.route(
+    "/admin/candidates"
+)
 @admin_required
 def admin_candidates():
 
     query = Application.query
 
-    search = request.args.get(
-        "search",
-        ""
-    ).strip()
+    search = (
+        request.args
+        .get(
+            "search",
+            ""
+        )
+        .strip()
+    )
 
     if search:
 
-        search_value = f"%{search}%"
+        search_value = (
+            f"%{search}%"
+        )
 
         query = query.filter(
             db.or_(
-                Application.full_name.ilike(search_value),
-                Application.email.ilike(search_value),
-                Application.reference_no.ilike(search_value)
+                Application.full_name.ilike(
+                    search_value
+                ),
+                Application.email.ilike(
+                    search_value
+                ),
+                Application.reference_no.ilike(
+                    search_value
+                )
             )
         )
 
-    status_filter = request.args.get(
-        "status",
-        ""
-    ).strip()
+    status_filter = (
+        request.args
+        .get(
+            "status",
+            ""
+        )
+        .strip()
+    )
 
     if (
         status_filter
@@ -2573,7 +2968,8 @@ def admin_candidates():
     ):
 
         query = query.filter(
-            Application.status == status_filter
+            Application.status
+            == status_filter
         )
 
     applications = (
@@ -2599,7 +2995,9 @@ def admin_candidates():
     "/admin/candidate/<int:app_id>"
 )
 @admin_required
-def admin_candidate_detail(app_id):
+def admin_candidate_detail(
+    app_id
+):
 
     application = (
         Application.query.get_or_404(
@@ -2620,11 +3018,16 @@ def admin_candidate_detail(app_id):
 
     if not application.viewed_at:
 
-        application.viewed_at = datetime.utcnow()
+        application.viewed_at = (
+            datetime.utcnow()
+        )
 
         try:
+
             db.session.commit()
+
         except Exception:
+
             db.session.rollback()
 
     return render_template(
@@ -2647,7 +3050,9 @@ def admin_candidate_detail(app_id):
     methods=["POST"]
 )
 @admin_required
-def update_application_status(app_id):
+def update_application_status(
+    app_id
+):
 
     application = (
         Application.query.get_or_404(
@@ -2656,7 +3061,8 @@ def update_application_status(app_id):
     )
 
     new_status = (
-        request.form.get(
+        request.form
+        .get(
             "status",
             ""
         )
@@ -2667,7 +3073,8 @@ def update_application_status(app_id):
     if not new_status:
 
         new_status = (
-            request.form.get(
+            request.form
+            .get(
                 "action",
                 ""
             )
@@ -2676,7 +3083,8 @@ def update_application_status(app_id):
         )
 
     notes = (
-        request.form.get(
+        request.form
+        .get(
             "notes",
             ""
         )
@@ -2702,13 +3110,22 @@ def update_application_status(app_id):
 
         return redirect(
             request.referrer
-            or url_for("admin_dashboard")
+            or url_for(
+                "admin_dashboard"
+            )
         )
 
-    old_status = application.status
+    old_status = (
+        application.status
+    )
 
-    application.status = new_status
-    application.status_updated_at = datetime.utcnow()
+    application.status = (
+        new_status
+    )
+
+    application.status_updated_at = (
+        datetime.utcnow()
+    )
 
     application.reviewed_by = (
         session.get(
@@ -2718,11 +3135,15 @@ def update_application_status(app_id):
 
     if new_status == "SHORTLISTED":
 
-        application.shortlisted_at = datetime.utcnow()
+        application.shortlisted_at = (
+            datetime.utcnow()
+        )
 
     if new_status == "REJECTED":
 
-        application.rejected_at = datetime.utcnow()
+        application.rejected_at = (
+            datetime.utcnow()
+        )
 
     if notes:
 
@@ -2732,11 +3153,13 @@ def update_application_status(app_id):
 
         db.session.commit()
 
-    except Exception as e:
+    except Exception:
 
         db.session.rollback()
 
-        traceback.print_exc()
+        app.logger.exception(
+            "STATUS UPDATE ERROR"
+        )
 
         flash(
             "Status ማዘመን አልተቻለም።",
@@ -2745,7 +3168,9 @@ def update_application_status(app_id):
 
         return redirect(
             request.referrer
-            or url_for("admin_dashboard")
+            or url_for(
+                "admin_dashboard"
+            )
         )
 
     log_audit(
@@ -2768,13 +3193,19 @@ def update_application_status(app_id):
     )
 
     flash(
-        f'የአመልካቹ Status ወደ "{new_status}" ተቀይሯል!',
+        (
+            f'የአመልካቹ Status '
+            f'ወደ "{new_status}" '
+            f'ተቀይሯል!'
+        ),
         "success"
     )
 
     return redirect(
         request.referrer
-        or url_for("admin_dashboard")
+        or url_for(
+            "admin_dashboard"
+        )
     )
 
 
@@ -2786,7 +3217,9 @@ def update_application_status(app_id):
     "/admin/candidate/<int:app_id>/cv/download"
 )
 @admin_required
-def download_candidate_cv(app_id):
+def download_candidate_cv(
+    app_id
+):
 
     application = (
         Application.query.get_or_404(
@@ -2803,12 +3236,28 @@ def download_candidate_cv(app_id):
 
         return redirect(
             request.referrer
-            or url_for("admin_candidates")
+            or url_for(
+                "admin_candidates"
+            )
         )
 
     filename = secure_filename(
         application.cv_filename
     )
+
+    if not filename:
+
+        flash(
+            "Invalid CV filename.",
+            "danger"
+        )
+
+        return redirect(
+            request.referrer
+            or url_for(
+                "admin_candidates"
+            )
+        )
 
     path = os.path.join(
         app.config["UPLOAD_FOLDER"],
@@ -2824,7 +3273,9 @@ def download_candidate_cv(app_id):
 
         return redirect(
             request.referrer
-            or url_for("admin_candidates")
+            or url_for(
+                "admin_candidates"
+            )
         )
 
     log_audit(
@@ -2848,7 +3299,9 @@ def download_candidate_cv(app_id):
 # ADMIN JOBS
 # ============================================================
 
-@app.route("/admin/jobs")
+@app.route(
+    "/admin/jobs"
+)
 @admin_required
 def admin_jobs():
 
@@ -2895,19 +3348,29 @@ def admin_job_new():
         .all()
     )
 
-    form.department_id.choices = [
-        (0, "None")
-    ] + [
-        (department.id, department.name)
-        for department in departments_list
-    ]
+    form.department_id.choices = (
+        [(0, "None")]
+        + [
+            (
+                department.id,
+                department.name
+            )
+            for department
+            in departments_list
+        ]
+    )
 
-    form.location_id.choices = [
-        (0, "None")
-    ] + [
-        (location.id, location.name)
-        for location in locations_list
-    ]
+    form.location_id.choices = (
+        [(0, "None")]
+        + [
+            (
+                location.id,
+                location.name
+            )
+            for location
+            in locations_list
+        ]
+    )
 
     if form.validate_on_submit():
 
@@ -2919,7 +3382,9 @@ def admin_job_new():
 
         job = Job(
 
-            title=form.title.data.strip(),
+            title=(
+                form.title.data.strip()
+            ),
 
             department_id=(
                 form.department_id.data
@@ -2953,7 +3418,9 @@ def admin_job_new():
                 form.what_we_offer.data.strip()
             ),
 
-            employment_type=form.employment_type.data,
+            employment_type=(
+                form.employment_type.data
+            ),
 
             experience_level=(
                 form.experience_level.data.strip()
@@ -2961,14 +3428,15 @@ def admin_job_new():
                 else None
             ),
 
-            # HR ONLY
             salary_range=(
                 form.salary_range.data.strip()
                 if form.salary_range.data
                 else None
             ),
 
-            deadline=form.deadline.data,
+            deadline=(
+                form.deadline.data
+            ),
 
             is_active=bool(
                 form.is_active.data
@@ -2983,24 +3451,25 @@ def admin_job_new():
 
         try:
 
-            db.session.add(job)
+            db.session.add(
+                job
+            )
+
             db.session.commit()
 
-        except Exception as e:
+        except Exception:
 
             db.session.rollback()
 
             if banner_image:
 
-                path = os.path.join(
-                    app.config["UPLOAD_FOLDER_JOBS"],
+                delete_job_image(
                     banner_image
                 )
 
-                if os.path.isfile(path):
-                    os.remove(path)
-
-            traceback.print_exc()
+            app.logger.exception(
+                "CREATE JOB ERROR"
+            )
 
             flash(
                 "Could not create job.",
@@ -3026,7 +3495,9 @@ def admin_job_new():
         )
 
         return redirect(
-            url_for("admin_jobs")
+            url_for(
+                "admin_jobs"
+            )
         )
 
     return render_template(
@@ -3045,11 +3516,17 @@ def admin_job_new():
     methods=["POST"]
 )
 @admin_required
-def admin_job_toggle(job_id):
+def admin_job_toggle(
+    job_id
+):
 
-    job = Job.query.get_or_404(job_id)
+    job = Job.query.get_or_404(
+        job_id
+    )
 
-    job.is_active = not job.is_active
+    job.is_active = (
+        not job.is_active
+    )
 
     try:
 
@@ -3059,7 +3536,9 @@ def admin_job_toggle(job_id):
 
         db.session.rollback()
 
-        traceback.print_exc()
+        app.logger.exception(
+            "TOGGLE JOB ERROR"
+        )
 
         flash(
             "Could not update job.",
@@ -3067,7 +3546,9 @@ def admin_job_toggle(job_id):
         )
 
         return redirect(
-            url_for("admin_jobs")
+            url_for(
+                "admin_jobs"
+            )
         )
 
     log_audit(
@@ -3090,7 +3571,9 @@ def admin_job_toggle(job_id):
     )
 
     return redirect(
-        url_for("admin_jobs")
+        url_for(
+            "admin_jobs"
+        )
     )
 
 
@@ -3098,7 +3581,9 @@ def admin_job_toggle(job_id):
 # ADMIN INTERVIEWS
 # ============================================================
 
-@app.route("/admin/interviews")
+@app.route(
+    "/admin/interviews"
+)
 @admin_required
 def admin_interviews():
 
@@ -3120,7 +3605,9 @@ def admin_interviews():
 # ADMIN TALENT POOL
 # ============================================================
 
-@app.route("/admin/talent-pool")
+@app.route(
+    "/admin/talent-pool"
+)
 @admin_required
 def admin_talent_pool():
 
@@ -3142,7 +3629,9 @@ def admin_talent_pool():
 # ADMIN AUDIT LOG
 # ============================================================
 
-@app.route("/admin/audit-log")
+@app.route(
+    "/admin/audit-log"
+)
 @admin_required
 def admin_audit_log():
 
@@ -3168,19 +3657,17 @@ def admin_audit_log():
 def get_column_type(column):
 
     """
-    Converts SQLAlchemy column type to a database-compatible
-    SQL type.
+    Convert SQLAlchemy column type into a type
+    supported by the current database dialect.
 
-    This avoids using PostgreSQL-invalid DATETIME.
-    SQLAlchemy will produce TIMESTAMP for PostgreSQL.
+    For PostgreSQL this produces types such as
+    VARCHAR, TEXT, BOOLEAN, DATE, TIMESTAMP, etc.
     """
 
     try:
 
-        dialect = db.engine.dialect
-
         return column.type.compile(
-            dialect=dialect
+            dialect=db.engine.dialect
         )
 
     except Exception:
@@ -3194,158 +3681,228 @@ def safe_add_column(
     column_type
 ):
 
+    """
+    Add a missing column safely.
+
+    The column is intentionally NOT added with
+    NOT NULL because the table may already contain
+    production records.
+
+    This prevents PostgreSQL errors such as:
+
+    column contains null values
+    """
+
     try:
 
         inspector = inspect(
             db.engine
         )
 
-        if table_name not in inspector.get_table_names():
-            return
+        if table_name not in (
+            inspector.get_table_names()
+        ):
+
+            return False
 
         columns = {
             column["name"]
-            for column in inspector.get_columns(
+            for column
+            in inspector.get_columns(
                 table_name
             )
         }
 
         if column_name in columns:
-            return
+
+            return True
+
+        sql = (
+            f'ALTER TABLE "{table_name}" '
+            f'ADD COLUMN "{column_name}" '
+            f'{column_type}'
+        )
 
         with db.engine.begin() as connection:
 
             connection.execute(
-                text(
-                    f'ALTER TABLE "{table_name}" '
-                    f'ADD COLUMN "{column_name}" '
-                    f'{column_type}'
-                )
+                text(sql)
             )
 
         print(
-            f"[DB] Added {table_name}.{column_name}"
+            f"[DB] Added missing column: "
+            f"{table_name}.{column_name}"
         )
+
+        return True
 
     except Exception as e:
 
         print(
-            f"[DB WARNING] "
+            f"[DB WARNING] Could not add "
             f"{table_name}.{column_name}: {e}"
         )
+
+        return False
 
 
 def migrate_existing_database():
 
     """
-    Adds missing nullable/optional columns to existing
-    databases.
+    Synchronize existing database tables with
+    the current SQLAlchemy models.
 
-    Important:
-    db.create_all() does NOT modify an existing table.
+    IMPORTANT:
+
+    db.create_all() creates missing tables but does
+    not add missing columns to an existing table.
+
+    Therefore this function checks every model and
+    adds missing columns.
+
+    Required columns are initially added as nullable
+    to protect existing production data.
     """
 
-    inspector = inspect(
-        db.engine
-    )
+    try:
 
-    existing_tables = set(
-        inspector.get_table_names()
-    )
+        # ----------------------------------------------------
+        # Create missing tables
+        # ----------------------------------------------------
 
-    # --------------------------------------------------------
-    # Create tables first
-    # --------------------------------------------------------
-
-    db.create_all()
-
-    inspector = inspect(
-        db.engine
-    )
-
-    existing_tables = set(
-        inspector.get_table_names()
-    )
-
-    # --------------------------------------------------------
-    # Add columns based on current SQLAlchemy models
-    # --------------------------------------------------------
-
-    models = [
-        Department,
-        Location,
-        Job,
-        Application,
-        TalentPool,
-        Interview,
-        Notification,
-        AuditLog
-    ]
-
-    for model in models:
-
-        table_name = model.__tablename__
-
-        if table_name not in existing_tables:
-            continue
-
-        existing_columns = {
-            column["name"]
-            for column in inspector.get_columns(
-                table_name
-            )
-        }
-
-        for column in model.__table__.columns:
-
-            if column.name in existing_columns:
-                continue
-
-            # Do not attempt to add primary keys or
-            # required columns to populated old tables.
-            if column.primary_key:
-                continue
-
-            if not column.nullable:
-                print(
-                    f"[DB WARNING] "
-                    f"Skipped required column "
-                    f"{table_name}.{column.name}"
-                )
-                continue
-
-            column_type = get_column_type(
-                column
-            )
-
-            safe_add_column(
-                table_name,
-                column.name,
-                column_type
-            )
+        db.create_all()
 
         inspector = inspect(
             db.engine
         )
 
+        existing_tables = set(
+            inspector.get_table_names()
+        )
+
+        models = [
+            Department,
+            Location,
+            Job,
+            Application,
+            TalentPool,
+            Interview,
+            Notification,
+            AuditLog
+        ]
+
+        # ----------------------------------------------------
+        # Synchronize columns
+        # ----------------------------------------------------
+
+        for model in models:
+
+            table_name = (
+                model.__tablename__
+            )
+
+            if table_name not in existing_tables:
+
+                continue
+
+            inspector = inspect(
+                db.engine
+            )
+
+            existing_columns = {
+                column["name"]
+                for column
+                in inspector.get_columns(
+                    table_name
+                )
+            }
+
+            for column in (
+                model.__table__.columns
+            ):
+
+                if column.name in existing_columns:
+
+                    continue
+
+                # Primary key cannot safely be
+                # added automatically.
+                if column.primary_key:
+
+                    print(
+                        f"[DB WARNING] "
+                        f"Skipped primary key "
+                        f"{table_name}.{column.name}"
+                    )
+
+                    continue
+
+                column_type = (
+                    get_column_type(
+                        column
+                    )
+                )
+
+                safe_add_column(
+                    table_name,
+                    column.name,
+                    column_type
+                )
+
+                # Refresh schema
+                inspector = inspect(
+                    db.engine
+                )
+
+                existing_columns = {
+                    column_info["name"]
+                    for column_info
+                    in inspector.get_columns(
+                        table_name
+                    )
+                }
+
+        print(
+            "[DB] Database schema synchronization completed."
+        )
+
+    except Exception:
+
+        app.logger.exception(
+            "DATABASE MIGRATION ERROR"
+        )
+
+        raise
+
+
+# ============================================================
+# SEED DEFAULT DATA
+# ============================================================
 
 def seed_default_data():
 
-    # --------------------------------------------------------
-    # Departments
-    # --------------------------------------------------------
-
     departments = [
+
         "Front Office",
+
         "Housekeeping",
+
         "Food & Beverage",
+
         "Kitchen",
+
         "Engineering",
+
         "Finance",
+
         "Human Resources",
+
         "IT",
+
         "Security",
+
         "Spa & Wellness",
+
         "Sales & Marketing"
     ]
 
@@ -3353,7 +3910,9 @@ def seed_default_data():
 
         existing = (
             Department.query
-            .filter_by(name=name)
+            .filter_by(
+                name=name
+            )
             .first()
         )
 
@@ -3364,10 +3923,6 @@ def seed_default_data():
                     name=name
                 )
             )
-
-    # --------------------------------------------------------
-    # Hawassa
-    # --------------------------------------------------------
 
     location = (
         Location.query
@@ -3381,7 +3936,9 @@ def seed_default_data():
 
         db.session.add(
             Location(
+
                 name="Hawassa",
+
                 address=(
                     "Hawassa, "
                     "Sidama Region, "
@@ -3393,24 +3950,33 @@ def seed_default_data():
     db.session.commit()
 
 
+# ============================================================
+# DATABASE INITIALIZATION
+# ============================================================
+
 def init_db_safe():
 
     with app.app_context():
 
         try:
 
+            # Create missing tables
             db.create_all()
 
+            # Synchronize existing tables
             migrate_existing_database()
 
+            # Seed default data
             seed_default_data()
 
             print(
                 "======================================"
             )
+
             print(
                 "DATABASE INITIALIZATION SUCCESS"
             )
+
             print(
                 "======================================"
             )
@@ -3422,11 +3988,17 @@ def init_db_safe():
             print(
                 "======================================"
             )
+
             print(
                 "DATABASE INITIALIZATION ERROR"
             )
+
             print(
                 "======================================"
+            )
+
+            print(
+                f"Database error: {e}"
             )
 
             traceback.print_exc()
@@ -3439,9 +4011,18 @@ def init_db_safe():
 @app.errorhandler(404)
 def page_not_found(error):
 
-    return render_template(
-        "404.html"
-    ), 404
+    try:
+
+        return render_template(
+            "404.html"
+        ), 404
+
+    except Exception:
+
+        return (
+            "404 - Page Not Found",
+            404
+        )
 
 
 @app.errorhandler(413)
@@ -3454,7 +4035,9 @@ def file_too_large(error):
 
     return redirect(
         request.referrer
-        or url_for("home")
+        or url_for(
+            "home"
+        )
     )
 
 
@@ -3462,27 +4045,34 @@ def file_too_large(error):
 def internal_server_error(error):
 
     try:
+
         db.session.rollback()
+
     except Exception:
+
         pass
 
-    print(
-        "======================================"
+    app.logger.error(
+        "INTERNAL SERVER ERROR: %s",
+        error
     )
 
-    print(
-        "INTERNAL SERVER ERROR"
+    app.logger.exception(
+        "Unhandled application exception"
     )
 
-    traceback.print_exc()
+    try:
 
-    print(
-        "======================================"
-    )
+        return render_template(
+            "500.html"
+        ), 500
 
-    return render_template(
-        "500.html"
-    ), 500
+    except Exception:
+
+        return (
+            "500 - Internal Server Error",
+            500
+        )
 
 
 # ============================================================
@@ -3505,13 +4095,15 @@ except Exception:
 if __name__ == "__main__":
 
     app.run(
+
         host="0.0.0.0",
+
         port=int(
             os.environ.get(
                 "PORT",
                 5000
             )
         ),
+
         debug=True
     )
- 
