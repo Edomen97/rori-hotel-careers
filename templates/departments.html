@@ -3,10 +3,13 @@
 {% block title %}Departments - Rori Hotel Careers{% endblock %}
 
 {% block extra_css %}
+<!-- Cormorant Garamond Font -->
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
 <link href="{{ url_for('static', filename='css/careers.css') }}" rel="stylesheet" />
+
 <style>
     .dept-hero {
-        background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0B132B 100%);
+        background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, var(--primary-navy) 100%);
         padding: 4rem 0 3rem;
         text-align: center;
         position: relative;
@@ -19,7 +22,7 @@
         left: -50%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(ellipse at center, rgba(197,160,89,0.03), transparent 60%);
+        background: radial-gradient(ellipse at center, rgba(197,160,89,0.05), transparent 60%);
         animation: shimmer 20s infinite alternate;
     }
     @keyframes shimmer {
@@ -33,7 +36,7 @@
     .dept-hero .gold-line {
         width: 80px;
         height: 2px;
-        background: linear-gradient(90deg, var(--gold), transparent);
+        background: linear-gradient(90deg, var(--accent-gold), transparent);
         margin: 0 auto 1rem;
     }
     .dept-hero h1 {
@@ -44,11 +47,11 @@
         letter-spacing: -0.02em;
     }
     .dept-hero h1 .gold-text {
-        color: var(--gold);
+        color: var(--accent-gold);
         font-style: italic;
     }
     .dept-hero p {
-        color: rgba(255,255,255,0.6);
+        color: rgba(255,255,255,0.7);
         font-size: 1.1rem;
         max-width: 600px;
         margin: 0.5rem auto 0;
@@ -69,10 +72,10 @@
     }
 
     .dept-card-link .dept-card {
-        background: rgba(255,255,255,0.04);
+        background: rgba(28, 37, 65, 0.6);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255,255,255,0.06);
+        border: 1px solid var(--border-gold);
         border-radius: 20px;
         padding: 2rem 1.5rem;
         text-align: center;
@@ -90,7 +93,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(135deg, rgba(197,160,89,0.06), transparent 60%);
+        background: linear-gradient(135deg, rgba(197,160,89,0.08), transparent 60%);
         opacity: 0;
         transition: opacity 0.4s ease;
     }
@@ -101,13 +104,13 @@
 
     .dept-card-link .dept-card:hover {
         transform: translateY(-6px);
-        border-color: rgba(197,160,89,0.25);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        border-color: var(--accent-gold);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     }
 
     .dept-card-link .dept-icon {
         font-size: 2.8rem;
-        color: var(--gold);
+        color: var(--accent-gold);
         display: block;
         margin-bottom: 1rem;
         transition: transform 0.4s ease;
@@ -119,7 +122,7 @@
 
     .dept-card-link .dept-name {
         font-family: 'Cormorant Garamond', serif;
-        font-size: 1.4rem;
+        font-size: 1.5rem;
         font-weight: 600;
         color: #fff;
         margin-bottom: 0.4rem;
@@ -127,13 +130,13 @@
 
     .dept-card-link .dept-count {
         font-size: 0.85rem;
-        color: rgba(255,255,255,0.4);
+        color: var(--accent-cyan);
         margin-bottom: 0.6rem;
     }
 
     .dept-card-link .dept-desc {
         font-size: 0.9rem;
-        color: rgba(255,255,255,0.5);
+        color: var(--text-muted);
         line-height: 1.6;
         margin-bottom: 0;
     }
@@ -141,7 +144,7 @@
     .dept-card-link .dept-arrow {
         display: inline-block;
         margin-top: 1rem;
-        color: var(--gold);
+        color: var(--accent-gold);
         font-size: 0.9rem;
         font-weight: 600;
         opacity: 0;
@@ -157,48 +160,36 @@
     .dept-empty {
         text-align: center;
         padding: 4rem 2rem;
-        color: rgba(255,255,255,0.4);
+        color: var(--text-muted);
     }
     .dept-empty i {
         font-size: 4rem;
-        color: rgba(197,160,89,0.2);
+        color: var(--accent-gold);
         display: block;
         margin-bottom: 1rem;
     }
     .dept-empty h4 {
         font-family: 'Cormorant Garamond', serif;
-        color: rgba(255,255,255,0.5);
+        color: #fff;
         font-size: 1.8rem;
     }
 
     /* Responsive */
     @media (max-width: 768px) {
-        .dept-hero h1 {
-            font-size: 2.5rem;
-        }
+        .dept-hero h1 { font-size: 2.5rem; }
         .dept-grid {
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 1.2rem;
             padding: 2rem 0;
         }
-        .dept-card-link .dept-card {
-            padding: 1.5rem 1rem;
-        }
-        .dept-card-link .dept-icon {
-            font-size: 2.2rem;
-        }
-        .dept-card-link .dept-name {
-            font-size: 1.2rem;
-        }
+        .dept-card-link .dept-card { padding: 1.5rem 1rem; }
+        .dept-card-link .dept-icon { font-size: 2.2rem; }
+        .dept-card-link .dept-name { font-size: 1.2rem; }
     }
 
     @media (max-width: 480px) {
-        .dept-hero {
-            padding: 3rem 0 2rem;
-        }
-        .dept-hero h1 {
-            font-size: 2rem;
-        }
+        .dept-hero { padding: 3rem 0 2rem; }
+        .dept-hero h1 { font-size: 2rem; }
         .dept-grid {
             grid-template-columns: 1fr 1fr;
             gap: 0.8rem;
@@ -208,18 +199,10 @@
             padding: 1.2rem 0.8rem;
             border-radius: 16px;
         }
-        .dept-card-link .dept-icon {
-            font-size: 1.8rem;
-        }
-        .dept-card-link .dept-name {
-            font-size: 1rem;
-        }
-        .dept-card-link .dept-desc {
-            font-size: 0.75rem;
-        }
-        .dept-card-link .dept-count {
-            font-size: 0.7rem;
-        }
+        .dept-card-link .dept-icon { font-size: 1.8rem; }
+        .dept-card-link .dept-name { font-size: 1rem; }
+        .dept-card-link .dept-desc { font-size: 0.75rem; }
+        .dept-card-link .dept-count { font-size: 0.7rem; }
     }
 </style>
 {% endblock %}
@@ -236,7 +219,7 @@
 </section>
 
 <!-- Department Grid -->
-<section style="background: #0B132B;">
+<section style="background: var(--primary-navy);">
     <div class="container">
         {% if departments %}
         <div class="dept-grid">
@@ -263,7 +246,7 @@
         {% endif %}
 
         <!-- Call to action -->
-        <div class="text-center pb-4">
+        <div class="text-center pb-5">
             <a href="{{ url_for('jobs') }}" class="btn btn-gold btn-lg px-5 py-3 text-uppercase fw-bold shadow">
                 <i class="bi bi-briefcase me-2"></i> View All Jobs
             </a>
