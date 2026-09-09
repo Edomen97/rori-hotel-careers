@@ -91,7 +91,6 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # PostgreSQL and SQLite compatible
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
         "pool_recycle": 300
@@ -131,7 +130,7 @@ class Config:
     }
 
     # ========================================================
-    # HR LOGIN (SUPPORT BOTH ADMIN_PASSWORD AND HR_PASSWORD)
+    # HR LOGIN
     # ========================================================
 
     HR_USERNAME = (
@@ -216,7 +215,8 @@ template_dirs = [
     os.path.join(app.root_path, "templates", "careers"),
     os.path.join(app.root_path, "templates", "application"),
     os.path.join(app.root_path, "templates", "auth"),
-    os.path.join(app.root_path, "templates", "admin")
+    os.path.join(app.root_path, "templates", "admin"),
+    os.path.join(app.root_path, "templates", "hr")
 ]
 
 app.jinja_loader = jinja2.FileSystemLoader(
@@ -1138,6 +1138,7 @@ class AdminLoginForm(FlaskForm):
         validators=[DataRequired()]
     )
 
+
 class ChangePasswordForm(FlaskForm):
     current_password = PasswordField(
         "Current Password", 
@@ -1157,6 +1158,7 @@ class ChangePasswordForm(FlaskForm):
             EqualTo('new_password', message="Passwords must match")
         ]
     )
+
 
 class InterviewForm(FlaskForm):
 
@@ -2322,11 +2324,15 @@ def talent_pool():
 
 
 # ============================================================
-# ADMIN LOGIN (UPDATED WITH FALLBACK & DUAL ENV VARIABLES)
+# ADMIN / HR LOGIN
 # ============================================================
 
 @app.route(
     "/admin/login",
+    methods=["GET", "POST"]
+)
+@app.route(
+    "/hr/login",
     methods=["GET", "POST"]
 )
 @app.route(
@@ -2376,7 +2382,7 @@ def admin_login():
         except Exception:
             db.session.rollback()
 
-        # 2. Fallback to Config credentials (ADMIN_PASSWORD or HR_PASSWORD)
+        # 2. Fallback to Config credentials
         default_username = app.config.get("HR_USERNAME", "admin")
         default_hash = app.config.get("HR_PASSWORD_HASH")
 
@@ -2428,6 +2434,10 @@ def admin_login():
     "/admin/change-password",
     methods=["GET", "POST"]
 )
+@app.route(
+    "/hr/change-password",
+    methods=["GET", "POST"]
+)
 @admin_required
 def admin_change_password():
     form = ChangePasswordForm()
@@ -2458,10 +2468,11 @@ def admin_change_password():
 
 
 # ============================================================
-# ADMIN LOGOUT
+# LOGOUT
 # ============================================================
 
 @app.route("/admin/logout")
+@app.route("/hr/logout")
 @app.route("/auth/logout")
 def admin_logout():
 
@@ -2517,11 +2528,13 @@ def forgot_password():
 
 
 # ============================================================
-# ADMIN DASHBOARD
+# ADMIN / HR DASHBOARD
 # ============================================================
 
 @app.route("/admin")
 @app.route("/admin/dashboard")
+@app.route("/hr")
+@app.route("/hr/dashboard")
 @admin_required
 def admin_dashboard():
 
@@ -2593,10 +2606,11 @@ def admin_dashboard():
 
 
 # ============================================================
-# ADMIN CANDIDATES
+# CANDIDATES (HR / ADMIN)
 # ============================================================
 
 @app.route("/admin/candidates")
+@app.route("/hr/candidates")
 @admin_required
 def admin_candidates():
 
@@ -2649,12 +2663,11 @@ def admin_candidates():
 
 
 # ============================================================
-# ADMIN CANDIDATE DETAIL
+# CANDIDATE DETAIL
 # ============================================================
 
-@app.route(
-    "/admin/candidate/<int:app_id>"
-)
+@app.route("/admin/candidate/<int:app_id>")
+@app.route("/hr/candidate/<int:app_id>")
 @admin_required
 def admin_candidate_detail(app_id):
 
@@ -2700,7 +2713,15 @@ def admin_candidate_detail(app_id):
     methods=["POST"]
 )
 @app.route(
+    "/hr/application/<int:app_id>/status",
+    methods=["POST"]
+)
+@app.route(
     "/admin/application/<int:app_id>/action",
+    methods=["POST"]
+)
+@app.route(
+    "/hr/application/<int:app_id>/action",
     methods=["POST"]
 )
 @admin_required
@@ -2839,9 +2860,8 @@ def update_application_status(app_id):
 # CV DOWNLOAD
 # ============================================================
 
-@app.route(
-    "/admin/candidate/<int:app_id>/cv/download"
-)
+@app.route("/admin/candidate/<int:app_id>/cv/download")
+@app.route("/hr/candidate/<int:app_id>/cv/download")
 @admin_required
 def download_candidate_cv(app_id):
 
@@ -2902,10 +2922,11 @@ def download_candidate_cv(app_id):
 
 
 # ============================================================
-# ADMIN JOBS
+# JOBS MANAGEMENT
 # ============================================================
 
 @app.route("/admin/jobs")
+@app.route("/hr/jobs")
 @admin_required
 def admin_jobs():
 
@@ -2923,12 +2944,12 @@ def admin_jobs():
     )
 
 
-# ============================================================
-# CREATE JOB
-# ============================================================
-
 @app.route(
     "/admin/job/new",
+    methods=["GET", "POST"]
+)
+@app.route(
+    "/hr/job/new",
     methods=["GET", "POST"]
 )
 @admin_required
@@ -3092,12 +3113,12 @@ def admin_job_new():
     )
 
 
-# ============================================================
-# TOGGLE JOB
-# ============================================================
-
 @app.route(
     "/admin/job/<int:job_id>/toggle",
+    methods=["POST"]
+)
+@app.route(
+    "/hr/job/<int:job_id>/toggle",
     methods=["POST"]
 )
 @admin_required
@@ -3151,10 +3172,11 @@ def admin_job_toggle(job_id):
 
 
 # ============================================================
-# ADMIN INTERVIEWS
+# INTERVIEWS / TALENT POOL / AUDIT LOG
 # ============================================================
 
 @app.route("/admin/interviews")
+@app.route("/hr/interviews")
 @admin_required
 def admin_interviews():
 
@@ -3172,11 +3194,8 @@ def admin_interviews():
     )
 
 
-# ============================================================
-# ADMIN TALENT POOL
-# ============================================================
-
 @app.route("/admin/talent-pool")
+@app.route("/hr/talent-pool")
 @admin_required
 def admin_talent_pool():
 
@@ -3194,11 +3213,8 @@ def admin_talent_pool():
     )
 
 
-# ============================================================
-# ADMIN AUDIT LOG
-# ============================================================
-
 @app.route("/admin/audit-log")
+@app.route("/hr/audit-log")
 @admin_required
 def admin_audit_log():
 
@@ -3218,23 +3234,8 @@ def admin_audit_log():
 
 
 # ============================================================
-# DATABASE MIGRATION
+# DATABASE MIGRATION (AUTO-REPAIR MISSING COLUMNS)
 # ============================================================
-
-def get_column_type(column):
-
-    try:
-
-        dialect = db.engine.dialect
-
-        return column.type.compile(
-            dialect=dialect
-        )
-
-    except Exception:
-
-        return "TEXT"
-
 
 def safe_add_column(
     table_name,
@@ -3261,24 +3262,36 @@ def safe_add_column(
         if column_name in columns:
             return
 
+        type_str = str(column_type).upper()
+        default_clause = ""
+
+        if "DATETIME" in type_str or "TIMESTAMP" in type_str:
+            default_clause = " DEFAULT CURRENT_TIMESTAMP"
+        elif "BOOLEAN" in type_str:
+            default_clause = " DEFAULT FALSE"
+        elif "INTEGER" in type_str:
+            default_clause = " DEFAULT 0"
+        elif "VARCHAR" in type_str or "TEXT" in type_str:
+            default_clause = " DEFAULT ''"
+
         with db.engine.begin() as connection:
 
             connection.execute(
                 text(
                     f'ALTER TABLE "{table_name}" '
                     f'ADD COLUMN "{column_name}" '
-                    f'{column_type}'
+                    f'{column_type}{default_clause}'
                 )
             )
 
         print(
-            f"[DB] Added {table_name}.{column_name}"
+            f"[DB AUTO-MIGRATION] Added missing column: {table_name}.{column_name}"
         )
 
     except Exception as e:
 
         print(
-            f"[DB WARNING] "
+            f"[DB WARNING] Could not add column "
             f"{table_name}.{column_name}: {e}"
         )
 
@@ -3294,14 +3307,6 @@ def migrate_existing_database():
     )
 
     db.create_all()
-
-    inspector = inspect(
-        db.engine
-    )
-
-    existing_tables = set(
-        inspector.get_table_names()
-    )
 
     models = [
         AdminUser,
@@ -3337,27 +3342,17 @@ def migrate_existing_database():
             if column.primary_key:
                 continue
 
-            if not column.nullable:
-                print(
-                    f"[DB WARNING] "
-                    f"Skipped required column "
-                    f"{table_name}.{column.name}"
-                )
-                continue
-
-            column_type = get_column_type(
-                column
-            )
+            try:
+                dialect = db.engine.dialect
+                column_type = column.type.compile(dialect=dialect)
+            except Exception:
+                column_type = "TEXT"
 
             safe_add_column(
                 table_name,
                 column.name,
                 column_type
             )
-
-        inspector = inspect(
-            db.engine
-        )
 
 
 def seed_default_data():
