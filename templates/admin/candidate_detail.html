@@ -1,54 +1,110 @@
 {% extends "base_admin.html" %}
 
-{% block title %}Candidates CV List{% endblock %}
+{% block title %}Candidate Details - {{ application.full_name if application else 'Details' }}{% endblock %}
 
 {% block admin_content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>የአመልካቾች ዝርዝር እና CV (Candidates)</h2>
+<div class="mb-3">
+    <a href="{{ url_for('admin_candidates') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i> ወደ አመልካቾች ዝርዝር ተመለስ
+    </a>
 </div>
 
-<div class="card shadow-sm">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>ሙሉ ስም</th>
-                        <th>ስልክ ቁጥር</th>
-                        <th>የሥራ መደብ</th>
-                        <th>CV (ሲቪ)</th>
-                        <th>ሁኔታ (Status)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if applications %}
-                      {% for app in applications %}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>{{ app.full_name }}</td>
-                            <td>{{ app.phone }}</td>
-                            <td>{{ app.job_title if app.job_title else 'General' }}</td>
-                            <td>
-                                {% if app.cv_filename %}
-                                    <a href="{{ url_for('download_cv', filename=app.cv_filename) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-download"></i> CV አውርድ
-                                    </a>
-                                {% else %}
-                                    <span class="text-muted">CV አልተያያዘም</span>
-                                {% endif %}
-                            </td>
-                            <td><span class="badge bg-warning text-dark">Pending</span></td>
-                        </tr>
-                      {% endfor %}
+{% if application %}
+<div class="row g-4">
+    <!-- Candidate Info Card -->
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+                    <div>
+                        <h3 class="fw-bold text-navy mb-1">{{ application.full_name }}</h3>
+                        <p class="text-muted mb-0">
+                            <strong>የሥራ መደብ:</strong> {{ application.job.title if application.job else (application.job_title or 'General Application') }}
+                        </p>
+                    </div>
+                    <span class="badge bg-primary fs-6 px-3 py-2">{{ application.status or 'NEW' }}</span>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <strong>ኢሜይል:</strong>
+                        <p class="text-muted mb-0">{{ application.email or '—' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>ስልክ ቁጥር:</strong>
+                        <p class="text-muted mb-0">{{ application.phone or '—' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>የቀረበበት ቀን:</strong>
+                        <p class="text-muted mb-0">
+                            {% if application.submitted_at %}
+                                {{ application.submitted_at.strftime('%b %d, %Y') }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>መለያ ቁጥር (Ref No):</strong>
+                        <p class="text-muted mb-0">{{ application.reference_no or '—' }}</p>
+                    </div>
+                </div>
+
+                <!-- CV Section -->
+                <div class="card bg-light border-0 p-3 mb-3">
+                    <h5 class="fw-bold text-navy mb-2">📄 CV / Resume</h5>
+                    {% if application.cv_filename %}
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span>{{ application.cv_filename }}</span>
+                            <a href="{{ url_for('download_cv', filename=application.cv_filename) }}" class="btn btn-navy btn-sm">
+                                <i class="bi bi-download"></i> CV አውርድ
+                            </a>
+                        </div>
                     {% else %}
-                        <tr>
-                            <td colspan="6" class="text-center py-4"> እስካሁን ምንም ማመልከቻ አልተላከም።</td>
-                        </tr>
+                        <p class="text-muted mb-0">ምንም CV አልተያያዘም።</p>
                     {% endif %}
-                </tbody>
-            </table>
+                </div>
+
+                <!-- Cover Letter or Notes -->
+                {% if application.cover_letter %}
+                <div class="mt-4">
+                    <h5 class="fw-bold text-navy mb-2">የማመልከቻ ጽሁፍ (Cover Letter)</h5>
+                    <p class="text-muted bg-light p-3 rounded">{{ application.cover_letter }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions / Status Management Card -->
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold text-navy mb-3">ሁኔታውን ቀይር (Update Status)</h5>
+                
+                <form method="POST" action="">
+                    <div class="mb-3">
+                        <label class="form-label">ደረጃ (Status)</label>
+                        <select name="status" class="form-select">
+                            <option value="NEW" {% if application.status == 'NEW' %}selected{% endif %}>NEW</option>
+                            <option value="UNDER REVIEW" {% if application.status == 'UNDER REVIEW' %}selected{% endif %}>UNDER REVIEW</option>
+                            <option value="SHORTLISTED" {% if application.status == 'SHORTLISTED' %}selected{% endif %}>SHORTLISTED</option>
+                            <option value="INTERVIEW" {% if application.status == 'INTERVIEW' %}selected{% endif %}>INTERVIEW</option>
+                            <option value="SELECTED" {% if application.status == 'SELECTED' %}selected{% endif %}>SELECTED</option>
+                            <option value="HIRED" {% if application.status == 'HIRED' %}selected{% endif %}>HIRED</option>
+                            <option value="REJECTED" {% if application.status == 'REJECTED' %}selected{% endif %}>REJECTED</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-navy w-100">አስቀምጥ (Save)</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+{% else %}
+<div class="alert alert-warning text-center py-4">
+    <h4>አመልካቹ አልተገኘም (Candidate not found)</h4>
+    <p class="mb-0">የተፈለገው አመልካች መረጃ በዳታቤዝ ውስጥ አልተገኘም።</p>
+</div>
+{% endif %}
 {% endblock %}
