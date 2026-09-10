@@ -1,322 +1,429 @@
 {% extends "base_admin.html" %}
 
-{% block title %}Candidate Details - {{ application.full_name if application else 'Details' }}{% endblock %}
+{% block title %}
+Candidate Details - {{ application.full_name if application else 'Details' }}
+{% endblock %}
 
 {% block admin_content %}
 
-<div class="mb-3">
-    <a href="{{ url_for('admin_candidates') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left"></i>
-        ወደ አመልካቾች ዝርዝር ተመለስ
-    </a>
-</div>
+<style>
+    .candidate-detail-page {
+        color: #212529;
+    }
 
-{% if application %}
+    .candidate-detail-page .card {
+        color: #212529;
+    }
 
-<div class="row g-4">
+    .candidate-detail-page h2,
+    .candidate-detail-page h5 {
+        color: #0b1f3a;
+    }
 
-    <!-- =========================
-         CANDIDATE PROFILE
-    ========================== -->
-    <div class="col-lg-8">
+    .info-box {
+        background: #ffffff;
+        color: #212529;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 16px;
+        height: 100%;
+    }
 
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body p-4">
+    .info-box small {
+        color: #6c757d !important;
+        display: block;
+        margin-bottom: 5px;
+    }
 
-                <!-- Header -->
-                <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-4">
+    .info-box strong {
+        color: #212529 !important;
+        word-break: break-word;
+    }
 
-                    <div>
-                        <h2 class="fw-bold text-navy mb-1">
-                            {{ application.full_name }}
-                        </h2>
+    .cover-letter-box {
+        background: #ffffff !important;
+        color: #212529 !important;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 20px;
+        font-size: 16px;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
 
-                        <p class="text-muted mb-1">
-                            <strong>የሥራ መደብ:</strong>
-                            {{ application.job.title if application.job else 'General Application' }}
-                        </p>
+    .cv-box {
+        background: #f8f9fa !important;
+        color: #212529 !important;
+        border: 1px solid #dee2e6 !important;
+        border-radius: 10px;
+        padding: 18px;
+    }
 
-                        <small class="text-muted">
-                            Ref No:
-                            <strong>{{ application.reference_no or '—' }}</strong>
-                        </small>
-                    </div>
+    .cv-filename {
+        color: #212529 !important;
+        font-weight: 600;
+        word-break: break-all;
+    }
 
-                    <span class="badge bg-primary fs-6 px-3 py-2">
-                        {{ application.status or 'NEW' }}
-                    </span>
+    .section-title {
+        color: #0b1f3a !important;
+        font-weight: 700;
+    }
 
-                </div>
+    .text-navy {
+        color: #0b1f3a !important;
+    }
 
+    .btn-navy {
+        background: #0b1f3a;
+        color: #ffffff;
+        border: none;
+    }
 
-                <!-- =========================
-                     PERSONAL INFORMATION
-                ========================== -->
-                <h5 class="fw-bold text-navy mb-3">
-                    👤 Personal Information
-                </h5>
+    .btn-navy:hover {
+        background: #162f52;
+        color: #ffffff;
+    }
 
-                <div class="row g-3 mb-4">
+    @media (max-width: 767px) {
+        .candidate-detail-page {
+            padding-bottom: 20px;
+        }
 
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <small class="text-muted d-block">Full Name</small>
-                            <strong>{{ application.full_name or '—' }}</strong>
-                        </div>
-                    </div>
+        .candidate-detail-page .card-body {
+            padding: 18px !important;
+        }
 
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <small class="text-muted d-block">Email</small>
-                            <strong>{{ application.email or '—' }}</strong>
-                        </div>
-                    </div>
+        .cover-letter-box {
+            font-size: 15px;
+            line-height: 1.7;
+            padding: 16px;
+        }
 
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <small class="text-muted d-block">Phone</small>
-                            <strong>{{ application.phone or '—' }}</strong>
-                        </div>
-                    </div>
+        .cv-filename {
+            max-width: 100%;
+        }
+    }
+</style>
 
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <small class="text-muted d-block">Location</small>
-                            <strong>{{ application.location or '—' }}</strong>
-                        </div>
-                    </div>
+<div class="candidate-detail-page">
 
-                </div>
+    <div class="mb-3">
+        <a href="{{ url_for('admin_candidates') }}"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i>
+            ወደ አመልካቾች ዝርዝር ተመለስ
+        </a>
+    </div>
 
+    {% if application %}
 
-                <!-- =========================
-                     EDUCATION & EXPERIENCE
-                ========================== -->
-                <h5 class="fw-bold text-navy mb-3">
-                    🎓 Education & Experience
-                </h5>
+    <div class="row g-4">
 
-                <div class="row g-3 mb-4">
+        <!-- =========================
+             CANDIDATE PROFILE
+        ========================== -->
+        <div class="col-lg-8">
 
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <small class="text-muted d-block">
-                                Education Background
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+
+                    <!-- HEADER -->
+                    <div class="d-flex justify-content-between align-items-start
+                                border-bottom pb-3 mb-4 gap-3">
+
+                        <div>
+                            <h2 class="fw-bold text-navy mb-1">
+                                {{ application.full_name }}
+                            </h2>
+
+                            <p class="text-muted mb-1">
+                                <strong>የሥራ መደብ:</strong>
+                                {{ application.job.title if application.job else 'General Application' }}
+                            </p>
+
+                            <small class="text-muted">
+                                Ref No:
+                                <strong>
+                                    {{ application.reference_no or '—' }}
+                                </strong>
                             </small>
-                            <strong>
-                                {{ application.education or '—' }}
-                            </strong>
                         </div>
+
+                        <span class="badge bg-primary fs-6 px-3 py-2">
+                            {{ application.status or 'NEW' }}
+                        </span>
+
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <small class="text-muted d-block">
-                                Years of Experience
-                            </small>
-                            <strong>
-                                {{ application.years_of_experience or '—' }}
-                            </strong>
+
+                    <!-- =========================
+                         PERSONAL INFORMATION
+                    ========================== -->
+
+                    <h5 class="section-title mb-3">
+                        👤 Personal Information
+                    </h5>
+
+                    <div class="row g-3 mb-4">
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Full Name</small>
+                                <strong>
+                                    {{ application.full_name or '—' }}
+                                </strong>
+                            </div>
                         </div>
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Email</small>
+                                <strong>
+                                    {{ application.email or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Phone</small>
+                                <strong>
+                                    {{ application.phone or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Location</small>
+                                <strong>
+                                    {{ application.location or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <small class="text-muted d-block">
-                                Current Position
-                            </small>
-                            <strong>
-                                {{ application.current_position or '—' }}
-                            </strong>
+
+                    <!-- =========================
+                         EDUCATION & EXPERIENCE
+                    ========================== -->
+
+                    <h5 class="section-title mb-3">
+                        🎓 Education & Experience
+                    </h5>
+
+                    <div class="row g-3 mb-4">
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Education Background</small>
+                                <strong>
+                                    {{ application.education or '—' }}
+                                </strong>
+                            </div>
                         </div>
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Years of Experience</small>
+                                <strong>
+                                    {{ application.years_of_experience or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Current Position</small>
+                                <strong>
+                                    {{ application.current_position or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Previous Employer</small>
+                                <strong>
+                                    {{ application.previous_employer or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <small class="text-muted d-block">
-                                Previous Employer
-                            </small>
-                            <strong>
-                                {{ application.previous_employer or '—' }}
-                            </strong>
-                        </div>
-                    </div>
 
-                </div>
+                    <!-- =========================
+                         SKILLS & QUALIFICATIONS
+                    ========================== -->
 
+                    <h5 class="section-title mb-3">
+                        🛠️ Skills & Qualifications
+                    </h5>
 
-                <!-- =========================
-                     SKILLS & LANGUAGES
-                ========================== -->
-                <h5 class="fw-bold text-navy mb-3">
-                    🛠️ Skills & Qualifications
-                </h5>
+                    <div class="row g-3 mb-4">
 
-                <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Skills</small>
 
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <small class="text-muted d-block">
-                                Skills
-                            </small>
-
-                            <div class="mt-2">
                                 {% if application.skills %}
-                                    {{ application.skills }}
+                                    <div class="mt-2">
+                                        {{ application.skills }}
+                                    </div>
                                 {% else %}
                                     <span class="text-muted">—</span>
                                 {% endif %}
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <small class="text-muted d-block">
-                                Languages
-                            </small>
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Languages</small>
 
-                            <div class="mt-2">
                                 {% if application.languages %}
-                                    {{ application.languages }}
+                                    <div class="mt-2">
+                                        {{ application.languages }}
+                                    </div>
                                 {% else %}
                                     <span class="text-muted">—</span>
                                 {% endif %}
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-12">
-                        <div class="border rounded p-3">
-                            <small class="text-muted d-block">
-                                Certifications
-                            </small>
+                        <div class="col-12">
+                            <div class="info-box">
+                                <small>Certifications</small>
 
-                            <div class="mt-2">
                                 {% if application.certifications %}
-                                    {{ application.certifications }}
+                                    <div class="mt-2">
+                                        {{ application.certifications }}
+                                    </div>
                                 {% else %}
                                     <span class="text-muted">—</span>
                                 {% endif %}
                             </div>
                         </div>
+
                     </div>
 
-                </div>
 
+                    <!-- =========================
+                         AVAILABILITY
+                    ========================== -->
 
-                <!-- =========================
-                     AVAILABILITY
-                ========================== -->
-                <h5 class="fw-bold text-navy mb-3">
-                    📅 Availability
-                </h5>
+                    <h5 class="section-title mb-3">
+                        📅 Availability
+                    </h5>
 
-                <div class="row g-3 mb-4">
+                    <div class="row g-3 mb-4">
 
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <small class="text-muted d-block">
-                                Availability Date
-                            </small>
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Availability Date</small>
 
-                            <strong>
-                                {% if application.availability_date %}
-                                    {{ application.availability_date.strftime('%b %d, %Y') }}
-                                {% else %}
-                                    —
-                                {% endif %}
-                            </strong>
+                                <strong>
+                                    {% if application.availability_date %}
+                                        {{ application.availability_date.strftime('%b %d, %Y') }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </strong>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <small class="text-muted d-block">
-                                Willing to Relocate
-                            </small>
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Willing to Relocate</small>
 
-                            <strong>
-                                {% if application.willing_to_relocate %}
-                                    Yes
-                                {% else %}
-                                    No
-                                {% endif %}
-                            </strong>
+                                <strong>
+                                    {% if application.willing_to_relocate %}
+                                        Yes
+                                    {% else %}
+                                        No
+                                    {% endif %}
+                                </strong>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <small class="text-muted d-block">
-                                Expected Salary
-                            </small>
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Expected Salary</small>
 
-                            <strong>
-                                {{ application.expected_salary or '—' }}
-                            </strong>
+                                <strong>
+                                    {{ application.expected_salary or '—' }}
+                                </strong>
+                            </div>
                         </div>
+
                     </div>
 
-                </div>
 
+                    <!-- =========================
+                         COVER LETTER
+                    ========================== -->
 
-                <!-- =========================
-                     COVER LETTER
-                ========================== -->
-                <h5 class="fw-bold text-navy mb-3">
-                    📝 Cover Letter
-                </h5>
-
-                <div class="bg-light rounded p-3 mb-4">
+                    <h5 class="section-title mb-3">
+                        📝 Cover Letter
+                    </h5>
 
                     {% if application.cover_letter %}
 
-                        <div style="white-space: pre-line;">
+                        <div class="cover-letter-box mb-4">
                             {{ application.cover_letter }}
                         </div>
 
                     {% else %}
 
-                        <span class="text-muted">
-                            No cover letter submitted.
-                        </span>
+                        <div class="cover-letter-box mb-4">
+                            <span class="text-muted">
+                                No cover letter submitted.
+                            </span>
+                        </div>
 
                     {% endif %}
 
-                </div>
 
+                    <!-- =========================
+                         CV / RESUME
+                    ========================== -->
 
-                <!-- =========================
-                     CV / RESUME
-                ========================== -->
-                <h5 class="fw-bold text-navy mb-3">
-                    📄 CV / Resume
-                </h5>
+                    <h5 class="section-title mb-3">
+                        📄 CV / Resume
+                    </h5>
 
-                <div class="card bg-light border-0 mb-4">
-
-                    <div class="card-body">
+                    <div class="cv-box mb-4">
 
                         {% if application.cv_filename %}
 
-                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <div class="d-flex align-items-center
+                                        justify-content-between
+                                        flex-wrap gap-3">
 
-                                <div>
-                                    <i class="bi bi-file-earmark-pdf fs-3 me-2"></i>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-file-earmark-pdf fs-2"></i>
 
-                                    <strong>
+                                    <span class="cv-filename">
                                         {{ application.cv_filename }}
-                                    </strong>
+                                    </span>
                                 </div>
 
-                                <a href="{{ url_for('download_candidate_cv', app_id=application.id) }}"
-                                   class="btn btn-navy btn-sm">
+                                <div class="d-flex gap-2">
 
-                                    <i class="bi bi-download"></i>
-                                    CV አውርድ
+                                    <!-- OPEN CV -->
+                                    <a href="{{ url_for('download_candidate_cv', app_id=application.id) }}"
+                                       class="btn btn-navy btn-sm"
+                                       target="_blank"
+                                       rel="noopener">
+                                        <i class="bi bi-eye me-1"></i>
+                                        CV ክፈት
+                                    </a>
 
-                                </a>
+                                </div>
 
                             </div>
 
@@ -330,21 +437,183 @@
 
                     </div>
 
+
+                    <!-- =========================
+                         APPLICATION INFORMATION
+                    ========================== -->
+
+                    <h5 class="section-title mb-3">
+                        📌 Application Information
+                    </h5>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Application Reference</small>
+                                <strong>
+                                    {{ application.reference_no or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Submitted Date</small>
+
+                                <strong>
+                                    {% if application.submitted_at %}
+                                        {{ application.submitted_at.strftime('%b %d, %Y %H:%M') }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Current Status</small>
+                                <strong>
+                                    {{ application.status or 'NEW' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <small>Last Status Update</small>
+
+                                <strong>
+                                    {% if application.status_updated_at %}
+                                        {{ application.status_updated_at.strftime('%b %d, %Y %H:%M') }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </strong>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             HR ACTIONS
+        ========================== -->
+
+        <div class="col-lg-4">
+
+            <div class="card shadow-sm border-0 mb-4">
+
+                <div class="card-body p-4">
+
+                    <h5 class="section-title mb-3">
+                        ⚙️ HR Actions
+                    </h5>
+
+                    <form method="POST">
+
+                        <div class="mb-3">
+
+                            <label class="form-label fw-bold">
+                                Status
+                            </label>
+
+                            <select name="status"
+                                    class="form-select">
+
+                                <option value="NEW"
+                                    {% if application.status == 'NEW' %}selected{% endif %}>
+                                    NEW
+                                </option>
+
+                                <option value="UNDER REVIEW"
+                                    {% if application.status == 'UNDER REVIEW' %}selected{% endif %}>
+                                    UNDER REVIEW
+                                </option>
+
+                                <option value="SHORTLISTED"
+                                    {% if application.status == 'SHORTLISTED' %}selected{% endif %}>
+                                    SHORTLISTED
+                                </option>
+
+                                <option value="INTERVIEW"
+                                    {% if application.status == 'INTERVIEW' %}selected{% endif %}>
+                                    INTERVIEW
+                                </option>
+
+                                <option value="SELECTED"
+                                    {% if application.status == 'SELECTED' %}selected{% endif %}>
+                                    SELECTED
+                                </option>
+
+                                <option value="HIRED"
+                                    {% if application.status == 'HIRED' %}selected{% endif %}>
+                                    HIRED
+                                </option>
+
+                                <option value="REJECTED"
+                                    {% if application.status == 'REJECTED' %}selected{% endif %}>
+                                    REJECTED
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-navy w-100">
+
+                            <i class="bi bi-check-circle me-1"></i>
+                            አስቀምጥ (Save Status)
+
+                        </button>
+
+                    </form>
+
                 </div>
 
+            </div>
 
-                <!-- =========================
-                     SUBMISSION INFORMATION
-                ========================== -->
-                <h5 class="fw-bold text-navy mb-3">
-                    📌 Application Information
-                </h5>
 
-                <div class="row g-3">
+            <!-- CANDIDATE SUMMARY -->
 
-                    <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body p-4">
+
+                    <h5 class="section-title mb-3">
+                        📊 Candidate Summary
+                    </h5>
+
+                    <div class="mb-3">
                         <small class="text-muted d-block">
-                            Application Reference
+                            Candidate
+                        </small>
+
+                        <strong>
+                            {{ application.full_name }}
+                        </strong>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-muted d-block">
+                            Position Applied
+                        </small>
+
+                        <strong>
+                            {{ application.job.title if application.job else 'General Application' }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <small class="text-muted d-block">
+                            Reference No.
                         </small>
 
                         <strong>
@@ -352,167 +621,6 @@
                         </strong>
                     </div>
 
-                    <div class="col-md-6">
-                        <small class="text-muted d-block">
-                            Submitted Date
-                        </small>
-
-                        <strong>
-                            {% if application.submitted_at %}
-                                {{ application.submitted_at.strftime('%b %d, %Y %H:%M') }}
-                            {% else %}
-                                —
-                            {% endif %}
-                        </strong>
-                    </div>
-
-                    <div class="col-md-6">
-                        <small class="text-muted d-block">
-                            Current Status
-                        </small>
-
-                        <strong>
-                            {{ application.status or 'NEW' }}
-                        </strong>
-                    </div>
-
-                    <div class="col-md-6">
-                        <small class="text-muted d-block">
-                            Last Status Update
-                        </small>
-
-                        <strong>
-                            {% if application.status_updated_at %}
-                                {{ application.status_updated_at.strftime('%b %d, %Y %H:%M') }}
-                            {% else %}
-                                —
-                            {% endif %}
-                        </strong>
-                    </div>
-
-                </div>
-
-            </div>
-        </div>
-
-    </div>
-
-
-    <!-- =========================
-         HR ACTIONS
-    ========================== -->
-    <div class="col-lg-4">
-
-        <div class="card shadow-sm border-0 mb-4">
-
-            <div class="card-body p-4">
-
-                <h5 class="fw-bold text-navy mb-3">
-                    ⚙️ HR Actions
-                </h5>
-
-                <form method="POST">
-
-                    <div class="mb-3">
-
-                        <label class="form-label fw-bold">
-                            Status
-                        </label>
-
-                        <select name="status" class="form-select">
-
-                            <option value="NEW"
-                                {% if application.status == 'NEW' %}selected{% endif %}>
-                                NEW
-                            </option>
-
-                            <option value="UNDER REVIEW"
-                                {% if application.status == 'UNDER REVIEW' %}selected{% endif %}>
-                                UNDER REVIEW
-                            </option>
-
-                            <option value="SHORTLISTED"
-                                {% if application.status == 'SHORTLISTED' %}selected{% endif %}>
-                                SHORTLISTED
-                            </option>
-
-                            <option value="INTERVIEW"
-                                {% if application.status == 'INTERVIEW' %}selected{% endif %}>
-                                INTERVIEW
-                            </option>
-
-                            <option value="SELECTED"
-                                {% if application.status == 'SELECTED' %}selected{% endif %}>
-                                SELECTED
-                            </option>
-
-                            <option value="HIRED"
-                                {% if application.status == 'HIRED' %}selected{% endif %}>
-                                HIRED
-                            </option>
-
-                            <option value="REJECTED"
-                                {% if application.status == 'REJECTED' %}selected{% endif %}>
-                                REJECTED
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                    <button type="submit"
-                            class="btn btn-navy w-100">
-
-                        <i class="bi bi-check-circle me-1"></i>
-                        አስቀምጥ (Save Status)
-
-                    </button>
-
-                </form>
-
-            </div>
-
-        </div>
-
-
-        <!-- Candidate Summary -->
-
-        <div class="card shadow-sm border-0">
-
-            <div class="card-body p-4">
-
-                <h5 class="fw-bold text-navy mb-3">
-                    📊 Candidate Summary
-                </h5>
-
-                <div class="mb-3">
-                    <small class="text-muted d-block">
-                        Candidate
-                    </small>
-
-                    <strong>
-                        {{ application.full_name }}
-                    </strong>
-                </div>
-
-                <div class="mb-3">
-                    <small class="text-muted d-block">
-                        Position Applied
-                    </small>
-
-                    <strong>
-                        {{ application.job.title if application.job else 'General Application' }}
-                    </strong>
-                </div>
-
-                <div>
-                    <small class="text-muted d-block">
-                        Reference No.
-                    </small>
-
-                    <strong>
-                        {{ application.reference_no or '—' }}
-                    </strong>
                 </div>
 
             </div>
@@ -521,22 +629,22 @@
 
     </div>
 
+    {% else %}
+
+    <div class="alert alert-warning text-center py-5">
+
+        <h4>
+            አመልካቹ አልተገኘም
+        </h4>
+
+        <p class="mb-0">
+            የተፈለገው አመልካች መረጃ በዳታቤዝ ውስጥ አልተገኘም።
+        </p>
+
+    </div>
+
+    {% endif %}
+
 </div>
 
-{% else %}
-
-<div class="alert alert-warning text-center py-5">
-
-    <h4>
-        አመልካቹ አልተገኘም
-    </h4>
-
-    <p class="mb-0">
-        የተፈለገው አመልካች መረጃ በዳታቤዝ ውስጥ አልተገኘም።
-    </p>
-
-</div>
-
-{% endif %}
-
-{% endblock %} 
+{% endblock %}
