@@ -2831,42 +2831,96 @@ def update_application_status(app_id):
     )
 
 
-# ============================================================
-# CV DOWNLOAD (ENHANCED FOR ALL FILE PATHS)
+ # ============================================================
+# CV DOWNLOAD
 # ============================================================
 
 @app.route("/admin/candidate/<int:app_id>/cv/download")
 @app.route("/hr/candidate/<int:app_id>/cv/download")
-@app.route("/download/cv/<path:filename>")
 @admin_required
-def download_candidate_cv(app_id=None, filename=None):
+def download_candidate_cv(app_id):
 
-    if app_id:
-        application = Application.query.get_or_404(app_id)
-        if not application.cv_filename:
-            flash("CV ለዚህ አመልካች አልተገኘም።", "warning")
-            return redirect(request.referrer or url_for("admin_candidates"))
-        filename = application.cv_filename
+    application = Application.query.get_or_404(app_id)
+
+    if not application.cv_filename:
+        flash("CV ለዚህ አመልካች አልተገኘም።", "warning")
+        return redirect(
+            request.referrer or url_for("admin_candidates")
+        )
+
+    filename = secure_filename(
+        os.path.basename(application.cv_filename)
+    )
 
     if not filename:
-        flash("የCV ፋይል ስም አልተገለጸም።", "warning")
-        return redirect(request.referrer or url_for("admin_candidates"))
+        flash("የCV ፋይል ስም ትክክል አይደለም።", "danger")
+        return redirect(
+            request.referrer or url_for("admin_candidates")
+        )
 
-    clean_filename = secure_filename(filename)
-    
-    # 1. ቨርቹዋል ፎልደር 1 (uploads/resumes)
-    path1 = os.path.join(app.config["UPLOAD_FOLDER"], clean_filename)
-    if os.path.isfile(path1):
-        return send_from_directory(app.config["UPLOAD_FOLDER"], clean_filename, as_attachment=True)
+    # Possible CV upload locations
+    upload_directories = [
+        app.config.get("UPLOAD_FOLDER"),
 
-    # 2. ቨርቹዋል ፎልደር 2 (uploads)
-    path2 = os.path.join(BASE_DIR, "uploads", clean_filename)
-    if os.path.isfile(path2):
-        return send_from_directory(os.path.join(BASE_DIR, "uploads"), clean_filename, as_attachment=True)
+        os.path.join(
+            BASE_DIR,
+            "uploads",
+            "resumes"
+        ),
 
-    flash("የCV ፋይሉ በserver ላይ አልተገኘም።", "danger")
-    return redirect(request.referrer or url_for("admin_candidates"))
+        os.path.join(
+            BASE_DIR,
+            "uploads"
+        ),
 
+        os.path.join(
+            app.root_path,
+            "static",
+            "uploads",
+            "resumes"
+        ),
+
+        os.path.join(
+            app.root_path,
+            "static",
+            "uploads"
+        ),
+    ]
+
+    # Remove empty / duplicate directories
+    upload_directories = list(
+        dict.fromkeys(
+            directory
+            for directory in upload_directories
+            if directory
+        )
+    )
+
+    # Search for the CV
+    for directory in upload_directories:
+
+        file_path = os.path.join(
+            directory,
+            filename
+        )
+
+        if os.path.isfile(file_path):
+
+            return send_from_directory(
+                directory,
+                filename,
+                as_attachment=False
+            )
+
+    # CV was not found
+    flash(
+        "የCV ፋይሉ በserver ላይ አልተገኘም።",
+        "danger"
+    )
+
+    return redirect(
+        request.referrer or url_for("admin_candidates")
+    )
 
 # ============================================================
 # JOBS MANAGEMENT & VACANCY POST/DELETE
