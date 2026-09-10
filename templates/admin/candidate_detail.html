@@ -3,108 +3,540 @@
 {% block title %}Candidate Details - {{ application.full_name if application else 'Details' }}{% endblock %}
 
 {% block admin_content %}
+
 <div class="mb-3">
     <a href="{{ url_for('admin_candidates') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left"></i> ወደ አመልካቾች ዝርዝር ተመለስ
+        <i class="bi bi-arrow-left"></i>
+        ወደ አመልካቾች ዝርዝር ተመለስ
     </a>
 </div>
 
 {% if application %}
+
 <div class="row g-4">
-    <!-- Candidate Info Card -->
-    <div class="col-md-8">
+
+    <!-- =========================
+         CANDIDATE PROFILE
+    ========================== -->
+    <div class="col-lg-8">
+
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-4">
+
                     <div>
-                        <h3 class="fw-bold text-navy mb-1">{{ application.full_name }}</h3>
-                        <p class="text-muted mb-0">
-                            <strong>የሥራ መደብ:</strong> {{ application.job.title if application.job else (application.job_title or 'General Application') }}
+                        <h2 class="fw-bold text-navy mb-1">
+                            {{ application.full_name }}
+                        </h2>
+
+                        <p class="text-muted mb-1">
+                            <strong>የሥራ መደብ:</strong>
+                            {{ application.job.title if application.job else 'General Application' }}
                         </p>
+
+                        <small class="text-muted">
+                            Ref No:
+                            <strong>{{ application.reference_no or '—' }}</strong>
+                        </small>
                     </div>
-                    <span class="badge bg-primary fs-6 px-3 py-2">{{ application.status or 'NEW' }}</span>
+
+                    <span class="badge bg-primary fs-6 px-3 py-2">
+                        {{ application.status or 'NEW' }}
+                    </span>
+
                 </div>
 
+
+                <!-- =========================
+                     PERSONAL INFORMATION
+                ========================== -->
+                <h5 class="fw-bold text-navy mb-3">
+                    👤 Personal Information
+                </h5>
+
                 <div class="row g-3 mb-4">
+
                     <div class="col-md-6">
-                        <strong>ኢሜይል:</strong>
-                        <p class="text-muted mb-0">{{ application.email or '—' }}</p>
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block">Full Name</small>
+                            <strong>{{ application.full_name or '—' }}</strong>
+                        </div>
                     </div>
+
                     <div class="col-md-6">
-                        <strong>ስልክ ቁጥር:</strong>
-                        <p class="text-muted mb-0">{{ application.phone or '—' }}</p>
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block">Email</small>
+                            <strong>{{ application.email or '—' }}</strong>
+                        </div>
                     </div>
+
                     <div class="col-md-6">
-                        <strong>የቀረበበት ቀን:</strong>
-                        <p class="text-muted mb-0">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block">Phone</small>
+                            <strong>{{ application.phone or '—' }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block">Location</small>
+                            <strong>{{ application.location or '—' }}</strong>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                     EDUCATION & EXPERIENCE
+                ========================== -->
+                <h5 class="fw-bold text-navy mb-3">
+                    🎓 Education & Experience
+                </h5>
+
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block">
+                                Education Background
+                            </small>
+                            <strong>
+                                {{ application.education or '—' }}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block">
+                                Years of Experience
+                            </small>
+                            <strong>
+                                {{ application.years_of_experience or '—' }}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block">
+                                Current Position
+                            </small>
+                            <strong>
+                                {{ application.current_position or '—' }}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block">
+                                Previous Employer
+                            </small>
+                            <strong>
+                                {{ application.previous_employer or '—' }}
+                            </strong>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                     SKILLS & LANGUAGES
+                ========================== -->
+                <h5 class="fw-bold text-navy mb-3">
+                    🛠️ Skills & Qualifications
+                </h5>
+
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block">
+                                Skills
+                            </small>
+
+                            <div class="mt-2">
+                                {% if application.skills %}
+                                    {{ application.skills }}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block">
+                                Languages
+                            </small>
+
+                            <div class="mt-2">
+                                {% if application.languages %}
+                                    {{ application.languages }}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="border rounded p-3">
+                            <small class="text-muted d-block">
+                                Certifications
+                            </small>
+
+                            <div class="mt-2">
+                                {% if application.certifications %}
+                                    {{ application.certifications }}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                     AVAILABILITY
+                ========================== -->
+                <h5 class="fw-bold text-navy mb-3">
+                    📅 Availability
+                </h5>
+
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block">
+                                Availability Date
+                            </small>
+
+                            <strong>
+                                {% if application.availability_date %}
+                                    {{ application.availability_date.strftime('%b %d, %Y') }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block">
+                                Willing to Relocate
+                            </small>
+
+                            <strong>
+                                {% if application.willing_to_relocate %}
+                                    Yes
+                                {% else %}
+                                    No
+                                {% endif %}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block">
+                                Expected Salary
+                            </small>
+
+                            <strong>
+                                {{ application.expected_salary or '—' }}
+                            </strong>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                     COVER LETTER
+                ========================== -->
+                <h5 class="fw-bold text-navy mb-3">
+                    📝 Cover Letter
+                </h5>
+
+                <div class="bg-light rounded p-3 mb-4">
+
+                    {% if application.cover_letter %}
+
+                        <div style="white-space: pre-line;">
+                            {{ application.cover_letter }}
+                        </div>
+
+                    {% else %}
+
+                        <span class="text-muted">
+                            No cover letter submitted.
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- =========================
+                     CV / RESUME
+                ========================== -->
+                <h5 class="fw-bold text-navy mb-3">
+                    📄 CV / Resume
+                </h5>
+
+                <div class="card bg-light border-0 mb-4">
+
+                    <div class="card-body">
+
+                        {% if application.cv_filename %}
+
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+
+                                <div>
+                                    <i class="bi bi-file-earmark-pdf fs-3 me-2"></i>
+
+                                    <strong>
+                                        {{ application.cv_filename }}
+                                    </strong>
+                                </div>
+
+                                <a href="{{ url_for('download_candidate_cv', app_id=application.id) }}"
+                                   class="btn btn-navy btn-sm">
+
+                                    <i class="bi bi-download"></i>
+                                    CV አውርድ
+
+                                </a>
+
+                            </div>
+
+                        {% else %}
+
+                            <p class="text-muted mb-0">
+                                ምንም CV አልተያያዘም።
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                     SUBMISSION INFORMATION
+                ========================== -->
+                <h5 class="fw-bold text-navy mb-3">
+                    📌 Application Information
+                </h5>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">
+                            Application Reference
+                        </small>
+
+                        <strong>
+                            {{ application.reference_no or '—' }}
+                        </strong>
+                    </div>
+
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">
+                            Submitted Date
+                        </small>
+
+                        <strong>
                             {% if application.submitted_at %}
-                                {{ application.submitted_at.strftime('%b %d, %Y') }}
+                                {{ application.submitted_at.strftime('%b %d, %Y %H:%M') }}
                             {% else %}
                                 —
                             {% endif %}
-                        </p>
+                        </strong>
                     </div>
+
                     <div class="col-md-6">
-                        <strong>መለያ ቁጥር (Ref No):</strong>
-                        <p class="text-muted mb-0">{{ application.reference_no or '—' }}</p>
+                        <small class="text-muted d-block">
+                            Current Status
+                        </small>
+
+                        <strong>
+                            {{ application.status or 'NEW' }}
+                        </strong>
                     </div>
+
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">
+                            Last Status Update
+                        </small>
+
+                        <strong>
+                            {% if application.status_updated_at %}
+                                {{ application.status_updated_at.strftime('%b %d, %Y %H:%M') }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </strong>
+                    </div>
+
                 </div>
 
-                <!-- CV Section -->
-                <div class="card bg-light border-0 p-3 mb-3">
-                    <h5 class="fw-bold text-navy mb-2">📄 CV / Resume</h5>
-                    {% if application.cv_filename %}
-                        <div class="d-flex align-items-center justify-content-between">
-                            <span>{{ application.cv_filename }}</span>
-                            <a href="{{ url_for('download_cv', filename=application.cv_filename) }}" class="btn btn-navy btn-sm">
-                                <i class="bi bi-download"></i> CV አውርድ
-                            </a>
-                        </div>
-                    {% else %}
-                        <p class="text-muted mb-0">ምንም CV አልተያያዘም።</p>
-                    {% endif %}
-                </div>
-
-                <!-- Cover Letter or Notes -->
-                {% if application.cover_letter %}
-                <div class="mt-4">
-                    <h5 class="fw-bold text-navy mb-2">የማመልከቻ ጽሁፍ (Cover Letter)</h5>
-                    <p class="text-muted bg-light p-3 rounded">{{ application.cover_letter }}</p>
-                </div>
-                {% endif %}
             </div>
         </div>
+
     </div>
 
-    <!-- Actions / Status Management Card -->
-    <div class="col-md-4">
+
+    <!-- =========================
+         HR ACTIONS
+    ========================== -->
+    <div class="col-lg-4">
+
         <div class="card shadow-sm border-0 mb-4">
+
             <div class="card-body p-4">
-                <h5 class="fw-bold text-navy mb-3">ሁኔታውን ቀይር (Update Status)</h5>
-                
-                <form method="POST" action="">
+
+                <h5 class="fw-bold text-navy mb-3">
+                    ⚙️ HR Actions
+                </h5>
+
+                <form method="POST">
+
                     <div class="mb-3">
-                        <label class="form-label">ደረጃ (Status)</label>
+
+                        <label class="form-label fw-bold">
+                            Status
+                        </label>
+
                         <select name="status" class="form-select">
-                            <option value="NEW" {% if application.status == 'NEW' %}selected{% endif %}>NEW</option>
-                            <option value="UNDER REVIEW" {% if application.status == 'UNDER REVIEW' %}selected{% endif %}>UNDER REVIEW</option>
-                            <option value="SHORTLISTED" {% if application.status == 'SHORTLISTED' %}selected{% endif %}>SHORTLISTED</option>
-                            <option value="INTERVIEW" {% if application.status == 'INTERVIEW' %}selected{% endif %}>INTERVIEW</option>
-                            <option value="SELECTED" {% if application.status == 'SELECTED' %}selected{% endif %}>SELECTED</option>
-                            <option value="HIRED" {% if application.status == 'HIRED' %}selected{% endif %}>HIRED</option>
-                            <option value="REJECTED" {% if application.status == 'REJECTED' %}selected{% endif %}>REJECTED</option>
+
+                            <option value="NEW"
+                                {% if application.status == 'NEW' %}selected{% endif %}>
+                                NEW
+                            </option>
+
+                            <option value="UNDER REVIEW"
+                                {% if application.status == 'UNDER REVIEW' %}selected{% endif %}>
+                                UNDER REVIEW
+                            </option>
+
+                            <option value="SHORTLISTED"
+                                {% if application.status == 'SHORTLISTED' %}selected{% endif %}>
+                                SHORTLISTED
+                            </option>
+
+                            <option value="INTERVIEW"
+                                {% if application.status == 'INTERVIEW' %}selected{% endif %}>
+                                INTERVIEW
+                            </option>
+
+                            <option value="SELECTED"
+                                {% if application.status == 'SELECTED' %}selected{% endif %}>
+                                SELECTED
+                            </option>
+
+                            <option value="HIRED"
+                                {% if application.status == 'HIRED' %}selected{% endif %}>
+                                HIRED
+                            </option>
+
+                            <option value="REJECTED"
+                                {% if application.status == 'REJECTED' %}selected{% endif %}>
+                                REJECTED
+                            </option>
+
                         </select>
+
                     </div>
-                    <button type="submit" class="btn btn-navy w-100">አስቀምጥ (Save)</button>
+
+                    <button type="submit"
+                            class="btn btn-navy w-100">
+
+                        <i class="bi bi-check-circle me-1"></i>
+                        አስቀምጥ (Save Status)
+
+                    </button>
+
                 </form>
+
             </div>
+
         </div>
+
+
+        <!-- Candidate Summary -->
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-body p-4">
+
+                <h5 class="fw-bold text-navy mb-3">
+                    📊 Candidate Summary
+                </h5>
+
+                <div class="mb-3">
+                    <small class="text-muted d-block">
+                        Candidate
+                    </small>
+
+                    <strong>
+                        {{ application.full_name }}
+                    </strong>
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-muted d-block">
+                        Position Applied
+                    </small>
+
+                    <strong>
+                        {{ application.job.title if application.job else 'General Application' }}
+                    </strong>
+                </div>
+
+                <div>
+                    <small class="text-muted d-block">
+                        Reference No.
+                    </small>
+
+                    <strong>
+                        {{ application.reference_no or '—' }}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
+
 </div>
+
 {% else %}
-<div class="alert alert-warning text-center py-4">
-    <h4>አመልካቹ አልተገኘም (Candidate not found)</h4>
-    <p class="mb-0">የተፈለገው አመልካች መረጃ በዳታቤዝ ውስጥ አልተገኘም።</p>
+
+<div class="alert alert-warning text-center py-5">
+
+    <h4>
+        አመልካቹ አልተገኘም
+    </h4>
+
+    <p class="mb-0">
+        የተፈለገው አመልካች መረጃ በዳታቤዝ ውስጥ አልተገኘም።
+    </p>
+
 </div>
+
 {% endif %}
+
 {% endblock %}
