@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Application Submitted - Rori Hotel Careers{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+
+            <div class="card shadow-lg border-0 rounded-4 text-center">
+
+                <div class="card-body p-5">
+
+                    <div class="mb-4">
+                        <div
+                            class="mx-auto d-flex align-items-center justify-content-center rounded-circle"
+                            style="
+                                width:90px;
+                                height:90px;
+                                background:#e8f5e9;
+                                color:#198754;
+                                font-size:45px;
+                            "
+                        >
+                            ✓
+                        </div>
+                    </div>
+
+                    <h1 class="fw-bold mb-3">
+                        Application Submitted Successfully!
+                    </h1>
+
+                    <p class="text-muted fs-5 mb-4">
+                        Thank you for applying to Rori Hotel Hawassa.
+                        Your application has been received by our HR team.
+                    </p>
+
+                    {% if application %}
+
+                    <div
+                        class="p-4 rounded-3 mb-4"
+                        style="
+                            background:#f8f9fa;
+                            border-left:5px solid #c5a059;
+                        "
+                    >
+
+                        <div class="mb-3">
+                            <small class="text-muted d-block">
+                                Application Reference
+                            </small>
+
+                            <strong class="fs-4">
+                                {{ application.reference_no }}
+                            </strong>
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="text-muted d-block">
+                                Candidate
+                            </small>
+
+                            <strong>
+                                {{ application.full_name }}
+                            </strong>
+                        </div>
+
+                        {% if application.job %}
+
+                        <div>
+                            <small class="text-muted d-block">
+                                Position Applied
+                            </small>
+
+                            <strong>
+                                {{ application.job.title }}
+                            </strong>
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+                    {% endif %}
+
+                    <p class="text-muted">
+                        Please keep your application reference number
+                        for future status tracking.
+                    </p>
+
+                    <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center mt-4">
+
+                        <a
+                            href="{{ url_for('home') }}"
+                            class="btn btn-dark px-4"
+                        >
+                            <i class="bi bi-house me-1"></i>
+                            Back to Home
+                        </a>
+
+                        {% if application %}
+
+                        <a
+                            href="{{ url_for(
+                                'application_status',
+                                reference_no=application.reference_no
+                            ) }}"
+                            class="btn btn-warning px-4"
+                        >
+                            <i class="bi bi-search me-1"></i>
+                            Track Application
+                        </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
