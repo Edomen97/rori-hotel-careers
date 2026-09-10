@@ -25,13 +25,16 @@
                     <!-- Job Title -->
                     <div class="col-md-6 mb-3">
                         {{ form.title.label(class="form-label fw-bold") }}
-                        {{ form.title(class="form-control",
-                                      placeholder="e.g. Front Office Supervisor") }}
+                        {{ form.title(
+                            class="form-control",
+                            placeholder="e.g. Front Office Supervisor"
+                        ) }}
 
                         {% for error in form.title.errors %}
                             <div class="text-danger small">{{ error }}</div>
                         {% endfor %}
                     </div>
+
 
                     <!-- Department -->
                     <div class="col-md-6 mb-3">
@@ -43,6 +46,7 @@
                         {% endfor %}
                     </div>
 
+
                     <!-- Location -->
                     <div class="col-md-6 mb-3">
                         {{ form.location_id.label(class="form-label fw-bold") }}
@@ -53,93 +57,159 @@
                         {% endfor %}
                     </div>
 
+
                     <!-- Employment Type -->
                     <div class="col-md-6 mb-3">
                         {{ form.employment_type.label(class="form-label fw-bold") }}
-                        {{ form.employment_type(class="form-control",
-                                               placeholder="Full-time / Contract") }}
+                        {{ form.employment_type(class="form-select") }}
+
+                        {% for error in form.employment_type.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
                     </div>
+
 
                     <!-- Experience Level -->
                     <div class="col-md-6 mb-3">
                         {{ form.experience_level.label(class="form-label fw-bold") }}
-                        {{ form.experience_level(class="form-control",
-                                                 placeholder="Entry Level / Mid Level / Senior") }}
+                        {{ form.experience_level(
+                            class="form-control",
+                            placeholder="Entry Level / Mid Level / Senior"
+                        ) }}
+
+                        {% for error in form.experience_level.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
                     </div>
+
 
                     <!-- Salary -->
                     <div class="col-md-6 mb-3">
                         {{ form.salary_range.label(class="form-label fw-bold") }}
-                        {{ form.salary_range(class="form-control",
-                                             placeholder="Optional — HR Private Information") }}
+                        {{ form.salary_range(
+                            class="form-control",
+                            placeholder="Optional — HR Private Information"
+                        ) }}
+
+                        {% for error in form.salary_range.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
                     </div>
+
 
                     <!-- Deadline -->
                     <div class="col-md-6 mb-3">
                         {{ form.deadline.label(class="form-label fw-bold") }}
                         {{ form.deadline(class="form-control") }}
+
+                        {% for error in form.deadline.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
                     </div>
+
 
                     <!-- Short Description -->
                     <div class="col-12 mb-3">
                         {{ form.short_description.label(class="form-label fw-bold") }}
-                        {{ form.short_description(class="form-control",
-                                                  rows="3",
-                                                  placeholder="Short description shown on the careers page") }}
+                        {{ form.short_description(
+                            class="form-control",
+                            placeholder="Short description shown on the careers page"
+                        ) }}
+
+                        {% for error in form.short_description.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
                     </div>
+
 
                     <!-- Full Description -->
                     <div class="col-12 mb-3">
                         {{ form.full_description.label(class="form-label fw-bold") }}
-                        {{ form.full_description(class="form-control",
-                                                 rows="5",
-                                                 placeholder="Detailed description of the position") }}
+                        {{ form.full_description(
+                            class="form-control",
+                            rows="5",
+                            placeholder="Detailed description of the position"
+                        ) }}
+
+                        {% for error in form.full_description.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
                     </div>
+
 
                     <!-- Responsibilities -->
                     <div class="col-12 mb-3">
                         {{ form.responsibilities.label(class="form-label fw-bold") }}
-                        {{ form.responsibilities(class="form-control",
-                                                 rows="6",
-                                                 placeholder="List the main responsibilities") }}
+                        {{ form.responsibilities(
+                            class="form-control",
+                            rows="6",
+                            placeholder="List the main responsibilities"
+                        ) }}
+
+                        {% for error in form.responsibilities.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
                     </div>
+
 
                     <!-- Requirements -->
                     <div class="col-12 mb-3">
                         {{ form.requirements.label(class="form-label fw-bold") }}
-                        {{ form.requirements(class="form-control",
-                                             rows="6",
-                                             placeholder="Education, experience, skills and other requirements") }}
+                        {{ form.requirements(
+                            class="form-control",
+                            rows="6",
+                            placeholder="Education, experience, skills and other requirements"
+                        ) }}
+
+                        {% for error in form.requirements.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
                     </div>
+
 
                     <!-- What We Offer -->
                     <div class="col-12 mb-3">
-                        {{ form.what_to_offer.label(class="form-label fw-bold") }}
-                        {{ form.what_to_offer(class="form-control",
-                                             rows="5",
-                                             placeholder="Benefits and what Rori Hotel offers") }}
+                        {{ form.what_we_offer.label(class="form-label fw-bold") }}
+                        {{ form.what_we_offer(
+                            class="form-control",
+                            rows="5",
+                            placeholder="Benefits and what Rori Hotel offers"
+                        ) }}
+
+                        {% for error in form.what_we_offer.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
                     </div>
+
 
                     <!-- Active -->
                     <div class="col-md-6 mb-3">
                         <div class="form-check">
                             {{ form.is_active(class="form-check-input") }}
-                            {{ form.is_active.label(class="form-check-label fw-bold") }}
+                            {{ form.is_active.label(
+                                class="form-check-label fw-bold"
+                            ) }}
                         </div>
                     </div>
+
 
                     <!-- Featured -->
                     <div class="col-md-6 mb-3">
                         <div class="form-check">
                             {{ form.is_featured(class="form-check-input") }}
-                            {{ form.is_featured.label(class="form-check-label fw-bold") }}
+                            {{ form.is_featured.label(
+                                class="form-check-label fw-bold"
+                            ) }}
                         </div>
                     </div>
 
                 </div>
 
+
                 <hr>
 
+
+                <!-- Buttons -->
                 <div class="d-flex gap-2">
 
                     <button type="submit" class="btn btn-warning">
