@@ -1,0 +1,131 @@
+{% extends "base_admin.html" %}
+
+{% block title %}HR Jobs Management{% endblock %}
+
+{% block admin_content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>Jobs</h1>
+        <p class="text-muted">
+            Manage Rori Hotel career vacancies.
+        </p>
+    </div>
+
+    <a href="{{ url_for('admin_job_new') }}" class="btn btn-warning">
+        <i class="bi bi-plus-circle me-1"></i>
+        Create Vacancy
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        {% if jobs %}
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Job Title</th>
+                        <th>Department</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Applications</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for job in jobs %}
+
+                    <tr>
+                        <td>{{ job.id }}</td>
+
+                        <td>
+                            <strong>{{ job.title }}</strong>
+                        </td>
+
+                        <td>
+                            {{ job.department.name if job.department else '—' }}
+                        </td>
+
+                        <td>
+                            {{ job.location.name if job.location else '—' }}
+                        </td>
+
+                        <td>
+                            {% if job.is_active %}
+                                <span class="badge bg-success">
+                                    Active
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    Inactive
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ job.applications|length }}
+                        </td>
+
+                        <td>
+                            <div class="d-flex gap-1">
+
+                                <a href="{{ url_for('job_detail', job_id=job.id) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    View
+                                </a>
+
+                                <a href="{{ url_for('admin_job_toggle', job_id=job.id) }}"
+                                   class="btn btn-sm btn-outline-warning">
+                                    Toggle
+                                </a>
+
+                                <a href="{{ url_for('admin_job_delete', job_id=job.id) }}"
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Are you sure you want to delete this vacancy?');">
+                                    Delete
+                                </a>
+
+                            </div>
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+        </div>
+
+        {% else %}
+
+        <div class="text-center py-5">
+            <i class="bi bi-briefcase fs-1 text-muted"></i>
+
+            <h4 class="mt-3">
+                No vacancies found
+            </h4>
+
+            <p class="text-muted">
+                HR has not created any vacancy yet.
+            </p>
+
+            <a href="{{ url_for('admin_job_new') }}"
+               class="btn btn-warning">
+                Create First Vacancy
+            </a>
+        </div>
+
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}
