@@ -95,7 +95,13 @@ class Config:
         "pool_pre_ping": True,
         "pool_recycle": 300
     }
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads", "resumes")
 
+    UPLOAD_FOLDER_JOBS = os.path.join(
+        BASE_DIR, "static", "uploads", "jobs"
+    )
+
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024
     # ========================================================
     # FILE UPLOADS
     # ========================================================
