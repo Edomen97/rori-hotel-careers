@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/admin.css') }}" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- HR / Admin Sidebar -->
+        <nav class="col-md-2 d-md-block bg-navy admin-sidebar" id="adminSidebar">
+
+            <ul class="nav flex-column">
+
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                        <i class="bi bi-speedometer2 me-2"></i>
+                        Dashboard
+                    </a>
+                </li>
+
+                <!-- Candidates -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/candidates">
+                        <i class="bi bi-people me-2"></i>
+                        Candidates
+                    </a>
+                </li>
+
+                <!-- Jobs -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/jobs">
+                        <i class="bi bi-briefcase me-2"></i>
+                        Jobs
+                    </a>
+                </li>
+
+                <!-- Interviews -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/interviews">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        Interviews
+                    </a>
+                </li>
+
+                <!-- Talent Pool -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/talent-pool">
+                        <i class="bi bi-person-plus me-2"></i>
+                        Talent Pool
+                    </a>
+                </li>
+
+                <!-- Audit Log -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/audit-log">
+                        <i class="bi bi-clock-history me-2"></i>
+                        Audit Log
+                    </a>
+                </li>
+
+                <!-- Logout -->
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="{{ url_for('admin_logout') }}">
+                        <i class="bi bi-box-arrow-right me-2"></i>
+                        Logout
+                    </a>
+                </li>
+
+            </ul>
+
+        </nav>
+
+        <!-- Main Admin Content -->
+        <main class="col-md-10 ms-sm-auto px-md-4 admin-main py-4">
+
+            {% block admin_content %}
+            {% endblock %}
+
+        </main>
+
+    </div>
+</div>
+
+
+<!-- Mobile Sidebar Button -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    const sidebarToggler = document.createElement('button');
+
+    sidebarToggler.className =
+        'btn btn-gold d-md-none mb-3';
+
+    sidebarToggler.innerHTML =
+        '<i class="bi bi-list"></i> Menu';
+
+    sidebarToggler.addEventListener('click', function() {
+
+        const sidebar =
+            document.getElementById('adminSidebar');
+
+        if (sidebar) {
+            sidebar.classList.toggle('d-none');
+        }
+
+    });
+
+    const main =
+        document.querySelector('.admin-main');
+
+    if (main) {
+        main.parentNode.insertBefore(
+            sidebarToggler,
+            main
+        );
+    }
+
+});
+</script>
+
+{% endblock %}
