@@ -1,0 +1,164 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Create Vacancy{% endblock %}
+
+{% block admin_content %}
+
+<div class="container-fluid">
+
+    <div class="mb-4">
+        <h1>Create New Vacancy</h1>
+        <p class="text-muted">
+            Create and publish a new Rori Hotel career opportunity.
+        </p>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form method="POST" enctype="multipart/form-data">
+
+                {{ form.hidden_tag() }}
+
+                <div class="row">
+
+                    <!-- Job Title -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.title.label(class="form-label fw-bold") }}
+                        {{ form.title(class="form-control",
+                                      placeholder="e.g. Front Office Supervisor") }}
+
+                        {% for error in form.title.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Department -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.department_id.label(class="form-label fw-bold") }}
+                        {{ form.department_id(class="form-select") }}
+
+                        {% for error in form.department_id.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Location -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.location_id.label(class="form-label fw-bold") }}
+                        {{ form.location_id(class="form-select") }}
+
+                        {% for error in form.location_id.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Employment Type -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.employment_type.label(class="form-label fw-bold") }}
+                        {{ form.employment_type(class="form-control",
+                                               placeholder="Full-time / Contract") }}
+                    </div>
+
+                    <!-- Experience Level -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.experience_level.label(class="form-label fw-bold") }}
+                        {{ form.experience_level(class="form-control",
+                                                 placeholder="Entry Level / Mid Level / Senior") }}
+                    </div>
+
+                    <!-- Salary -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.salary_range.label(class="form-label fw-bold") }}
+                        {{ form.salary_range(class="form-control",
+                                             placeholder="Optional — HR Private Information") }}
+                    </div>
+
+                    <!-- Deadline -->
+                    <div class="col-md-6 mb-3">
+                        {{ form.deadline.label(class="form-label fw-bold") }}
+                        {{ form.deadline(class="form-control") }}
+                    </div>
+
+                    <!-- Short Description -->
+                    <div class="col-12 mb-3">
+                        {{ form.short_description.label(class="form-label fw-bold") }}
+                        {{ form.short_description(class="form-control",
+                                                  rows="3",
+                                                  placeholder="Short description shown on the careers page") }}
+                    </div>
+
+                    <!-- Full Description -->
+                    <div class="col-12 mb-3">
+                        {{ form.full_description.label(class="form-label fw-bold") }}
+                        {{ form.full_description(class="form-control",
+                                                 rows="5",
+                                                 placeholder="Detailed description of the position") }}
+                    </div>
+
+                    <!-- Responsibilities -->
+                    <div class="col-12 mb-3">
+                        {{ form.responsibilities.label(class="form-label fw-bold") }}
+                        {{ form.responsibilities(class="form-control",
+                                                 rows="6",
+                                                 placeholder="List the main responsibilities") }}
+                    </div>
+
+                    <!-- Requirements -->
+                    <div class="col-12 mb-3">
+                        {{ form.requirements.label(class="form-label fw-bold") }}
+                        {{ form.requirements(class="form-control",
+                                             rows="6",
+                                             placeholder="Education, experience, skills and other requirements") }}
+                    </div>
+
+                    <!-- What We Offer -->
+                    <div class="col-12 mb-3">
+                        {{ form.what_to_offer.label(class="form-label fw-bold") }}
+                        {{ form.what_to_offer(class="form-control",
+                                             rows="5",
+                                             placeholder="Benefits and what Rori Hotel offers") }}
+                    </div>
+
+                    <!-- Active -->
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            {{ form.is_active(class="form-check-input") }}
+                            {{ form.is_active.label(class="form-check-label fw-bold") }}
+                        </div>
+                    </div>
+
+                    <!-- Featured -->
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            {{ form.is_featured(class="form-check-input") }}
+                            {{ form.is_featured.label(class="form-check-label fw-bold") }}
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <div class="d-flex gap-2">
+
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Create Vacancy
+                    </button>
+
+                    <a href="{{ url_for('admin_jobs') }}"
+                       class="btn btn-secondary">
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
