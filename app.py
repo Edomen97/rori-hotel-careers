@@ -3,7 +3,7 @@ import secrets
 import traceback
 import jinja2
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from threading import Thread
 
@@ -16,7 +16,8 @@ from flask import (
     flash,
     session,
     jsonify,
-    send_from_directory
+    send_from_directory,
+    abort
 )
 
 from flask_sqlalchemy import SQLAlchemy
@@ -52,6 +53,18 @@ from flask_mail import Mail, Message
 
 from sqlalchemy import inspect, text
 
+# ============================================================
+# CLOUDINARY
+# ============================================================
+
+try:
+    import cloudinary
+    import cloudinary.uploader
+    import cloudinary.utils
+    CLOUDINARY_AVAILABLE = True
+except ImportError:
+    CLOUDINARY_AVAILABLE = False
+
 
 # ============================================================
 # CONFIGURATION
@@ -70,6 +83,7 @@ class Config:
     DATABASE_URL = os.environ.get("DATABASE_URL")
 
     if DATABASE_URL:
+
         if DATABASE_URL.startswith("postgres://"):
             DATABASE_URL = DATABASE_URL.replace(
                 "postgres://",
@@ -80,6 +94,7 @@ class Config:
         SQLALCHEMY_DATABASE_URI = DATABASE_URL
 
     else:
+
         SQLALCHEMY_DATABASE_URI = (
             "sqlite:///"
             + os.path.join(
@@ -95,15 +110,9 @@ class Config:
         "pool_pre_ping": True,
         "pool_recycle": 300
     }
-    UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads", "resumes")
 
-    UPLOAD_FOLDER_JOBS = os.path.join(
-        BASE_DIR, "static", "uploads", "jobs"
-    )
-
-    MAX_CONTENT_LENGTH = 10 * 1024 * 1024
     # ========================================================
-    # FILE UPLOADS
+    # LOCAL FILE UPLOADS
     # ========================================================
 
     UPLOAD_FOLDER = os.path.join(
@@ -136,6 +145,27 @@ class Config:
     }
 
     # ========================================================
+    # CLOUDINARY
+    # ========================================================
+
+    CLOUDINARY_CLOUD_NAME = os.environ.get(
+        "CLOUDINARY_CLOUD_NAME"
+    )
+
+    CLOUDINARY_API_KEY = os.environ.get(
+        "CLOUDINARY_API_KEY"
+    )
+
+    CLOUDINARY_API_SECRET = os.environ.get(
+        "CLOUDINARY_API_SECRET"
+    )
+
+    CLOUDINARY_CV_FOLDER = os.environ.get(
+        "CLOUDINARY_CV_FOLDER",
+        "rori-hotel-cv"
+    )
+
+    # ========================================================
     # HR LOGIN
     # ========================================================
 
@@ -145,15 +175,21 @@ class Config:
         or "admin"
     )
 
-    HR_PASSWORD_HASH = os.environ.get("HR_PASSWORD_HASH")
+    HR_PASSWORD_HASH = os.environ.get(
+        "HR_PASSWORD_HASH"
+    )
 
     if not HR_PASSWORD_HASH:
+
         raw_password = (
             os.environ.get("HR_PASSWORD")
             or os.environ.get("ADMIN_PASSWORD")
             or "RoriHR2026"
         )
-        HR_PASSWORD_HASH = generate_password_hash(raw_password)
+
+        HR_PASSWORD_HASH = generate_password_hash(
+            raw_password
+        )
 
     # ========================================================
     # MAIL
@@ -213,6 +249,35 @@ mail = Mail(app)
 
 
 # ============================================================
+# CLOUDINARY CONFIGURATION
+# ============================================================
+
+if (
+    CLOUDINARY_AVAILABLE
+    and app.config.get("CLOUDINARY_CLOUD_NAME")
+    and app.config.get("CLOUDINARY_API_KEY")
+    and app.config.get("CLOUDINARY_API_SECRET")
+):
+
+    cloudinary.config(
+        cloud_name=app.config["CLOUDINARY_CLOUD_NAME"],
+        api_key=app.config["CLOUDINARY_API_KEY"],
+        api_secret=app.config["CLOUDINARY_API_SECRET"],
+        secure=True
+    )
+
+    print(
+        "[CLOUDINARY] Configuration loaded successfully."
+    )
+
+else:
+
+    print(
+        "[CLOUDINARY] WARNING: Cloudinary is not fully configured."
+    )
+
+
+# ============================================================
 # TEMPLATE LOADER
 # ============================================================
 
@@ -255,14 +320,28 @@ os.makedirs(
 # ============================================================
 
 class AdminUser(db.Model):
+
     __tablename__ = "admin_users"
-    
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
-    
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    username = db.Column(
+        db.String(100),
+        unique=True,
+        nullable=False
+    )
+
+    password_hash = db.Column(
+        db.String(255),
+        nullable=False
+    )
+
     def __repr__(self):
         return f"<AdminUser {self.username}>"
+
 
 class Department(db.Model):
 
@@ -437,29 +516,53 @@ class Job(db.Model):
         lazy=True
     )
 
+    # --------------------------------------------------------
+    # TEMPLATE COMPATIBILITY
+    # --------------------------------------------------------
+
+    @property
+    def department(self):
+        return self.department_ref
+
+    @property
+    def location(self):
+        return self.location_ref
+
+    # --------------------------------------------------------
+
     def responsibilities_list(self):
+
         return [
             item.strip()
-            for item in (self.responsibilities or "").splitlines()
+            for item in (
+                self.responsibilities or ""
+            ).splitlines()
             if item.strip()
         ]
 
     def requirements_list(self):
+
         return [
             item.strip()
-            for item in (self.requirements or "").splitlines()
+            for item in (
+                self.requirements or ""
+            ).splitlines()
             if item.strip()
         ]
 
     def what_we_offer_list(self):
+
         return [
             item.strip()
-            for item in (self.what_we_offer or "").splitlines()
+            for item in (
+                self.what_we_offer or ""
+            ).splitlines()
             if item.strip()
         ]
 
     @property
     def department_name(self):
+
         return (
             self.department_ref.name
             if self.department_ref
@@ -468,6 +571,7 @@ class Job(db.Model):
 
     @property
     def location_name(self):
+
         return (
             self.location_ref.name
             if self.location_ref
@@ -480,7 +584,10 @@ class Job(db.Model):
         if not self.deadline:
             return False
 
-        return self.deadline < datetime.utcnow().date()
+        return (
+            self.deadline
+            < datetime.utcnow().date()
+        )
 
     def __repr__(self):
         return f"<Job {self.title}>"
@@ -943,9 +1050,18 @@ class ApplicationForm(FlaskForm):
         "Highest Education Level",
         choices=[
             ("High School", "High School Diploma"),
-            ("Technical Diploma", "TVET / Advanced Diploma"),
-            ("Bachelor Degree", "Bachelor's Degree"),
-            ("Master Degree", "Master's Degree / Doctorate")
+            (
+                "Technical Diploma",
+                "TVET / Advanced Diploma"
+            ),
+            (
+                "Bachelor Degree",
+                "Bachelor's Degree"
+            ),
+            (
+                "Master Degree",
+                "Master's Degree / Doctorate"
+            )
         ],
         validators=[DataRequired()]
     )
@@ -1146,22 +1262,31 @@ class AdminLoginForm(FlaskForm):
 
 
 class ChangePasswordForm(FlaskForm):
+
     current_password = PasswordField(
-        "Current Password", 
+        "Current Password",
         validators=[DataRequired()]
     )
+
     new_password = PasswordField(
-        "New Password", 
+        "New Password",
         validators=[
             DataRequired(),
-            Length(min=6, message="Password must be at least 6 characters")
+            Length(
+                min=6,
+                message="Password must be at least 6 characters"
+            )
         ]
     )
+
     confirm_password = PasswordField(
-        "Confirm New Password", 
+        "Confirm New Password",
         validators=[
             DataRequired(),
-            EqualTo('new_password', message="Passwords must match")
+            EqualTo(
+                "new_password",
+                message="Passwords must match"
+            )
         ]
     )
 
@@ -1232,7 +1357,10 @@ def allowed_file(filename):
         filename
         and "."
         in filename
-        and filename.rsplit(".", 1)[1].lower()
+        and filename.rsplit(
+            ".",
+            1
+        )[1].lower()
         in app.config["ALLOWED_EXTENSIONS"]
     )
 
@@ -1243,12 +1371,80 @@ def allowed_image_file(filename):
         filename
         and "."
         in filename
-        and filename.rsplit(".", 1)[1].lower()
+        and filename.rsplit(
+            ".",
+            1
+        )[1].lower()
         in app.config["ALLOWED_IMAGE_EXTENSIONS"]
     )
 
 
+# ============================================================
+# CLOUDINARY HELPERS
+# ============================================================
+
+def cloudinary_ready():
+
+    return bool(
+        CLOUDINARY_AVAILABLE
+        and app.config.get("CLOUDINARY_CLOUD_NAME")
+        and app.config.get("CLOUDINARY_API_KEY")
+        and app.config.get("CLOUDINARY_API_SECRET")
+    )
+
+
+def is_cloudinary_cv(filename):
+
+    return bool(
+        filename
+        and filename.startswith("cloudinary:")
+    )
+
+
+def parse_cloudinary_cv(filename):
+
+    """
+    Stored format:
+
+    cloudinary:rori-hotel-cv/example_123|pdf
+    """
+
+    if not is_cloudinary_cv(filename):
+        return None, None
+
+    value = filename[len("cloudinary:"):]
+
+    if "|" not in value:
+        return None, None
+
+    public_id, extension = value.rsplit(
+        "|",
+        1
+    )
+
+    public_id = public_id.strip()
+    extension = extension.strip().lower()
+
+    if not public_id:
+        return None, None
+
+    if extension not in app.config[
+        "ALLOWED_EXTENSIONS"
+    ]:
+        return None, None
+
+    return public_id, extension
+
+
 def save_uploaded_file(file):
+
+    """
+    CV storage strategy:
+
+    1. Cloudinary authenticated raw asset
+    2. Local storage fallback only if Cloudinary
+       is not configured
+    """
 
     if not file or not file.filename:
         return None
@@ -1256,18 +1452,92 @@ def save_uploaded_file(file):
     if not allowed_file(file.filename):
         return None
 
-    original = secure_filename(file.filename)
+    original = secure_filename(
+        file.filename
+    )
 
     if not original:
         return None
 
-    name, ext = os.path.splitext(original)
+    name, ext = os.path.splitext(
+        original
+    )
+
+    extension = ext.lower().lstrip(".")
 
     timestamp = datetime.utcnow().strftime(
         "%Y%m%d%H%M%S%f"
     )
 
-    filename = f"{name}_{timestamp}{ext.lower()}"
+    safe_name = secure_filename(
+        name
+    ) or "cv"
+
+    unique_name = (
+        f"{safe_name}_{timestamp}"
+    )
+
+    # ========================================================
+    # CLOUDINARY
+    # ========================================================
+
+    if cloudinary_ready():
+
+        try:
+
+            upload_result = cloudinary.uploader.upload(
+                file,
+                resource_type="raw",
+                type="authenticated",
+                folder=app.config[
+                    "CLOUDINARY_CV_FOLDER"
+                ],
+                public_id=unique_name,
+                overwrite=False
+            )
+
+            public_id = upload_result.get(
+                "public_id"
+            )
+
+            if not public_id:
+                raise RuntimeError(
+                    "Cloudinary did not return public_id."
+                )
+
+            stored_reference = (
+                "cloudinary:"
+                + public_id
+                + "|"
+                + extension
+            )
+
+            print(
+                "[CLOUDINARY] CV uploaded:",
+                public_id
+            )
+
+            return stored_reference
+
+        except Exception as e:
+
+            print(
+                "[CLOUDINARY] CV upload failed:",
+                e
+            )
+
+            traceback.print_exc()
+
+            return None
+
+    # ========================================================
+    # LOCAL FALLBACK
+    # ========================================================
+
+    filename = (
+        f"{unique_name}"
+        f".{extension}"
+    )
 
     path = os.path.join(
         app.config["UPLOAD_FOLDER"],
@@ -1275,6 +1545,7 @@ def save_uploaded_file(file):
     )
 
     try:
+
         os.makedirs(
             app.config["UPLOAD_FOLDER"],
             exist_ok=True
@@ -1288,30 +1559,200 @@ def save_uploaded_file(file):
         return filename
 
     except Exception:
+
         traceback.print_exc()
+
         return None
 
+
+def delete_uploaded_file(filename):
+
+    if not filename:
+        return
+
+    # ========================================================
+    # CLOUDINARY FILE
+    # ========================================================
+
+    if is_cloudinary_cv(filename):
+
+        public_id, extension = parse_cloudinary_cv(
+            filename
+        )
+
+        if not public_id:
+            return
+
+        if not cloudinary_ready():
+            return
+
+        try:
+
+            cloudinary.uploader.destroy(
+                public_id,
+                resource_type="raw",
+                type="authenticated"
+            )
+
+            print(
+                "[CLOUDINARY] CV deleted:",
+                public_id
+            )
+
+        except Exception:
+
+            traceback.print_exc()
+
+        return
+
+    # ========================================================
+    # OLD LOCAL FILE
+    # ========================================================
+
+    try:
+
+        safe_filename = secure_filename(
+            os.path.basename(filename)
+        )
+
+        if not safe_filename:
+            return
+
+        upload_directories = [
+            app.config.get(
+                "UPLOAD_FOLDER"
+            ),
+
+            os.path.join(
+                BASE_DIR,
+                "uploads",
+                "resumes"
+            ),
+
+            os.path.join(
+                BASE_DIR,
+                "uploads"
+            ),
+
+            os.path.join(
+                app.root_path,
+                "static",
+                "uploads",
+                "resumes"
+            ),
+
+            os.path.join(
+                app.root_path,
+                "static",
+                "uploads"
+            )
+        ]
+
+        for directory in upload_directories:
+
+            if not directory:
+                continue
+
+            path = os.path.join(
+                directory,
+                safe_filename
+            )
+
+            if os.path.isfile(path):
+
+                os.remove(path)
+
+                print(
+                    "[LOCAL] CV deleted:",
+                    path
+                )
+
+                break
+
+    except Exception:
+
+        traceback.print_exc()
+
+
+def generate_cloudinary_cv_url(filename):
+
+    """
+    Creates a short-lived signed download URL.
+
+    This function must NEVER be exposed to public
+    routes without admin_required.
+    """
+
+    public_id, extension = parse_cloudinary_cv(
+        filename
+    )
+
+    if not public_id:
+        return None
+
+    if not cloudinary_ready():
+        return None
+
+    try:
+
+        expires_at = int(
+            (
+                datetime.utcnow()
+                + timedelta(minutes=10)
+            ).timestamp()
+        )
+
+        url = cloudinary.utils.private_download_url(
+            public_id,
+            extension,
+            resource_type="raw",
+            type="authenticated",
+            attachment=False,
+            expires_at=expires_at
+        )
+
+        return url
+
+    except Exception:
+
+        traceback.print_exc()
+
+        return None
+
+
+# ============================================================
+# JOB IMAGE
+# ============================================================
 
 def save_job_image(file):
 
     if not file or not file.filename:
         return None
 
-    if not allowed_image_file(file.filename):
+    if not allowed_image_file(
+        file.filename
+    ):
         return None
 
-    original = secure_filename(file.filename)
+    original = secure_filename(
+        file.filename
+    )
 
     if not original:
         return None
 
-    name, ext = os.path.splitext(original)
+    name, ext = os.path.splitext(
+        original
+    )
 
     timestamp = datetime.utcnow().strftime(
         "%Y%m%d%H%M%S%f"
     )
 
-    filename = f"{name}_{timestamp}{ext.lower()}"
+    filename = (
+        f"{name}_{timestamp}"
+        f"{ext.lower()}"
+    )
 
     path = os.path.join(
         app.config["UPLOAD_FOLDER_JOBS"],
@@ -1327,29 +1768,42 @@ def save_job_image(file):
 
         file.save(path)
 
+        if not os.path.isfile(path):
+            return None
+
         return filename
 
     except Exception:
+
         traceback.print_exc()
+
         return None
 
 
-def delete_uploaded_file(filename):
+def delete_job_image(filename):
 
     if not filename:
         return
 
     try:
 
+        safe_filename = secure_filename(
+            os.path.basename(filename)
+        )
+
+        if not safe_filename:
+            return
+
         path = os.path.join(
-            app.config["UPLOAD_FOLDER"],
-            secure_filename(filename)
+            app.config["UPLOAD_FOLDER_JOBS"],
+            safe_filename
         )
 
         if os.path.isfile(path):
             os.remove(path)
 
     except Exception:
+
         traceback.print_exc()
 
 
@@ -1362,7 +1816,9 @@ def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
 
-        if not session.get("admin_logged_in"):
+        if not session.get(
+            "admin_logged_in"
+        ):
 
             flash(
                 "እባክዎን አስቀድመው Login ያድርጉ።",
@@ -1370,7 +1826,9 @@ def admin_required(f):
             )
 
             return redirect(
-                url_for("admin_login")
+                url_for(
+                    "admin_login"
+                )
             )
 
         return f(*args, **kwargs)
@@ -1392,16 +1850,26 @@ def log_audit(
     try:
 
         audit = AuditLog(
-            user_id=session.get("admin_id"),
+
+            user_id=session.get(
+                "admin_id"
+            ),
+
             user_name=session.get(
                 "admin_username",
                 "system"
             ),
+
             action=action,
+
             description=description,
+
             target_type=target_type,
+
             target_id=target_id,
+
             ip_address=request.remote_addr,
+
             user_agent=request.headers.get(
                 "User-Agent"
             )
@@ -1431,6 +1899,7 @@ def send_async_email(message):
             mail.send(message)
 
     except Exception as e:
+
         print(
             f"EMAIL ERROR: {e}"
         )
@@ -1443,7 +1912,9 @@ def send_application_status_email(
     notes=""
 ):
 
-    if not app.config.get("MAIL_USERNAME"):
+    if not app.config.get(
+        "MAIL_USERNAME"
+    ):
         return
 
     if not application.email:
@@ -1464,7 +1935,7 @@ def send_application_status_email(
             "Congratulations! You have been selected for the position.",
 
         "HIRED":
-            "Congratulations! You have been hired.",
+            "Congratulations! You have been hired by Rori Hotel.",
 
         "REJECTED":
             "We regret to inform you that your application was not successful."
@@ -1491,20 +1962,36 @@ def send_application_status_email(
         notes_html = ""
 
         if notes:
+
+            safe_notes = (
+                notes
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\n", "<br>")
+            )
+
             notes_html = f"""
             <p>
                 <strong>HR Note:</strong><br>
-                {notes}
+                {safe_notes}
             </p>
             """
 
         message = Message(
+
             subject=(
                 "Rori Hotel - Application Status "
                 f"{reference}"
             ),
-            sender=app.config["MAIL_DEFAULT_SENDER"],
-            recipients=[application.email]
+
+            sender=app.config[
+                "MAIL_DEFAULT_SENDER"
+            ],
+
+            recipients=[
+                application.email
+            ]
         )
 
         message.html = f"""
@@ -1539,7 +2026,9 @@ def send_application_status_email(
             <hr>
 
             <p>
-                Dear <strong>{application.full_name}</strong>,
+                Dear <strong>
+                    {application.full_name}
+                </strong>,
             </p>
 
             <p>
@@ -1565,13 +2054,20 @@ def send_application_status_email(
 
             <hr>
 
-            <p style="font-size:13px;color:#777;">
+            <p style="
+                font-size:13px;
+                color:#777;
+            ">
                 Please keep your reference number
                 for future application tracking.
             </p>
 
-            <p style="font-size:12px;color:#999;">
-                © 2026 Rori Hotel. All rights reserved.
+            <p style="
+                font-size:12px;
+                color:#999;
+            ">
+                © 2026 Rori Hotel.
+                All rights reserved.
             </p>
 
         </div>
@@ -1597,7 +2093,10 @@ def send_application_status_email(
 # SIMILAR JOBS
 # ============================================================
 
-def get_similar_jobs(job, limit=3):
+def get_similar_jobs(
+    job,
+    limit=3
+):
 
     query = Job.query.filter(
         Job.is_active.is_(True),
@@ -1608,14 +2107,19 @@ def get_similar_jobs(job, limit=3):
 
         query = query.filter(
             db.or_(
-                Job.department_id == job.department_id,
-                Job.employment_type == job.employment_type
+                Job.department_id
+                == job.department_id,
+
+                Job.employment_type
+                == job.employment_type
             )
         )
 
     return (
         query
-        .order_by(Job.created_at.desc())
+        .order_by(
+            Job.created_at.desc()
+        )
         .limit(limit)
         .all()
     )
@@ -1631,20 +2135,32 @@ def inject_globals():
     try:
 
         return {
+
             "now": datetime.utcnow,
-            "all_departments": Department.query.order_by(
-                Department.name
-            ).all(),
-            "all_locations": Location.query.order_by(
-                Location.name
-            ).all()
+
+            "all_departments":
+                Department.query
+                .order_by(
+                    Department.name
+                )
+                .all(),
+
+            "all_locations":
+                Location.query
+                .order_by(
+                    Location.name
+                )
+                .all()
         }
 
     except Exception:
 
         return {
+
             "now": datetime.utcnow,
+
             "all_departments": [],
+
             "all_locations": []
         }
 
@@ -1685,12 +2201,18 @@ def home():
         "home.html",
         featured_jobs=featured_jobs,
         latest_jobs=latest_jobs,
-        departments=Department.query.all()
+        departments=(
+            Department.query
+            .order_by(
+                Department.name
+            )
+            .all()
+        )
     )
 
 
 # ============================================================
-# JOBS (MAIN PUBLIC LIST)
+# PUBLIC JOBS
 # ============================================================
 
 @app.route("/jobs")
@@ -1726,23 +2248,31 @@ def jobs():
     )
 
     if department_id:
+
         query = query.filter(
-            Job.department_id == department_id
+            Job.department_id
+            == department_id
         )
 
     if location_id:
+
         query = query.filter(
-            Job.location_id == location_id
+            Job.location_id
+            == location_id
         )
 
     if type_filter:
+
         query = query.filter(
-            Job.employment_type == type_filter
+            Job.employment_type
+            == type_filter
         )
 
     if experience_filter:
+
         query = query.filter(
-            Job.experience_level == experience_filter
+            Job.experience_level
+            == experience_filter
         )
 
     if search_query:
@@ -1777,10 +2307,14 @@ def jobs():
 # JOB DETAIL
 # ============================================================
 
-@app.route("/job/<int:job_id>")
+@app.route(
+    "/job/<int:job_id>"
+)
 def job_detail(job_id):
 
-    job = Job.query.get_or_404(job_id)
+    job = Job.query.get_or_404(
+        job_id
+    )
 
     return render_template(
         "job_detail.html",
@@ -1802,11 +2336,14 @@ def departments():
     )
 
 
-@app.route("/department/<int:dept_id>")
+@app.route(
+    "/department/<int:dept_id>"
+)
 def department_detail(dept_id):
 
-    department = Department.query.get_or_404(
-        dept_id
+    department = (
+        Department.query
+        .get_or_404(dept_id)
     )
 
     jobs_list = (
@@ -1854,7 +2391,7 @@ def about_careers():
 
 
 # ============================================================
-# TRACK APPLICATION
+# TRACK STATUS
 # ============================================================
 
 @app.route(
@@ -1876,7 +2413,10 @@ def track_status():
 
         reference_no = (
             request.form
-            .get("reference_no", "")
+            .get(
+                "reference_no",
+                ""
+            )
             .strip()
             .upper()
         )
@@ -1908,7 +2448,9 @@ def track_status():
 )
 def apply(job_id):
 
-    job = Job.query.get_or_404(job_id)
+    job = Job.query.get_or_404(
+        job_id
+    )
 
     if not job.is_active:
 
@@ -1949,7 +2491,8 @@ def apply(job_id):
         if not cv_filename:
 
             flash(
-                "Invalid CV. Please upload PDF, DOC, or DOCX.",
+                "CV upload failed. "
+                "Please upload PDF, DOC, or DOCX.",
                 "danger"
             )
 
@@ -1961,29 +2504,37 @@ def apply(job_id):
 
         reference_no = None
 
-        for _ in range(10):
+        for _ in range(20):
 
             candidate_reference = (
                 "RH-"
-                + secrets.token_hex(4).upper()
+                + secrets.token_hex(
+                    4
+                ).upper()
             )
 
             exists = (
                 Application.query
                 .filter_by(
-                    reference_no=candidate_reference
+                    reference_no=
+                    candidate_reference
                 )
                 .first()
             )
 
             if not exists:
 
-                reference_no = candidate_reference
+                reference_no = (
+                    candidate_reference
+                )
+
                 break
 
         if not reference_no:
 
-            delete_uploaded_file(cv_filename)
+            delete_uploaded_file(
+                cv_filename
+            )
 
             flash(
                 "Could not generate application reference number.",
@@ -2002,38 +2553,61 @@ def apply(job_id):
 
             reference_no=reference_no,
 
-            full_name=form.full_name.data.strip(),
+            full_name=(
+                form.full_name.data
+                .strip()
+            ),
 
-            email=form.email.data.strip().lower(),
+            email=(
+                form.email.data
+                .strip()
+                .lower()
+            ),
 
-            phone=form.phone.data.strip(),
+            phone=(
+                form.phone.data
+                .strip()
+            ),
 
-            location=form.location.data.strip(),
+            location=(
+                form.location.data
+                .strip()
+            ),
 
             education=form.education.data,
 
             years_of_experience=(
-                form.years_of_experience.data.strip()
+                form.years_of_experience.data
+                .strip()
             ),
 
             current_position=(
-                form.current_position.data.strip()
+                form.current_position.data
+                .strip()
                 if form.current_position.data
                 else None
             ),
 
             previous_employer=(
-                form.previous_employer.data.strip()
+                form.previous_employer.data
+                .strip()
                 if form.previous_employer.data
                 else None
             ),
 
-            skills=form.skills.data.strip(),
+            skills=(
+                form.skills.data
+                .strip()
+            ),
 
-            languages=form.languages.data.strip(),
+            languages=(
+                form.languages.data
+                .strip()
+            ),
 
             certifications=(
-                form.certifications.data.strip()
+                form.certifications.data
+                .strip()
                 if form.certifications.data
                 else None
             ),
@@ -2047,33 +2621,39 @@ def apply(job_id):
             ),
 
             expected_salary=(
-                form.expected_salary.data.strip()
+                form.expected_salary.data
+                .strip()
                 if form.expected_salary.data
                 else None
             ),
 
-            cover_letter=form.cover_letter.data.strip(),
+            cover_letter=(
+                form.cover_letter.data
+                .strip()
+            ),
 
             cv_filename=cv_filename,
 
             status="NEW",
 
-            status_updated_at=datetime.utcnow(),
+            status_updated_at=
+                datetime.utcnow(),
 
-            submitted_at=datetime.utcnow()
+            submitted_at=
+                datetime.utcnow()
         )
 
         try:
 
-            db.session.add(application)
+            db.session.add(
+                application
+            )
 
             db.session.flush()
 
             notification = Notification(
 
-                title=(
-                    "New Application"
-                ),
+                title="New Application",
 
                 message=(
                     f"{application.full_name} "
@@ -2088,15 +2668,19 @@ def apply(job_id):
                 is_read=False
             )
 
-            db.session.add(notification)
+            db.session.add(
+                notification
+            )
 
             db.session.commit()
 
-        except Exception as e:
+        except Exception:
 
             db.session.rollback()
 
-            delete_uploaded_file(cv_filename)
+            delete_uploaded_file(
+                cv_filename
+            )
 
             traceback.print_exc()
 
@@ -2114,11 +2698,15 @@ def apply(job_id):
 
         log_audit(
             "New Application",
+
             (
                 f"{application.full_name} "
-                f"applied for {job.title}"
+                f"applied for "
+                f"{job.title}"
             ),
+
             "Application",
+
             application.id
         )
 
@@ -2151,9 +2739,8 @@ def apply(job_id):
 def application_success(app_id):
 
     application = (
-        Application.query.get_or_404(
-            app_id
-        )
+        Application.query
+        .get_or_404(app_id)
     )
 
     return render_template(
@@ -2164,7 +2751,7 @@ def application_success(app_id):
 
 
 # ============================================================
-# APPLICATION STATUS PAGE
+# APPLICATION STATUS
 # ============================================================
 
 @app.route(
@@ -2173,18 +2760,22 @@ def application_success(app_id):
 def application_status(app_id):
 
     application = (
-        Application.query.get_or_404(
-            app_id
-        )
+        Application.query
+        .get_or_404(app_id)
     )
 
     if not application.viewed_at:
 
-        application.viewed_at = datetime.utcnow()
+        application.viewed_at = (
+            datetime.utcnow()
+        )
 
         try:
+
             db.session.commit()
+
         except Exception:
+
             db.session.rollback()
 
     return render_template(
@@ -2208,13 +2799,18 @@ def talent_pool():
 
     if form.validate_on_submit():
 
+        email = (
+            form.email.data
+            .strip()
+            .lower()
+        )
+
         existing = (
             TalentPool.query
             .filter(
                 db.func.lower(
                     TalentPool.email
-                )
-                == form.email.data.strip().lower()
+                ) == email
             )
             .first()
         )
@@ -2248,26 +2844,43 @@ def talent_pool():
 
         talent = TalentPool(
 
-            full_name=form.full_name.data.strip(),
+            full_name=(
+                form.full_name.data
+                .strip()
+            ),
 
-            email=form.email.data.strip().lower(),
+            email=email,
 
-            phone=form.phone.data.strip(),
+            phone=(
+                form.phone.data
+                .strip()
+            ),
 
-            location=form.location.data.strip(),
+            location=(
+                form.location.data
+                .strip()
+            ),
 
             education=form.education.data,
 
             years_of_experience=(
-                form.years_of_experience.data.strip()
+                form.years_of_experience.data
+                .strip()
             ),
 
-            skills=form.skills.data.strip(),
+            skills=(
+                form.skills.data
+                .strip()
+            ),
 
-            languages=form.languages.data.strip(),
+            languages=(
+                form.languages.data
+                .strip()
+            ),
 
             certifications=(
-                form.certifications.data.strip()
+                form.certifications.data
+                .strip()
                 if form.certifications.data
                 else None
             ),
@@ -2281,26 +2894,35 @@ def talent_pool():
             ),
 
             expected_salary=(
-                form.expected_salary.data.strip()
+                form.expected_salary.data
+                .strip()
                 if form.expected_salary.data
                 else None
             ),
 
-            cover_letter=form.cover_letter.data.strip(),
+            cover_letter=(
+                form.cover_letter.data
+                .strip()
+            ),
 
             cv_filename=cv_filename
         )
 
         try:
 
-            db.session.add(talent)
+            db.session.add(
+                talent
+            )
+
             db.session.commit()
 
-        except Exception as e:
+        except Exception:
 
             db.session.rollback()
 
-            delete_uploaded_file(cv_filename)
+            delete_uploaded_file(
+                cv_filename
+            )
 
             traceback.print_exc()
 
@@ -2330,7 +2952,7 @@ def talent_pool():
 
 
 # ============================================================
-# ADMIN / HR LOGIN (BULLETPROOF & MULTI-FORM SUPPORT)
+# ADMIN / HR LOGIN
 # ============================================================
 
 @app.route(
@@ -2347,59 +2969,214 @@ def talent_pool():
 )
 def admin_login():
 
-    if session.get("admin_logged_in"):
-        return redirect(url_for("admin_dashboard"))
+    if session.get(
+        "admin_logged_in"
+    ):
+
+        return redirect(
+            url_for(
+                "admin_dashboard"
+            )
+        )
 
     form = AdminLoginForm()
 
     if request.method == "POST":
-        # Form validate ቢያደርግም ባያደርግም ከ request.form አወጣጥ ጋር ተጣጥሞ እንዲሰራ
-        username = (form.username.data or request.form.get("username", "")).strip()
-        password = form.password.data or request.form.get("password", "")
 
-        if username and password:
-            # 1. Database ውስጥ ማረጋገጥ
-            try:
-                admin_user = AdminUser.query.filter_by(username=username).first()
+        username = (
+            request.form
+            .get(
+                "username",
+                ""
+            )
+            .strip()
+        )
 
-                if admin_user and check_password_hash(admin_user.password_hash, password):
-                    session.clear()
-                    session["admin_logged_in"] = True
-                    session["admin_username"] = username
-                    session["admin_id"] = admin_user.id
+        password = request.form.get(
+            "password",
+            ""
+        )
 
-                    log_audit("Login", f"Admin {username} logged in.")
-                    flash("እንኳን በደህና መጡ!", "success")
-                    return redirect(url_for("admin_dashboard"))
-            except Exception:
-                db.session.rollback()
+        if not username:
+            username = (
+                form.username.data
+                or ""
+            ).strip()
 
-            # 2. Config / Environment variables ማረጋገጥ (Fallback)
-            default_username = app.config.get("HR_USERNAME", "admin")
-            default_hash = app.config.get("HR_PASSWORD_HASH")
+        if not password:
+            password = (
+                form.password.data
+                or ""
+            )
 
-            if username == default_username and default_hash and check_password_hash(default_hash, password):
-                try:
-                    new_admin = AdminUser(username=username, password_hash=default_hash)
-                    db.session.add(new_admin)
-                    db.session.commit()
-                    admin_id = new_admin.id
-                except Exception:
-                    db.session.rollback()
-                    admin_id = 1
+        if not username or not password:
+
+            flash(
+                "እባክዎን Username እና Password ይሙሉ!",
+                "warning"
+            )
+
+            return render_template(
+                "login.html",
+                form=form
+            )
+
+        # ====================================================
+        # DATABASE LOGIN
+        # ====================================================
+
+        try:
+
+            admin_user = (
+                AdminUser.query
+                .filter_by(
+                    username=username
+                )
+                .first()
+            )
+
+            if (
+                admin_user
+                and check_password_hash(
+                    admin_user.password_hash,
+                    password
+                )
+            ):
 
                 session.clear()
-                session["admin_logged_in"] = True
-                session["admin_username"] = username
-                session["admin_id"] = admin_id
 
-                log_audit("Login", f"Admin {username} logged in via fallback.")
-                flash("እንኳን በደህና መጡ!", "success")
-                return redirect(url_for("admin_dashboard"))
+                session[
+                    "admin_logged_in"
+                ] = True
 
-            flash("የተሳሳተ Username ወይም Password!", "danger")
-        else:
-            flash("እባክዎን Username እና Password ይሙሉ!", "warning")
+                session[
+                    "admin_username"
+                ] = username
+
+                session[
+                    "admin_id"
+                ] = admin_user.id
+
+                log_audit(
+                    "Login",
+                    f"Admin {username} logged in."
+                )
+
+                flash(
+                    "እንኳን በደህና መጡ!",
+                    "success"
+                )
+
+                return redirect(
+                    url_for(
+                        "admin_dashboard"
+                    )
+                )
+
+        except Exception:
+
+            db.session.rollback()
+
+            traceback.print_exc()
+
+        # ====================================================
+        # ENVIRONMENT FALLBACK
+        # ====================================================
+
+        default_username = (
+            app.config.get(
+                "HR_USERNAME",
+                "admin"
+            )
+        )
+
+        default_hash = (
+            app.config.get(
+                "HR_PASSWORD_HASH"
+            )
+        )
+
+        if (
+            username == default_username
+            and default_hash
+            and check_password_hash(
+                default_hash,
+                password
+            )
+        ):
+
+            admin_id = None
+
+            try:
+
+                new_admin = AdminUser(
+                    username=username,
+                    password_hash=default_hash
+                )
+
+                db.session.add(
+                    new_admin
+                )
+
+                db.session.commit()
+
+                admin_id = new_admin.id
+
+            except Exception:
+
+                db.session.rollback()
+
+                existing = (
+                    AdminUser.query
+                    .filter_by(
+                        username=username
+                    )
+                    .first()
+                )
+
+                if existing:
+                    admin_id = existing.id
+
+            if admin_id is None:
+                admin_id = 1
+
+            session.clear()
+
+            session[
+                "admin_logged_in"
+            ] = True
+
+            session[
+                "admin_username"
+            ] = username
+
+            session[
+                "admin_id"
+            ] = admin_id
+
+            log_audit(
+                "Login",
+                (
+                    f"Admin {username} "
+                    f"logged in via fallback."
+                )
+            )
+
+            flash(
+                "እንኳን በደህና መጡ!",
+                "success"
+            )
+
+            return redirect(
+                url_for(
+                    "admin_dashboard"
+                )
+            )
+
+        flash(
+            "የተሳሳተ Username ወይም Password!",
+            "danger"
+        )
 
     return render_template(
         "login.html",
@@ -2421,27 +3198,79 @@ def admin_login():
 )
 @admin_required
 def admin_change_password():
+
     form = ChangePasswordForm()
-    
+
     if form.validate_on_submit():
-        username = session.get("admin_username")
-        admin_user = AdminUser.query.filter_by(username=username).first()
-        
-        if admin_user and check_password_hash(admin_user.password_hash, form.current_password.data):
-            
-            admin_user.password_hash = generate_password_hash(form.new_password.data)
-            db.session.commit()
-            
+
+        username = session.get(
+            "admin_username"
+        )
+
+        admin_user = (
+            AdminUser.query
+            .filter_by(
+                username=username
+            )
+            .first()
+        )
+
+        if (
+            admin_user
+            and check_password_hash(
+                admin_user.password_hash,
+                form.current_password.data
+            )
+        ):
+
+            admin_user.password_hash = (
+                generate_password_hash(
+                    form.new_password.data
+                )
+            )
+
+            try:
+
+                db.session.commit()
+
+            except Exception:
+
+                db.session.rollback()
+
+                flash(
+                    "Password update failed.",
+                    "danger"
+                )
+
+                return render_template(
+                    "admin/change_password.html",
+                    form=form
+                )
+
             log_audit(
                 "Change Password",
-                f"Admin {username} changed their password."
+                (
+                    f"Admin {username} "
+                    f"changed their password."
+                )
             )
-            
-            flash("የይለፍ ቃልዎ በተሳካ ሁኔታ ተቀይሯል!", "success")
-            return redirect(url_for("admin_dashboard"))
-        else:
-            flash("ያስተገቡት የአሁን የይለፍ ቃል (Current Password) ትክክል አይደለም!", "danger")
-            
+
+            flash(
+                "የይለፍ ቃልዎ በስኬት ተቀይሯል!",
+                "success"
+            )
+
+            return redirect(
+                url_for(
+                    "admin_dashboard"
+                )
+            )
+
+        flash(
+            "ያስተገቡት Current Password ትክክል አይደለም!",
+            "danger"
+        )
+
     return render_template(
         "admin/change_password.html",
         form=form
@@ -2462,7 +3291,9 @@ def admin_logout():
         "Unknown"
     )
 
-    if session.get("admin_logged_in"):
+    if session.get(
+        "admin_logged_in"
+    ):
 
         log_audit(
             "Logout",
@@ -2477,7 +3308,9 @@ def admin_logout():
     )
 
     return redirect(
-        url_for("admin_login")
+        url_for(
+            "admin_login"
+        )
     )
 
 
@@ -2500,7 +3333,9 @@ def forgot_password():
         )
 
         return redirect(
-            url_for("admin_login")
+            url_for(
+                "admin_login"
+            )
         )
 
     return render_template(
@@ -2509,7 +3344,7 @@ def forgot_password():
 
 
 # ============================================================
-# ADMIN / HR DASHBOARD
+# HR DASHBOARD
 # ============================================================
 
 @app.route("/admin")
@@ -2529,9 +3364,13 @@ def admin_dashboard():
         .count()
     )
 
-    total_applications = Application.query.count()
+    total_applications = (
+        Application.query.count()
+    )
 
-    total_interviews = Interview.query.count()
+    total_interviews = (
+        Interview.query.count()
+    )
 
     recent_applications = (
         Application.query
@@ -2575,49 +3414,82 @@ def admin_dashboard():
 
     return render_template(
         "admin/dashboard.html",
+
         total_jobs=total_jobs,
+
         active_jobs=active_jobs,
-        total_applications=total_applications,
-        total_interviews=total_interviews,
-        recent_applications=recent_applications,
-        notifications=notifications,
-        status_counts=status_counts,
-        applications=recent_applications
+
+        total_applications=
+            total_applications,
+
+        total_interviews=
+            total_interviews,
+
+        recent_applications=
+            recent_applications,
+
+        notifications=
+            notifications,
+
+        status_counts=
+            status_counts,
+
+        applications=
+            recent_applications
     )
 
 
 # ============================================================
-# CANDIDATES (HR / ADMIN)
+# CANDIDATES
 # ============================================================
 
-@app.route("/admin/candidates")
-@app.route("/hr/candidates")
+@app.route(
+    "/admin/candidates"
+)
+@app.route(
+    "/hr/candidates"
+)
 @admin_required
 def admin_candidates():
 
     query = Application.query
 
-    search = request.args.get(
-        "search",
-        ""
-    ).strip()
+    search = (
+        request.args
+        .get(
+            "search",
+            ""
+        )
+        .strip()
+    )
 
     if search:
 
-        search_value = f"%{search}%"
+        search_value = (
+            f"%{search}%"
+        )
 
         query = query.filter(
             db.or_(
-                Application.full_name.ilike(search_value),
-                Application.email.ilike(search_value),
-                Application.reference_no.ilike(search_value)
+                Application.full_name
+                .ilike(search_value),
+
+                Application.email
+                .ilike(search_value),
+
+                Application.reference_no
+                .ilike(search_value)
             )
         )
 
-    status_filter = request.args.get(
-        "status",
-        ""
-    ).strip()
+    status_filter = (
+        request.args
+        .get(
+            "status",
+            ""
+        )
+        .strip()
+    )
 
     if (
         status_filter
@@ -2625,7 +3497,8 @@ def admin_candidates():
     ):
 
         query = query.filter(
-            Application.status == status_filter
+            Application.status
+            == status_filter
         )
 
     applications = (
@@ -2647,15 +3520,18 @@ def admin_candidates():
 # CANDIDATE DETAIL
 # ============================================================
 
-@app.route("/admin/candidate/<int:app_id>")
-@app.route("/hr/candidate/<int:app_id>")
+@app.route(
+    "/admin/candidate/<int:app_id>"
+)
+@app.route(
+    "/hr/candidate/<int:app_id>"
+)
 @admin_required
 def admin_candidate_detail(app_id):
 
     application = (
-        Application.query.get_or_404(
-            app_id
-        )
+        Application.query
+        .get_or_404(app_id)
     )
 
     interviews = (
@@ -2671,17 +3547,205 @@ def admin_candidate_detail(app_id):
 
     if not application.viewed_at:
 
-        application.viewed_at = datetime.utcnow()
+        application.viewed_at = (
+            datetime.utcnow()
+        )
 
         try:
+
             db.session.commit()
+
         except Exception:
+
             db.session.rollback()
 
     return render_template(
         "admin/candidate_detail.html",
         application=application,
         interviews=interviews
+    )
+
+
+# ============================================================
+# CV DOWNLOAD
+# ============================================================
+
+@app.route(
+    "/admin/candidate/<int:app_id>/cv/download"
+)
+@app.route(
+    "/hr/candidate/<int:app_id>/cv/download"
+)
+@admin_required
+def download_candidate_cv(app_id):
+
+    # ========================================================
+    # SECURITY:
+    # ONLY AUTHENTICATED HR/ADMIN CAN REACH THIS ROUTE.
+    # ========================================================
+
+    application = (
+        Application.query
+        .get_or_404(app_id)
+    )
+
+    filename = application.cv_filename
+
+    if not filename:
+
+        flash(
+            "CV ለዚህ አመልካች አልተገኘም።",
+            "warning"
+        )
+
+        return redirect(
+            request.referrer
+            or url_for(
+                "admin_candidates"
+            )
+        )
+
+    # ========================================================
+    # CLOUDINARY CV
+    # ========================================================
+
+    if is_cloudinary_cv(
+        filename
+    ):
+
+        download_url = (
+            generate_cloudinary_cv_url(
+                filename
+            )
+        )
+
+        if download_url:
+
+            log_audit(
+                "CV Download",
+                (
+                    f"HR downloaded CV for "
+                    f"{application.full_name}"
+                ),
+                "Application",
+                application.id
+            )
+
+            return redirect(
+                download_url
+            )
+
+        flash(
+            "Cloudinary CV ማግኘት አልተቻለም።",
+            "danger"
+        )
+
+        return redirect(
+            request.referrer
+            or url_for(
+                "admin_candidates"
+            )
+        )
+
+    # ========================================================
+    # OLD LOCAL CV FALLBACK
+    # ========================================================
+
+    safe_filename = secure_filename(
+        os.path.basename(filename)
+    )
+
+    if not safe_filename:
+
+        flash(
+            "የCV ፋይል ስም ትክክል አይደለም።",
+            "danger"
+        )
+
+        return redirect(
+            request.referrer
+            or url_for(
+                "admin_candidates"
+            )
+        )
+
+    upload_directories = [
+
+        app.config.get(
+            "UPLOAD_FOLDER"
+        ),
+
+        os.path.join(
+            BASE_DIR,
+            "uploads",
+            "resumes"
+        ),
+
+        os.path.join(
+            BASE_DIR,
+            "uploads"
+        ),
+
+        os.path.join(
+            app.root_path,
+            "static",
+            "uploads",
+            "resumes"
+        ),
+
+        os.path.join(
+            app.root_path,
+            "static",
+            "uploads"
+        )
+    ]
+
+    upload_directories = list(
+        dict.fromkeys(
+            directory
+            for directory
+            in upload_directories
+            if directory
+        )
+    )
+
+    for directory in upload_directories:
+
+        file_path = os.path.join(
+            directory,
+            safe_filename
+        )
+
+        if os.path.isfile(
+            file_path
+        ):
+
+            log_audit(
+                "CV Download",
+                (
+                    f"HR downloaded local CV "
+                    f"for {application.full_name}"
+                ),
+                "Application",
+                application.id
+            )
+
+            return send_from_directory(
+                directory,
+                safe_filename,
+                as_attachment=False
+            )
+
+    flash(
+        "የCV ፋይሉ በserver ላይ አልተገኘም።",
+        "danger"
+    )
+
+    return redirect(
+        request.referrer
+        or url_for(
+            "admin_candidates"
+        )
     )
 
 
@@ -2709,13 +3773,13 @@ def admin_candidate_detail(app_id):
 def update_application_status(app_id):
 
     application = (
-        Application.query.get_or_404(
-            app_id
-        )
+        Application.query
+        .get_or_404(app_id)
     )
 
     new_status = (
-        request.form.get(
+        request.form
+        .get(
             "status",
             ""
         )
@@ -2726,7 +3790,8 @@ def update_application_status(app_id):
     if not new_status:
 
         new_status = (
-            request.form.get(
+            request.form
+            .get(
                 "action",
                 ""
             )
@@ -2735,7 +3800,8 @@ def update_application_status(app_id):
         )
 
     notes = (
-        request.form.get(
+        request.form
+        .get(
             "notes",
             ""
         )
@@ -2761,13 +3827,18 @@ def update_application_status(app_id):
 
         return redirect(
             request.referrer
-            or url_for("admin_dashboard")
+            or url_for(
+                "admin_dashboard"
+            )
         )
 
     old_status = application.status
 
     application.status = new_status
-    application.status_updated_at = datetime.utcnow()
+
+    application.status_updated_at = (
+        datetime.utcnow()
+    )
 
     application.reviewed_by = (
         session.get(
@@ -2777,11 +3848,15 @@ def update_application_status(app_id):
 
     if new_status == "SHORTLISTED":
 
-        application.shortlisted_at = datetime.utcnow()
+        application.shortlisted_at = (
+            datetime.utcnow()
+        )
 
     if new_status == "REJECTED":
 
-        application.rejected_at = datetime.utcnow()
+        application.rejected_at = (
+            datetime.utcnow()
+        )
 
     if notes:
 
@@ -2791,7 +3866,7 @@ def update_application_status(app_id):
 
         db.session.commit()
 
-    except Exception as e:
+    except Exception:
 
         db.session.rollback()
 
@@ -2804,20 +3879,74 @@ def update_application_status(app_id):
 
         return redirect(
             request.referrer
-            or url_for("admin_dashboard")
+            or url_for(
+                "admin_dashboard"
+            )
         )
+
+    # ========================================================
+    # APPLICANT NOTIFICATION
+    # ========================================================
+
+    try:
+
+        position = (
+            application.job.title
+            if application.job
+            else "Rori Hotel Position"
+        )
+
+        status_notification = Notification(
+
+            title=(
+                "Application Status Updated"
+            ),
+
+            message=(
+                f"Your application for "
+                f"{position} is now "
+                f"{new_status}. "
+                f"Reference: "
+                f"{application.reference_no}"
+            ),
+
+            recipient=application.email,
+
+            is_read=False
+        )
+
+        db.session.add(
+            status_notification
+        )
+
+        db.session.commit()
+
+    except Exception:
+
+        db.session.rollback()
+
+    # ========================================================
+    # AUDIT
+    # ========================================================
 
     log_audit(
         "Status Update",
+
         (
             f"Changed "
             f"{application.full_name} "
             f"from {old_status} "
             f"to {new_status}"
         ),
+
         "Application",
+
         application.id
     )
+
+    # ========================================================
+    # EMAIL
+    # ========================================================
 
     send_application_status_email(
         application,
@@ -2827,113 +3956,31 @@ def update_application_status(app_id):
     )
 
     flash(
-        f'የአመልካቹ Status ወደ "{new_status}" ተቀይሯል!',
+        (
+            f'የአመልካቹ Status ወደ '
+            f'"{new_status}" ተቀይሯል!'
+        ),
         "success"
     )
 
     return redirect(
         request.referrer
-        or url_for("admin_dashboard")
-    )
-
-
- # ============================================================
-# CV DOWNLOAD
-# ============================================================
-
-@app.route("/admin/candidate/<int:app_id>/cv/download")
-@app.route("/hr/candidate/<int:app_id>/cv/download")
-@admin_required
-def download_candidate_cv(app_id):
-
-    application = Application.query.get_or_404(app_id)
-
-    if not application.cv_filename:
-        flash("CV ለዚህ አመልካች አልተገኘም።", "warning")
-        return redirect(
-            request.referrer or url_for("admin_candidates")
-        )
-
-    filename = secure_filename(
-        os.path.basename(application.cv_filename)
-    )
-
-    if not filename:
-        flash("የCV ፋይል ስም ትክክል አይደለም።", "danger")
-        return redirect(
-            request.referrer or url_for("admin_candidates")
-        )
-
-    # Possible CV upload locations
-    upload_directories = [
-        app.config.get("UPLOAD_FOLDER"),
-
-        os.path.join(
-            BASE_DIR,
-            "uploads",
-            "resumes"
-        ),
-
-        os.path.join(
-            BASE_DIR,
-            "uploads"
-        ),
-
-        os.path.join(
-            app.root_path,
-            "static",
-            "uploads",
-            "resumes"
-        ),
-
-        os.path.join(
-            app.root_path,
-            "static",
-            "uploads"
-        ),
-    ]
-
-    # Remove empty / duplicate directories
-    upload_directories = list(
-        dict.fromkeys(
-            directory
-            for directory in upload_directories
-            if directory
+        or url_for(
+            "admin_dashboard"
         )
     )
 
-    # Search for the CV
-    for directory in upload_directories:
-
-        file_path = os.path.join(
-            directory,
-            filename
-        )
-
-        if os.path.isfile(file_path):
-
-            return send_from_directory(
-                directory,
-                filename,
-                as_attachment=False
-            )
-
-    # CV was not found
-    flash(
-        "የCV ፋይሉ በserver ላይ አልተገኘም።",
-        "danger"
-    )
-
-    return redirect(
-        request.referrer or url_for("admin_candidates")
-    )
 
 # ============================================================
-# JOBS MANAGEMENT & VACANCY POST/DELETE
+# JOB MANAGEMENT
 # ============================================================
 
-@app.route("/admin/jobs")
-@app.route("/hr/jobs")
+@app.route(
+    "/admin/jobs"
+)
+@app.route(
+    "/hr/jobs"
+)
 @admin_required
 def admin_jobs():
 
@@ -2951,18 +3998,11 @@ def admin_jobs():
     )
 
 
-@app.route(
-    "/admin/job/new",
-    methods=["GET", "POST"]
-)
-@app.route(
-    "/hr/job/new",
-    methods=["GET", "POST"]
-)
-@admin_required
-def admin_job_new():
+# ============================================================
+# JOB FORM CHOICES
+# ============================================================
 
-    form = JobForm()
+def configure_job_form_choices(form):
 
     departments_list = (
         Department.query
@@ -2980,73 +4020,206 @@ def admin_job_new():
         .all()
     )
 
-    form.department_id.choices = [
-        (0, "None")
-    ] + [
-        (department.id, department.name)
-        for department in departments_list
-    ]
+    form.department_id.choices = (
+        [(0, "None")]
+        + [
+            (
+                department.id,
+                department.name
+            )
+            for department
+            in departments_list
+        ]
+    )
 
-    form.location_id.choices = [
-        (0, "None")
-    ] + [
-        (location.id, location.name)
-        for location in locations_list
-    ]
+    form.location_id.choices = (
+        [(0, "None")]
+        + [
+            (
+                location.id,
+                location.name
+            )
+            for location
+            in locations_list
+        ]
+    )
+
+
+# ============================================================
+# CREATE JOB
+# ============================================================
+
+@app.route(
+    "/admin/job/new",
+    methods=["GET", "POST"]
+)
+@app.route(
+    "/hr/job/new",
+    methods=["GET", "POST"]
+)
+@admin_required
+def admin_job_new():
+
+    form = JobForm()
+
+    configure_job_form_choices(
+        form
+    )
 
     if request.method == "POST":
 
-        banner_image = save_job_image(
-            request.files.get(
-                "banner_image"
+        banner_image = None
+
+        if form.validate_on_submit():
+
+            banner_image = save_job_image(
+                request.files.get(
+                    "banner_image"
+                )
             )
-        )
 
-        title = form.title.data or request.form.get("title")
-        short_desc = form.short_description.data or request.form.get("short_description")
-        full_desc = form.full_description.data or request.form.get("full_description")
-        resp = form.responsibilities.data or request.form.get("responsibilities")
-        reqs = form.requirements.data or request.form.get("requirements")
-        offer = form.what_we_offer.data or request.form.get("what_we_offer")
+            dept_id = (
+                form.department_id.data
+            )
 
-        if title and full_desc:
-            dept_id = request.form.get("department_id", type=int) or form.department_id.data
-            loc_id = request.form.get("location_id", type=int) or form.location_id.data
+            loc_id = (
+                form.location_id.data
+            )
 
             job = Job(
-                title=title.strip(),
-                department_id=dept_id if dept_id and dept_id != 0 else None,
-                location_id=loc_id if loc_id and loc_id != 0 else None,
-                short_description=(short_desc or title).strip(),
-                full_description=full_desc.strip(),
-                responsibilities=(resp or "See details").strip(),
-                requirements=(reqs or "See details").strip(),
-                what_we_offer=(offer or "Competitive Salary").strip(),
-                employment_type=form.employment_type.data or request.form.get("employment_type", "Full-time"),
-                experience_level=form.experience_level.data or request.form.get("experience_level"),
-                salary_range=form.salary_range.data or request.form.get("salary_range"),
-                deadline=form.deadline.data,
-                is_active=True,
-                is_featured=bool(form.is_featured.data),
+
+                title=(
+                    form.title.data
+                    .strip()
+                ),
+
+                department_id=(
+                    dept_id
+                    if dept_id
+                    and dept_id != 0
+                    else None
+                ),
+
+                location_id=(
+                    loc_id
+                    if loc_id
+                    and loc_id != 0
+                    else None
+                ),
+
+                short_description=(
+                    form.short_description.data
+                    .strip()
+                ),
+
+                full_description=(
+                    form.full_description.data
+                    .strip()
+                ),
+
+                responsibilities=(
+                    form.responsibilities.data
+                    .strip()
+                ),
+
+                requirements=(
+                    form.requirements.data
+                    .strip()
+                ),
+
+                what_we_offer=(
+                    form.what_we_offer.data
+                    .strip()
+                ),
+
+                employment_type=(
+                    form.employment_type.data
+                ),
+
+                experience_level=(
+                    form.experience_level.data
+                    .strip()
+                    if form.experience_level.data
+                    else None
+                ),
+
+                salary_range=(
+                    form.salary_range.data
+                    .strip()
+                    if form.salary_range.data
+                    else None
+                ),
+
+                deadline=(
+                    form.deadline.data
+                ),
+
+                is_active=(
+                    bool(
+                        form.is_active.data
+                    )
+                ),
+
+                is_featured=(
+                    bool(
+                        form.is_featured.data
+                    )
+                ),
+
                 banner_image=banner_image
             )
 
             try:
-                db.session.add(job)
+
+                db.session.add(
+                    job
+                )
+
                 db.session.commit()
 
-                log_audit("Created Job", f"Created job: {job.title}", "Job", job.id)
-                flash("የስራ ማስታወቂያው በስኬት ተለጥፏል!", "success")
-                return redirect(url_for("admin_jobs"))
+                log_audit(
+                    "Created Job",
+                    (
+                        f"Created job: "
+                        f"{job.title}"
+                    ),
+                    "Job",
+                    job.id
+                )
 
-            except Exception as e:
+                flash(
+                    "የስራ ማስታወቂያው በስኬት ተለጥፏል!",
+                    "success"
+                )
+
+                return redirect(
+                    url_for(
+                        "admin_jobs"
+                    )
+                )
+
+            except Exception:
+
                 db.session.rollback()
+
                 if banner_image:
-                    path = os.path.join(app.config["UPLOAD_FOLDER_JOBS"], banner_image)
-                    if os.path.isfile(path):
-                        os.remove(path)
+                    delete_job_image(
+                        banner_image
+                    )
+
                 traceback.print_exc()
-                flash("የስራ ማስታወቂያውን መፍጠር አልተቻለም።", "danger")
+
+                flash(
+                    "የስራ ማስታወቂያውን መፍጠር አልተቻለም።",
+                    "danger"
+                )
+
+        else:
+
+            flash(
+                "እባክዎን የተጠየቁትን የስራ መረጃዎች በትክክል ይሙሉ።",
+                "warning"
+            )
 
     return render_template(
         "admin/job_form.html",
@@ -3055,82 +4228,419 @@ def admin_job_new():
     )
 
 
+# ============================================================
+# EDIT JOB
+# ============================================================
+
+@app.route(
+    "/admin/job/<int:job_id>/edit",
+    methods=["GET", "POST"]
+)
+@app.route(
+    "/hr/job/<int:job_id>/edit",
+    methods=["GET", "POST"]
+)
+@admin_required
+def admin_job_edit(job_id):
+
+    job = Job.query.get_or_404(
+        job_id
+    )
+
+    form = JobForm()
+
+    configure_job_form_choices(
+        form
+    )
+
+    if request.method == "GET":
+
+        form.title.data = job.title
+
+        form.department_id.data = (
+            job.department_id or 0
+        )
+
+        form.location_id.data = (
+            job.location_id or 0
+        )
+
+        form.short_description.data = (
+            job.short_description
+        )
+
+        form.full_description.data = (
+            job.full_description
+        )
+
+        form.responsibilities.data = (
+            job.responsibilities
+        )
+
+        form.requirements.data = (
+            job.requirements
+        )
+
+        form.what_we_offer.data = (
+            job.what_we_offer
+        )
+
+        form.employment_type.data = (
+            job.employment_type
+        )
+
+        form.experience_level.data = (
+            job.experience_level
+        )
+
+        form.salary_range.data = (
+            job.salary_range
+        )
+
+        form.deadline.data = (
+            job.deadline
+        )
+
+        form.is_active.data = (
+            job.is_active
+        )
+
+        form.is_featured.data = (
+            job.is_featured
+        )
+
+    if request.method == "POST":
+
+        if form.validate_on_submit():
+
+            old_banner = (
+                job.banner_image
+            )
+
+            new_banner = save_job_image(
+                request.files.get(
+                    "banner_image"
+                )
+            )
+
+            job.title = (
+                form.title.data.strip()
+            )
+
+            job.department_id = (
+                form.department_id.data
+                if form.department_id.data
+                and form.department_id.data != 0
+                else None
+            )
+
+            job.location_id = (
+                form.location_id.data
+                if form.location_id.data
+                and form.location_id.data != 0
+                else None
+            )
+
+            job.short_description = (
+                form.short_description.data
+                .strip()
+            )
+
+            job.full_description = (
+                form.full_description.data
+                .strip()
+            )
+
+            job.responsibilities = (
+                form.responsibilities.data
+                .strip()
+            )
+
+            job.requirements = (
+                form.requirements.data
+                .strip()
+            )
+
+            job.what_we_offer = (
+                form.what_we_offer.data
+                .strip()
+            )
+
+            job.employment_type = (
+                form.employment_type.data
+            )
+
+            job.experience_level = (
+                form.experience_level.data
+                .strip()
+                if form.experience_level.data
+                else None
+            )
+
+            job.salary_range = (
+                form.salary_range.data
+                .strip()
+                if form.salary_range.data
+                else None
+            )
+
+            job.deadline = (
+                form.deadline.data
+            )
+
+            job.is_active = (
+                bool(
+                    form.is_active.data
+                )
+            )
+
+            job.is_featured = (
+                bool(
+                    form.is_featured.data
+                )
+            )
+
+            if new_banner:
+                job.banner_image = new_banner
+
+            try:
+
+                db.session.commit()
+
+                if (
+                    new_banner
+                    and old_banner
+                    and old_banner != new_banner
+                ):
+                    delete_job_image(
+                        old_banner
+                    )
+
+                log_audit(
+                    "Updated Job",
+                    (
+                        f"Updated job: "
+                        f"{job.title}"
+                    ),
+                    "Job",
+                    job.id
+                )
+
+                flash(
+                    "የስራ ማስታወቂያው ተስተካክሏል!",
+                    "success"
+                )
+
+                return redirect(
+                    url_for(
+                        "admin_jobs"
+                    )
+                )
+
+            except Exception:
+
+                db.session.rollback()
+
+                if new_banner:
+                    delete_job_image(
+                        new_banner
+                    )
+
+                traceback.print_exc()
+
+                flash(
+                    "የስራ ማስታወቂያውን ማስተካከል አልተቻለም።",
+                    "danger"
+                )
+
+    return render_template(
+        "admin/job_form.html",
+        form=form,
+        is_new=False,
+        job=job
+    )
+
+
+# ============================================================
+# TOGGLE JOB
+# ============================================================
+
 @app.route(
     "/admin/job/<int:job_id>/toggle",
-    methods=["POST"]
+    methods=["GET", "POST"]
 )
 @app.route(
     "/hr/job/<int:job_id>/toggle",
-    methods=["POST"]
+    methods=["GET", "POST"]
 )
 @admin_required
 def admin_job_toggle(job_id):
 
-    job = Job.query.get_or_404(job_id)
+    job = Job.query.get_or_404(
+        job_id
+    )
 
     job.is_active = not job.is_active
 
     try:
+
         db.session.commit()
+
     except Exception:
+
         db.session.rollback()
+
         traceback.print_exc()
-        flash("Could not update job.", "danger")
-        return redirect(url_for("admin_jobs"))
+
+        flash(
+            "Could not update job.",
+            "danger"
+        )
+
+        return redirect(
+            url_for("admin_jobs")
+        )
 
     log_audit(
         "Toggled Job",
-        f"{job.title} active status changed to {job.is_active}",
+
+        (
+            f"{job.title} active status "
+            f"changed to {job.is_active}"
+        ),
+
         "Job",
+
         job.id
     )
 
     flash(
-        ("Job activated." if job.is_active else "Job deactivated."),
+        (
+            "Job activated."
+            if job.is_active
+            else "Job deactivated."
+        ),
         "success"
     )
 
-    return redirect(url_for("admin_jobs"))
+    return redirect(
+        url_for("admin_jobs")
+    )
 
 
 # ============================================================
-# DELETE JOB (የስራ ማስታወቂያ ማጥፊያ ROUTE)
+# DELETE JOB
 # ============================================================
 
-@app.route("/admin/job/<int:job_id>/delete", methods=["POST", "GET"])
-@app.route("/hr/job/<int:job_id>/delete", methods=["POST", "GET"])
+@app.route(
+    "/admin/job/<int:job_id>/delete",
+    methods=["POST", "GET"]
+)
+@app.route(
+    "/hr/job/<int:job_id>/delete",
+    methods=["POST", "GET"]
+)
 @admin_required
 def admin_job_delete(job_id):
 
-    job = Job.query.get_or_404(job_id)
+    job = Job.query.get_or_404(
+        job_id
+    )
+
+    # --------------------------------------------------------
+    # Do not delete a job that already has applications.
+    # This protects candidate records and CV references.
+    # --------------------------------------------------------
+
+    application_count = (
+        Application.query
+        .filter_by(
+            job_id=job.id
+        )
+        .count()
+    )
+
+    if application_count > 0:
+
+        flash(
+            (
+                "ይህ vacancy የተመዘገቡ "
+                f"{application_count} application(s) አሉት። "
+                "ስለዚህ መሰረዝ አይቻልም። "
+                "Toggle በማድረግ ዝጋው።"
+            ),
+            "warning"
+        )
+
+        return redirect(
+            url_for(
+                "admin_jobs"
+            )
+        )
 
     try:
-        # የነበረውን ባነር ፎቶ ማፅዳት
-        if job.banner_image:
-            banner_path = os.path.join(app.config["UPLOAD_FOLDER_JOBS"], job.banner_image)
-            if os.path.isfile(banner_path):
-                os.remove(banner_path)
 
-        db.session.delete(job)
+        old_banner = (
+            job.banner_image
+        )
+
+        db.session.delete(
+            job
+        )
+
         db.session.commit()
 
-        log_audit("Deleted Job", f"Deleted job: {job.title}", "Job", job_id)
-        flash("የስራ ማስታወቂያው በስኬት ተሰርዟል!", "success")
+        if old_banner:
+            delete_job_image(
+                old_banner
+            )
 
-    except Exception as e:
+        log_audit(
+            "Deleted Job",
+
+            (
+                f"Deleted job: "
+                f"{job.title}"
+            ),
+
+            "Job",
+
+            job_id
+        )
+
+        flash(
+            "የስራ ማስታወቂያው በስኬት ተሰርዟል!",
+            "success"
+        )
+
+    except Exception:
+
         db.session.rollback()
+
         traceback.print_exc()
-        flash("ማስታወቂያውን ለማጥፋት ችግር አጋጥሟል!", "danger")
 
-    return redirect(url_for("admin_jobs"))
+        flash(
+            "ማስታወቂያውን ለማጥፋት ችግር አጋጥሟል!",
+            "danger"
+        )
+
+    return redirect(
+        url_for(
+            "admin_jobs"
+        )
+    )
 
 
 # ============================================================
-# INTERVIEWS / TALENT POOL / AUDIT LOG
+# INTERVIEWS
 # ============================================================
 
-@app.route("/admin/interviews")
-@app.route("/hr/interviews")
+@app.route(
+    "/admin/interviews"
+)
+@app.route(
+    "/hr/interviews"
+)
 @admin_required
 def admin_interviews():
 
@@ -3148,8 +4658,16 @@ def admin_interviews():
     )
 
 
-@app.route("/admin/talent-pool")
-@app.route("/hr/talent-pool")
+# ============================================================
+# TALENT POOL ADMIN
+# ============================================================
+
+@app.route(
+    "/admin/talent-pool"
+)
+@app.route(
+    "/hr/talent-pool"
+)
 @admin_required
 def admin_talent_pool():
 
@@ -3167,8 +4685,16 @@ def admin_talent_pool():
     )
 
 
-@app.route("/admin/audit-log")
-@app.route("/hr/audit-log")
+# ============================================================
+# AUDIT LOG
+# ============================================================
+
+@app.route(
+    "/admin/audit-log"
+)
+@app.route(
+    "/hr/audit-log"
+)
 @admin_required
 def admin_audit_log():
 
@@ -3188,7 +4714,7 @@ def admin_audit_log():
 
 
 # ============================================================
-# DATABASE MIGRATION (AUTO-REPAIR MISSING COLUMNS)
+# DATABASE MIGRATION
 # ============================================================
 
 def safe_add_column(
@@ -3203,12 +4729,16 @@ def safe_add_column(
             db.engine
         )
 
-        if table_name not in inspector.get_table_names():
+        if (
+            table_name
+            not in inspector.get_table_names()
+        ):
             return
 
         columns = {
             column["name"]
-            for column in inspector.get_columns(
+            for column
+            in inspector.get_columns(
                 table_name
             )
         }
@@ -3216,17 +4746,45 @@ def safe_add_column(
         if column_name in columns:
             return
 
-        type_str = str(column_type).upper()
+        type_str = str(
+            column_type
+        ).upper()
+
         default_clause = ""
 
-        if "DATETIME" in type_str or "TIMESTAMP" in type_str:
-            default_clause = " DEFAULT CURRENT_TIMESTAMP"
+        if (
+            "DATETIME"
+            in type_str
+            or "TIMESTAMP"
+            in type_str
+        ):
+
+            default_clause = (
+                " DEFAULT CURRENT_TIMESTAMP"
+            )
+
         elif "BOOLEAN" in type_str:
-            default_clause = " DEFAULT FALSE"
+
+            default_clause = (
+                " DEFAULT FALSE"
+            )
+
         elif "INTEGER" in type_str:
-            default_clause = " DEFAULT 0"
-        elif "VARCHAR" in type_str or "TEXT" in type_str:
-            default_clause = " DEFAULT ''"
+
+            default_clause = (
+                " DEFAULT 0"
+            )
+
+        elif (
+            "VARCHAR"
+            in type_str
+            or "TEXT"
+            in type_str
+        ):
+
+            default_clause = (
+                " DEFAULT ''"
+            )
 
         with db.engine.begin() as connection:
 
@@ -3234,19 +4792,23 @@ def safe_add_column(
                 text(
                     f'ALTER TABLE "{table_name}" '
                     f'ADD COLUMN "{column_name}" '
-                    f'{column_type}{default_clause}'
+                    f'{column_type}'
+                    f'{default_clause}'
                 )
             )
 
         print(
-            f"[DB AUTO-MIGRATION] Added missing column: {table_name}.{column_name}"
+            "[DB AUTO-MIGRATION] "
+            f"Added missing column: "
+            f"{table_name}.{column_name}"
         )
 
     except Exception as e:
 
         print(
-            f"[DB WARNING] Could not add column "
-            f"{table_name}.{column_name}: {e}"
+            "[DB WARNING] Could not add "
+            f"column {table_name}."
+            f"{column_name}: {e}"
         )
 
 
@@ -3276,14 +4838,20 @@ def migrate_existing_database():
 
     for model in models:
 
-        table_name = model.__tablename__
+        table_name = (
+            model.__tablename__
+        )
 
-        if table_name not in existing_tables:
+        if (
+            table_name
+            not in existing_tables
+        ):
             continue
 
         existing_columns = {
             column["name"]
-            for column in inspector.get_columns(
+            for column
+            in inspector.get_columns(
                 table_name
             )
         }
@@ -3297,9 +4865,17 @@ def migrate_existing_database():
                 continue
 
             try:
+
                 dialect = db.engine.dialect
-                column_type = column.type.compile(dialect=dialect)
+
+                column_type = (
+                    column.type.compile(
+                        dialect=dialect
+                    )
+                )
+
             except Exception:
+
                 column_type = "TEXT"
 
             safe_add_column(
@@ -3309,28 +4885,59 @@ def migrate_existing_database():
             )
 
 
+# ============================================================
+# SEED DEFAULT DATA
+# ============================================================
+
 def seed_default_data():
 
-    admin = AdminUser.query.filter_by(username=app.config["HR_USERNAME"]).first()
+    admin = (
+        AdminUser.query
+        .filter_by(
+            username=app.config[
+                "HR_USERNAME"
+            ]
+        )
+        .first()
+    )
+
     if not admin:
+
         db.session.add(
             AdminUser(
-                username=app.config["HR_USERNAME"],
-                password_hash=app.config["HR_PASSWORD_HASH"]
+
+                username=app.config[
+                    "HR_USERNAME"
+                ],
+
+                password_hash=app.config[
+                    "HR_PASSWORD_HASH"
+                ]
             )
         )
 
     departments = [
+
         "Front Office",
+
         "Housekeeping",
+
         "Food & Beverage",
+
         "Kitchen",
+
         "Engineering",
+
         "Finance",
+
         "Human Resources",
+
         "IT",
+
         "Security",
+
         "Spa & Wellness",
+
         "Sales & Marketing"
     ]
 
@@ -3338,7 +4945,9 @@ def seed_default_data():
 
         existing = (
             Department.query
-            .filter_by(name=name)
+            .filter_by(
+                name=name
+            )
             .first()
         )
 
@@ -3362,7 +4971,9 @@ def seed_default_data():
 
         db.session.add(
             Location(
+
                 name="Hawassa",
+
                 address=(
                     "Hawassa, "
                     "Sidama Region, "
@@ -3386,17 +4997,33 @@ def init_db_safe():
 
             seed_default_data()
 
-            print("======================================")
-            print("DATABASE INITIALIZATION SUCCESS")
-            print("======================================")
+            print(
+                "======================================"
+            )
 
-        except Exception as e:
+            print(
+                "DATABASE INITIALIZATION SUCCESS"
+            )
+
+            print(
+                "======================================"
+            )
+
+        except Exception:
 
             db.session.rollback()
 
-            print("======================================")
-            print("DATABASE INITIALIZATION ERROR")
-            print("======================================")
+            print(
+                "======================================"
+            )
+
+            print(
+                "DATABASE INITIALIZATION ERROR"
+            )
+
+            print(
+                "======================================"
+            )
 
             traceback.print_exc()
 
@@ -3408,31 +5035,53 @@ def init_db_safe():
 @app.errorhandler(404)
 def page_not_found(error):
 
-    return render_template("404.html"), 404
+    return render_template(
+        "404.html"
+    ), 404
 
 
 @app.errorhandler(413)
 def file_too_large(error):
 
-    flash("File is too large. Maximum size is 10 MB.", "danger")
+    flash(
+        "File is too large. Maximum size is 10 MB.",
+        "danger"
+    )
 
-    return redirect(request.referrer or url_for("home"))
+    return redirect(
+        request.referrer
+        or url_for("home")
+    )
 
 
 @app.errorhandler(500)
 def internal_server_error(error):
 
     try:
+
         db.session.rollback()
+
     except Exception:
+
         pass
 
-    print("======================================")
-    print("INTERNAL SERVER ERROR")
-    traceback.print_exc()
-    print("======================================")
+    print(
+        "======================================"
+    )
 
-    return render_template("500.html"), 500
+    print(
+        "INTERNAL SERVER ERROR"
+    )
+
+    traceback.print_exc()
+
+    print(
+        "======================================"
+    )
+
+    return render_template(
+        "500.html"
+    ), 500
 
 
 # ============================================================
@@ -3440,8 +5089,11 @@ def internal_server_error(error):
 # ============================================================
 
 try:
+
     init_db_safe()
+
 except Exception:
+
     traceback.print_exc()
 
 
@@ -3452,8 +5104,15 @@ except Exception:
 if __name__ == "__main__":
 
     app.run(
+
         host="0.0.0.0",
-        port=int(os.environ.get("PORT", 5000)),
+
+        port=int(
+            os.environ.get(
+                "PORT",
+                5000
+            )
+        ),
+
         debug=True
     )
- 
