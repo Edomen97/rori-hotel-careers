@@ -236,7 +236,7 @@
 
 
         <!-- FORM -->
-        <form method="POST" enctype="multipart/form-data" id="applicationForm" novalidate>
+        <form action="" method="POST" enctype="multipart/form-data" id="applicationForm" novalidate>
 
             {% if form %}
                 {{ form.hidden_tag() }}
@@ -257,7 +257,7 @@
                 <div class="row g-3">
 
                     <div class="col-md-6">
-                        {% if form %}
+                        {% if form and form.full_name %}
                             {{ form.full_name.label(class="form-label fw-semibold required") }}
                             {{ form.full_name(class="form-control", required=true, placeholder="Enter your full name") }}
                         {% else %}
@@ -267,7 +267,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        {% if form %}
+                        {% if form and form.email %}
                             {{ form.email.label(class="form-label fw-semibold required") }}
                             {{ form.email(class="form-control", required=true, placeholder="name@example.com") }}
                         {% else %}
@@ -277,7 +277,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        {% if form %}
+                        {% if form and form.phone %}
                             {{ form.phone.label(class="form-label fw-semibold required") }}
                             {{ form.phone(class="form-control", required=true, placeholder="+251 ...") }}
                         {% else %}
@@ -287,7 +287,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        {% if form %}
+                        {% if form and form.location %}
                             {{ form.location.label(class="form-label fw-semibold") }}
                             {{ form.location(class="form-control", placeholder="City / Town") }}
                         {% else %}
@@ -315,7 +315,7 @@
                 <div class="row g-3">
 
                     <div class="col-md-6">
-                        {% if form %}
+                        {% if form and form.education %}
                             {{ form.education.label(class="form-label fw-semibold") }}
                             {{ form.education(class="form-select") }}
                         {% else %}
@@ -334,7 +334,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        {% if form %}
+                        {% if form and form.years_of_experience %}
                             {{ form.years_of_experience.label(class="form-label fw-semibold") }}
                             {{ form.years_of_experience(class="form-control", placeholder="e.g. 3 years") }}
                         {% else %}
@@ -344,7 +344,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        {% if form %}
+                        {% if form and form.current_position %}
                             {{ form.current_position.label(class="form-label fw-semibold") }}
                             {{ form.current_position(class="form-control", placeholder="Current / Most Recent Position") }}
                         {% else %}
@@ -354,7 +354,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        {% if form %}
+                        {% if form and form.previous_employer %}
                             {{ form.previous_employer.label(class="form-label fw-semibold") }}
                             {{ form.previous_employer(class="form-control", placeholder="Company / Organization") }}
                         {% else %}
@@ -382,7 +382,7 @@
                 <div class="row g-3">
 
                     <div class="col-12">
-                        {% if form %}
+                        {% if form and form.skills %}
                             {{ form.skills.label(class="form-label fw-semibold") }}
                             {{ form.skills(class="form-control", placeholder="e.g. Customer Service, Accounting, IT Support...") }}
                         {% else %}
@@ -392,7 +392,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        {% if form %}
+                        {% if form and form.languages %}
                             {{ form.languages.label(class="form-label fw-semibold") }}
                             {{ form.languages(class="form-control", placeholder="e.g. Amharic, English...") }}
                         {% else %}
@@ -402,7 +402,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        {% if form %}
+                        {% if form and form.certifications %}
                             {{ form.certifications.label(class="form-label fw-semibold") }}
                             {{ form.certifications(class="form-control", placeholder="Certificates / Training") }}
                         {% else %}
@@ -430,7 +430,7 @@
                 <div class="row g-3">
 
                     <div class="col-md-6">
-                        {% if form %}
+                        {% if form and form.availability_date %}
                             {{ form.availability_date.label(class="form-label fw-semibold") }}
                             {{ form.availability_date(class="form-control") }}
                         {% else %}
@@ -440,7 +440,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        {% if form %}
+                        {% if form and form.willing_to_relocate %}
                             {{ form.willing_to_relocate.label(class="form-label fw-semibold") }}
                             {{ form.willing_to_relocate(class="form-select") }}
                         {% else %}
@@ -454,7 +454,7 @@
                     </div>
 
                     <div class="col-12">
-                        {% if form %}
+                        {% if form and form.cover_letter %}
                             {{ form.cover_letter.label(class="form-label fw-semibold") }}
                             {{ form.cover_letter(class="form-control", rows="5", placeholder="Tell us briefly about yourself, your experience and why you are interested in working at Rori Hotel.") }}
                         {% else %}
@@ -483,7 +483,7 @@
 
                     <i class="bi bi-cloud-arrow-up text-gold display-4 d-block mb-3"></i>
 
-                    <label class="form-label fw-bold text-navy fs-5 d-block" id="uploadLabel">
+                    <label class="form-label fw-bold text-navy fs-5 d-block" id="uploadLabel" for="cv_file">
                         Upload Resume / CV
                     </label>
 
@@ -494,7 +494,7 @@
                     </p>
 
                     {% if form and form.cv_file %}
-                        {{ form.cv_file(class="form-control w-100 w-md-75 mx-auto", id="cv_file", accept=".pdf,.doc,.docx") }}
+                        {{ form.cv_file(class="form-control w-100 w-md-75 mx-auto", id="cv_file", name="cv_file", accept=".pdf,.doc,.docx", required=true) }}
                     {% else %}
                         <input type="file" name="cv_file" id="cv_file" class="form-control w-100 w-md-75 mx-auto" accept=".pdf,.doc,.docx" required>
                     {% endif %}
@@ -550,7 +550,6 @@
 let currentStep = 1;
 
 function navigateToStep(targetStep) {
-    // Only allow clicking to steps that are already completed or the current step
     if (targetStep < currentStep) {
         currentStep = targetStep;
         showStep(currentStep);
@@ -574,7 +573,6 @@ function showStep(step) {
     if (content) content.classList.add("active");
     if (indicator) indicator.classList.add("active");
 
-    // Mark previous steps as completed
     document.querySelectorAll(".wizard-step").forEach((ind, index) => {
         const stepNum = index + 1;
         if (stepNum < step) {
@@ -616,8 +614,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const uploadLabel = document.getElementById("uploadLabel");
     const fileError = document.getElementById("fileError");
 
-    function validateCurrentStep() {
-        const currentContent = document.getElementById("wizard-step-" + currentStep);
+    function validateStep(stepIndex) {
+        const currentContent = document.getElementById("wizard-step-" + stepIndex);
         if (!currentContent) return true;
 
         const fields = currentContent.querySelectorAll("input, select, textarea");
@@ -633,8 +631,19 @@ document.addEventListener("DOMContentLoaded", function () {
         return true;
     }
 
+    function validateAllSteps() {
+        for (let s = 1; s <= totalSteps; s++) {
+            if (!validateStep(s)) {
+                currentStep = s;
+                showStep(s);
+                return false;
+            }
+        }
+        return true;
+    }
+
     nextBtn.addEventListener("click", function () {
-        if (!validateCurrentStep()) return;
+        if (!validateStep(currentStep)) return;
 
         if (currentStep < totalSteps) {
             currentStep++;
@@ -653,7 +662,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (uploadArea && fileInput) {
 
         uploadArea.addEventListener("click", function (e) {
-            if (e.target !== fileInput) {
+            if (e.target !== fileInput && !fileInput.contains(e.target)) {
                 fileInput.click();
             }
         });
@@ -674,10 +683,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         uploadArea.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
-            const files = dt.files;
-            if (files.length > 0) {
-                fileInput.files = files;
-                validateAndShowFile(files[0]);
+            if (dt && dt.files && dt.files.length > 0) {
+                // Using DataTransfer to safely set input files in mobile/modern browsers
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(dt.files[0]);
+                fileInput.files = dataTransfer.files;
+                validateAndShowFile(dt.files[0]);
             }
         });
 
@@ -720,7 +731,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Submit Validation & Loading UI
     form.addEventListener("submit", function (event) {
 
-        if (!validateCurrentStep()) {
+        if (!validateAllSteps()) {
             event.preventDefault();
             return;
         }
