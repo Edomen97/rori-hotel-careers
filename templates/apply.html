@@ -494,7 +494,7 @@
                     </p>
 
                     {% if form and form.cv_file %}
-                        {{ form.cv_file(class="form-control w-100 w-md-75 mx-auto", id="cv_file", name="cv_file", accept=".pdf,.doc,.docx", required=true) }}
+                        {{ form.cv_file(class="form-control w-100 w-md-75 mx-auto", id="cv_file", accept=".pdf,.doc,.docx", required=true) }}
                     {% else %}
                         <input type="file" name="cv_file" id="cv_file" class="form-control w-100 w-md-75 mx-auto" accept=".pdf,.doc,.docx" required>
                     {% endif %}
@@ -684,7 +684,6 @@ document.addEventListener("DOMContentLoaded", function () {
         uploadArea.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
             if (dt && dt.files && dt.files.length > 0) {
-                // Using DataTransfer to safely set input files in mobile/modern browsers
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(dt.files[0]);
                 fileInput.files = dataTransfer.files;
