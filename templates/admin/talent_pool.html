@@ -1,0 +1,115 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Talent Pool - Rori Hotel HR{% endblock %}
+
+{% block admin_content %}
+
+<div class="container-fluid px-0">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="header-icon">
+                    <i class="bi bi-people"></i>
+                </span>
+                <h2 class="fw-bold text-navy mb-0">Talent Pool</h2>
+            </div>
+            <p class="text-muted mb-0">
+                Candidates who joined the general talent pool.
+            </p>
+        </div>
+        <div class="badge bg-navy-light text-navy p-3">
+            {{ candidates|length }} candidate{{ '' if candidates|length == 1 else 's' }}
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm" style="border-radius:16px;overflow:hidden;">
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="min-width:950px;">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Candidate</th>
+                        <th>Contact</th>
+                        <th>Location</th>
+                        <th>Experience</th>
+                        <th>Skills</th>
+                        <th class="pe-4">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for c in candidates %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <div style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--navy);color:var(--gold);font-weight:700;font-size:0.9rem;">
+                                    {{ c.full_name[:1]|upper }}
+                                </div>
+                                <div>
+                                    <div class="fw-semibold text-navy">
+                                        {{ c.full_name }}
+                                    </div>
+                                    <small class="text-muted">{{ c.education }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small">{{ c.email }}</div>
+                            <small class="text-muted">{{ c.phone }}</small>
+                        </td>
+                        <td>
+                            <span class="text-muted small">
+                                {{ c.location or '—' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark">
+                                {{ c.years_of_experience }}
+                            </span>
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                {{ c.skills[:60] }}{% if c.skills|length > 60 %}…{% endif %}
+                            </small>
+                        </td>
+                        <td class="pe-4">
+                            <div class="small">
+                                {{ c.submitted_at.strftime('%b %d, %Y') }}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="py-5 text-center">
+                            <div style="width:70px;height:70px;margin:0 auto;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(197,160,89,0.1);color:var(--gold);font-size:1.8rem;">
+                                <i class="bi bi-person-plus"></i>
+                            </div>
+                            <h5 class="fw-bold text-navy mt-3">Talent Pool is Empty</h5>
+                            <p class="text-muted mb-0">
+                                Candidates who join the talent pool will appear here.
+                            </p>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.header-icon {
+    width:42px;height:42px;
+    display:inline-flex;align-items:center;justify-content:center;
+    border-radius:11px;background:rgba(197,160,89,0.12);
+    color:var(--gold);font-size:1.15rem;
+}
+.bg-navy-light {
+    background: rgba(11,19,43,0.08);
+    color: var(--navy);
+    font-weight: 600;
+}
+</style>
+
+{% endblock %}
