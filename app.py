@@ -4650,33 +4650,93 @@ return redirect(
     )    
 )
 
-============================================================
+# ============================================================
+# INTERVIEWS
+# ============================================================
 
-INTERVIEWS
-
-============================================================
-
-@app.route(
-"/admin/interviews"
-)
-@app.route(
-"/hr/interviews"
-)
+@app.route("/admin/interviews")
+@app.route("/hr/interviews")
 @admin_required
 def admin_interviews():
 
-interviews = (    
-    Interview.query    
-    .order_by(    
-        Interview.scheduled_at.desc()    
-    )    
-    .all()    
-)    
-  
-return render_template(    
-    "admin/interviews.html",    
-    interviews=interviews    
-)
+    interviews = (
+        Interview.query
+        .order_by(Interview.scheduled_at.desc())
+        .all()
+    )
+
+    return render_template(
+        "admin/interviews.html",
+        interviews=interviews
+    )
+
+
+# ============================================================
+# NEW INTERVIEW
+# ============================================================
+
+@app.route("/admin/interview/new", methods=["GET", "POST"])
+@app.route("/admin/interviews/new", methods=["GET", "POST"])
+@admin_required
+def admin_interview_new():
+
+    if request.method == "POST":
+
+        application_id = request.form.get("application_id")
+        scheduled_at = request.form.get("scheduled_at")
+
+        if not application_id or not scheduled_at:
+            flash("Please select a candidate and interview date.", "danger")
+            return redirect(url_for("admin_interview_new"))
+
+        try:
+            scheduled_at = datetime.strptime(
+                scheduled_at,
+                "%Y-%m-%dT%H:%M"
+            )
+
+            interview = Interview(
+                application_id=int(application_id),
+                scheduled_at=scheduled_at,
+                duration_minutes=30,
+                interview_type=request.form.get("interview_type"),
+                interviewer_name=request.form.get("interviewer_name"),
+                location=request.form.get("location"),
+                notes=request.form.get("notes"),
+                status="Scheduled"
+            )
+
+            db.session.add(interview)
+            db.session.commit()
+
+            flash(
+                "Interview scheduled successfully.",
+                "success"
+            )
+
+            return redirect(url_for("admin_interviews"))
+
+        except Exception:
+            db.session.rollback()
+            app.logger.exception(
+                "Error creating interview"
+            )
+
+            flash(
+                "Could not schedule interview.",
+                "danger"
+            )
+
+    applications = (
+        Application.query
+        .order_by(Application.id.desc())
+        .all()
+    )
+
+    return render_template(
+        "admin/interview_form.html",
+        applications=applications
+    )
 
 ============================================================
 
