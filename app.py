@@ -4647,10 +4647,13 @@ except Exception:
 return redirect(    
     url_for(    
         "admin_jobs"    
-    )    
-)
+    ) 
 
-# ============================================================
+  )    
+          
+ 
+             
+       # ============================================================
 # INTERVIEWS
 # ============================================================
 
@@ -4686,19 +4689,25 @@ def admin_interview_new():
         scheduled_at = request.form.get("scheduled_at")
 
         if not application_id or not scheduled_at:
-            flash("Please select a candidate and interview date.", "danger")
+            flash(
+                "Please select a candidate and interview date.",
+                "danger"
+            )
             return redirect(url_for("admin_interview_new"))
 
         try:
+
             scheduled_at = datetime.strptime(
                 scheduled_at,
                 "%Y-%m-%dT%H:%M"
             )
 
+            duration = request.form.get("duration_minutes")
+
             interview = Interview(
                 application_id=int(application_id),
                 scheduled_at=scheduled_at,
-                duration_minutes=30,
+                duration_minutes=int(duration) if duration else 30,
                 interview_type=request.form.get("interview_type"),
                 interviewer_name=request.form.get("interviewer_name"),
                 location=request.form.get("location"),
@@ -4717,7 +4726,9 @@ def admin_interview_new():
             return redirect(url_for("admin_interviews"))
 
         except Exception:
+
             db.session.rollback()
+
             app.logger.exception(
                 "Error creating interview"
             )
@@ -4735,9 +4746,116 @@ def admin_interview_new():
 
     return render_template(
         "admin/interview_form.html",
-        applications=applications
+        applications=applications,
+        interview=None,
+        selected_app_id=None
     )
 
+
+# ============================================================
+# EDIT INTERVIEW
+# ============================================================
+
+@app.route(
+    "/admin/interview/<int:interview_id>/edit",
+    methods=["GET", "POST"]
+)
+@admin_required
+def admin_interview_edit(interview_id):
+
+    interview = Interview.query.get_or_404(interview_id)
+
+    if request.method == "POST":
+
+        try:
+
+            scheduled_at = request.form.get("scheduled_at")
+
+            if not scheduled_at:
+                flash(
+                    "Interview date and time are required.",
+                    "danger"
+                )
+                return redirect(
+                    url_for(
+                        "admin_interview_edit",
+                        interview_id=interview.id
+                    )
+                )
+
+            interview.scheduled_at = datetime.strptime(
+                scheduled_at,
+                "%Y-%m-%dT%H:%M"
+            )
+
+            duration = request.form.get("duration_minutes")
+
+            if duration:
+                interview.duration_minutes = int(duration)
+
+            interview.interview_type = request.form.get(
+                "interview_type"
+            )
+
+            interview.interviewer_name = request.form.get(
+                "interviewer_name"
+            )
+
+            interview.location = request.form.get(
+                "location"
+            )
+
+            interview.notes = request.form.get(
+                "notes"
+            )
+
+            status = request.form.get("status")
+
+            if status:
+                interview.status = status
+
+            db.session.commit()
+
+            flash(
+                "Interview updated successfully.",
+                "success"
+            )
+
+            return redirect(
+                url_for("admin_interviews")
+            )
+
+        except Exception:
+
+            db.session.rollback()
+
+            app.logger.exception(
+                "Error updating interview"
+            )
+
+            flash(
+                "Could not update interview.",
+                "danger"
+            )
+
+    applications = (
+        Application.query
+        .order_by(Application.id.desc())
+        .all()
+    )
+
+    return render_template(
+        "admin/interview_form.html",
+        applications=applications,
+        interview=interview,
+        selected_app_id=interview.application_id
+    )     
+           
+              
+         
+          
+          
+             
 ============================================================
 
 TALENT POOL ADMIN
