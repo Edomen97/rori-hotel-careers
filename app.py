@@ -73,8 +73,6 @@ except ImportError:
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-# IMPORTANT: absolute templates directory.
-# This is what fixes "TemplateNotFound: admin/interviews.html"
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 
 
@@ -291,8 +289,6 @@ else:
 # TEMPLATE LOADER  (FIXED)
 # ============================================================
 
-# All template search paths.  "templates" MUST be first so that
-# references like "admin/interviews.html" resolve against it.
 template_dirs = [
     TEMPLATES_DIR,
     os.path.join(TEMPLATES_DIR, "careers"),
@@ -302,21 +298,16 @@ template_dirs = [
     os.path.join(TEMPLATES_DIR, "hr"),
 ]
 
-# Only keep paths that actually exist on disk.
 existing_template_dirs = [
     d for d in template_dirs
     if os.path.isdir(d)
 ]
 
-# Use ChoiceLoader so ANY directory can satisfy a lookup.
-# FileSystemLoader with multiple paths also works, but ChoiceLoader
-# is more explicit and predictable.
 app.jinja_loader = jinja2.ChoiceLoader([
     jinja2.FileSystemLoader(d)
     for d in existing_template_dirs
 ])
 
-# Startup diagnostics — lets you SEE what Render sees.
 print("======================================")
 print("[TEMPLATES] Search paths:")
 for _d in existing_template_dirs:
@@ -337,6 +328,91 @@ else:
         _admin_dir
     )
 print("======================================")
+
+
+# ============================================================
+# SAFE RENDER  (TemplateNotFound -> friendly fallback)
+# ============================================================
+
+def safe_render(template_name, **context):
+    """
+    Wraps render_template so that a missing template returns
+    a helpful fallback page instead of a 500 error.
+    """
+    try:
+        return render_template(template_name, **context)
+    except jinja2.TemplateNotFound:
+
+        print(
+            f"[TEMPLATE MISSING] {template_name} "
+            f"— returning fallback view."
+        )
+
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Template Missing</title>
+            <style>
+                body {{
+                    font-family: system-ui, sans-serif;
+                    background: #0b132b;
+                    color: #fff;
+                    margin: 0;
+                    padding: 60px 20px;
+                    text-align: center;
+                }}
+                .box {{
+                    max-width: 560px;
+                    margin: 0 auto;
+                    background: rgba(255,255,255,0.04);
+                    border: 1px solid rgba(197,160,89,0.3);
+                    border-radius: 16px;
+                    padding: 40px 30px;
+                }}
+                h1 {{
+                    color: #c5a059;
+                    margin-top: 0;
+                }}
+                code {{
+                    background: rgba(0,0,0,0.35);
+                    padding: 3px 8px;
+                    border-radius: 6px;
+                    color: #ffd97d;
+                }}
+                a {{
+                    display: inline-block;
+                    margin-top: 24px;
+                    color: #c5a059;
+                    text-decoration: none;
+                    border: 1px solid #c5a059;
+                    padding: 10px 22px;
+                    border-radius: 8px;
+                }}
+                a:hover {{ background: rgba(197,160,89,0.1); }}
+            </style>
+        </head>
+        <body>
+            <div class="box">
+                <h1>Template Missing</h1>
+                <p>
+                    The template
+                    <code>{template_name}</code>
+                    was not found on the server.
+                </p>
+                <p style="color:#8a9199;font-size:13px;">
+                    Create it under
+                    <code>templates/{template_name}</code>
+                    and redeploy.
+                </p>
+                <a href="/admin/dashboard">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </body>
+        </html>
+        """
 
 
 # ============================================================
@@ -1441,12 +1517,6 @@ def is_cloudinary_cv(filename):
 
 def parse_cloudinary_cv(filename):
 
-    """
-    Stored format:
-
-    cloudinary:rori-hotel-cv/example_123|pdf
-    """
-
     if not is_cloudinary_cv(filename):
         return None, None
 
@@ -1475,14 +1545,6 @@ def parse_cloudinary_cv(filename):
 
 
 def save_uploaded_file(file):
-
-    """
-    CV storage strategy:
-
-    1. Cloudinary authenticated raw asset
-    2. Local storage fallback only if Cloudinary
-       is not configured
-    """
 
     if not file or not file.filename:
         return None
@@ -1514,10 +1576,6 @@ def save_uploaded_file(file):
     unique_name = (
         f"{safe_name}_{timestamp}"
     )
-
-    # ========================================================
-    # CLOUDINARY
-    # ========================================================
 
     if cloudinary_ready():
 
@@ -1568,10 +1626,6 @@ def save_uploaded_file(file):
 
             return None
 
-    # ========================================================
-    # LOCAL FALLBACK
-    # ========================================================
-
     filename = (
         f"{unique_name}"
         f".{extension}"
@@ -1608,10 +1662,6 @@ def delete_uploaded_file(filename):
     if not filename:
         return
 
-    # ========================================================
-    # CLOUDINARY FILE
-    # ========================================================
-
     if is_cloudinary_cv(filename):
 
         public_id, extension = parse_cloudinary_cv(
@@ -1642,10 +1692,6 @@ def delete_uploaded_file(filename):
             traceback.print_exc()
 
         return
-
-    # ========================================================
-    # OLD LOCAL FILE
-    # ========================================================
 
     try:
 
@@ -1713,13 +1759,6 @@ def delete_uploaded_file(filename):
 
 
 def generate_cloudinary_cv_url(filename):
-
-    """
-    Creates a short-lived signed download URL.
-
-    This function must NEVER be exposed to public
-    routes without admin_required.
-    """
 
     public_id, extension = parse_cloudinary_cv(
         filename
@@ -2181,7 +2220,7 @@ def send_interview_email(
         }
 
         subject = subject_map.get(
-            subject,
+            event,
             subject_map["scheduled"]
         )
 
@@ -2329,8 +2368,6 @@ def create_interview_notification(
     event="scheduled"
 ):
 
-    """Creates an in-system Notification for the applicant."""
-
     if not application:
         return
 
@@ -2390,17 +2427,9 @@ def apply_interview_side_effects(
     extra_note=None
 ):
 
-    """
-    Central integration point:
-      * Update Application status -> INTERVIEW
-      * Create in-system Notification
-      * Send email
-    """
-
     if not application:
         return
 
-    # ---- Application status ---------------------------------
     try:
 
         if application.status not in (
@@ -2422,7 +2451,6 @@ def apply_interview_side_effects(
         db.session.rollback()
         traceback.print_exc()
 
-    # ---- Notification + Email -------------------------------
     create_interview_notification(
         application,
         interview,
@@ -3369,10 +3397,6 @@ def admin_login():
                 form=form
             )
 
-        # ====================================================
-        # DATABASE LOGIN
-        # ====================================================
-
         try:
 
             admin_user = (
@@ -3426,10 +3450,6 @@ def admin_login():
             db.session.rollback()
 
             traceback.print_exc()
-
-        # ====================================================
-        # ENVIRONMENT FALLBACK
-        # ====================================================
 
         default_username = (
             app.config.get(
@@ -3760,7 +3780,7 @@ def admin_dashboard():
             .count()
         )
 
-    return render_template(
+    return safe_render(
         "admin/dashboard.html",
 
         total_jobs=total_jobs,
@@ -3857,7 +3877,7 @@ def admin_candidates():
         .all()
     )
 
-    return render_template(
+    return safe_render(
         "admin/candidates.html",
         applications=applications,
         departments=Department.query.all()
@@ -3907,7 +3927,7 @@ def admin_candidate_detail(app_id):
 
             db.session.rollback()
 
-    return render_template(
+    return safe_render(
         "admin/candidate_detail.html",
         application=application,
         interviews=interviews
@@ -3926,11 +3946,6 @@ def admin_candidate_detail(app_id):
 )
 @admin_required
 def download_candidate_cv(app_id):
-
-    # ========================================================
-    # SECURITY:
-    # ONLY AUTHENTICATED HR/ADMIN CAN REACH THIS ROUTE.
-    # ========================================================
 
     application = (
         Application.query
@@ -3952,10 +3967,6 @@ def download_candidate_cv(app_id):
                 "admin_candidates"
             )
         )
-
-    # ========================================================
-    # CLOUDINARY CV
-    # ========================================================
 
     if is_cloudinary_cv(
         filename
@@ -3994,10 +4005,6 @@ def download_candidate_cv(app_id):
                 "admin_candidates"
             )
         )
-
-    # ========================================================
-    # OLD LOCAL CV FALLBACK
-    # ========================================================
 
     safe_filename = secure_filename(
         os.path.basename(filename)
@@ -4232,10 +4239,6 @@ def update_application_status(app_id):
             )
         )
 
-    # ========================================================
-    # APPLICANT NOTIFICATION
-    # ========================================================
-
     try:
 
         position = (
@@ -4273,10 +4276,6 @@ def update_application_status(app_id):
 
         db.session.rollback()
 
-    # ========================================================
-    # AUDIT
-    # ========================================================
-
     log_audit(
         "Status Update",
 
@@ -4291,10 +4290,6 @@ def update_application_status(app_id):
 
         application.id
     )
-
-    # ========================================================
-    # EMAIL
-    # ========================================================
 
     send_application_status_email(
         application,
@@ -4340,7 +4335,7 @@ def admin_jobs():
         .all()
     )
 
-    return render_template(
+    return safe_render(
         "admin/jobs.html",
         jobs=jobs_list
     )
@@ -4569,7 +4564,7 @@ def admin_job_new():
                 "warning"
             )
 
-    return render_template(
+    return safe_render(
         "admin/job_form.html",
         form=form,
         is_new=True
@@ -4801,7 +4796,7 @@ def admin_job_edit(job_id):
                     "danger"
                 )
 
-    return render_template(
+    return safe_render(
         "admin/job_form.html",
         form=form,
         is_new=False,
@@ -4894,11 +4889,6 @@ def admin_job_delete(job_id):
     job = Job.query.get_or_404(
         job_id
     )
-
-    # --------------------------------------------------------
-    # Do not delete a job that already has applications.
-    # This protects candidate records and CV references.
-    # --------------------------------------------------------
 
     application_count = (
         Application.query
@@ -4994,7 +4984,7 @@ def admin_interviews():
         .all()
     )
 
-    return render_template(
+    return safe_render(
         "admin/interviews.html",
         interviews=interviews
     )
@@ -5029,7 +5019,7 @@ def admin_interview_new():
                 "danger"
             )
 
-            return render_template(
+            return safe_render(
                 "admin/interview_form.html",
                 applications=applications,
                 interview=None,
@@ -5050,7 +5040,7 @@ def admin_interview_new():
                 "danger"
             )
 
-            return render_template(
+            return safe_render(
                 "admin/interview_form.html",
                 applications=applications,
                 interview=None,
@@ -5094,9 +5084,6 @@ def admin_interview_new():
 
             db.session.commit()
 
-            # ------------------------------------------------
-            # INTEGRATION: status + notification + email
-            # ------------------------------------------------
             apply_interview_side_effects(
                 application,
                 interview,
@@ -5135,7 +5122,7 @@ def admin_interview_new():
                 "danger"
             )
 
-    return render_template(
+    return safe_render(
         "admin/interview_form.html",
         applications=applications,
         interview=None,
@@ -5230,9 +5217,6 @@ def admin_interview_edit(interview_id):
 
             db.session.commit()
 
-            # ------------------------------------------------
-            # Figure out which event happened
-            # ------------------------------------------------
             event = None
 
             if (
@@ -5306,7 +5290,7 @@ def admin_interview_edit(interview_id):
                 "danger"
             )
 
-    return render_template(
+    return safe_render(
         "admin/interview_form.html",
         applications=applications,
         interview=interview,
@@ -5358,7 +5342,6 @@ def admin_interview_status(interview_id):
     old_status = interview.status
     interview.status = new_status
 
-    # Optional fields
     evaluation = request.form.get("evaluation")
     rating = request.form.get("rating")
     decision = request.form.get("decision")
@@ -5395,7 +5378,6 @@ def admin_interview_status(interview_id):
             or url_for("admin_interviews")
         )
 
-    # Determine event
     event = None
 
     if new_status == "Cancelled" and old_status != "Cancelled":
@@ -5463,7 +5445,7 @@ def admin_talent_pool():
         .all()
     )
 
-    return render_template(
+    return safe_render(
         "admin/talent_pool.html",
         candidates=candidates
     )
@@ -5491,7 +5473,7 @@ def admin_audit_log():
         .all()
     )
 
-    return render_template(
+    return safe_render(
         "admin/audit_log.html",
         logs=logs
     )
