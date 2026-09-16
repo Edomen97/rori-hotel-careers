@@ -1,50 +1,120 @@
-{% extends "admin/base_admin.html" %}
+{% extends "base_admin.html" %}
 
-{% block title %}System Audit Logs - Rori Hotel Careers{% endblock %}
+{% block title %}Audit Log - Rori Hotel HR{% endblock %}
 
 {% block admin_content %}
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+
+<div class="container-fluid px-0">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div>
-            <h2 class="fw-bold text-navy mb-1">System Audit Logs</h2>
-            <p class="text-muted mb-0">Track system activities and administrator logs</p>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="header-icon">
+                    <i class="bi bi-shield-check"></i>
+                </span>
+                <h2 class="fw-bold text-navy mb-0">Audit Log</h2>
+            </div>
+            <p class="text-muted mb-0">Recent HR and system activity.</p>
         </div>
-        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-navy btn-sm">
-            <i class="bi bi-arrow-left me-1"></i> Dashboard
-        </a>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4 p-3 p-md-4">
+    <div class="card border-0 shadow-sm" style="border-radius:16px;overflow:hidden;">
+
+        <div class="card-header bg-white border-0 p-4">
+            <h5 class="fw-bold text-navy mb-1">Activity History</h5>
+            <small class="text-muted">Showing the latest {{ logs|length }} entries</small>
+        </div>
+
         <div class="table-responsive">
-            <table class="table table-striped align-middle">
-                <thead class="table-dark">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
                     <tr>
-                        <th>Date / Time</th>
-                        <th>User</th>
+                        <th class="ps-4">#</th>
                         <th>Action</th>
+                        <th>User</th>
                         <th>Description</th>
-                        <th>IP Address</th>
+                        <th>Target</th>
+                        <th>IP</th>
+                        <th class="pe-4">When</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for log in logs %}
+                {% for log in logs %}
                     <tr>
-                        <td class="small">{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') if log.created_at else 'N/A' }}</td>
-                        <td class="fw-bold">{{ log.user_name or 'System' }}</td>
-                        <td><span class="badge bg-secondary">{{ log.action }}</span></td>
-                        <td>{{ log.description }}</td>
-                        <td><code>{{ log.ip_address or '127.0.0.1' }}</code></td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" class="text-center text-muted py-4">
-                            No audit logs found in the database.
+                        <td class="ps-4">
+                            <span class="text-muted small">#{{ log.id }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-navy-light text-navy">
+                                {{ log.action }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">
+                                {{ log.user_name or 'system' }}
+                            </div>
+                            {% if log.user_id %}
+                                <small class="text-muted">ID: {{ log.user_id }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="text-muted small">
+                                {{ log.description or '—' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if log.target_type %}
+                                <span class="badge bg-light text-dark">
+                                    {{ log.target_type }}
+                                    {% if log.target_id %}#{{ log.target_id }}{% endif %}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <code class="small">{{ log.ip_address or '—' }}</code>
+                        </td>
+                        <td class="pe-4">
+                            <div class="small">
+                                {{ log.created_at.strftime('%b %d, %Y') }}
+                            </div>
+                            <small class="text-muted">
+                                {{ log.created_at.strftime('%I:%M %p') }}
+                            </small>
                         </td>
                     </tr>
-                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="py-5 text-center">
+                            <div style="width:70px;height:70px;margin:0 auto;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(197,160,89,0.1);color:var(--gold);font-size:1.8rem;">
+                                <i class="bi bi-journal-text"></i>
+                            </div>
+                            <h5 class="fw-bold text-navy mt-3">No Activity Yet</h5>
+                            <p class="text-muted mb-0">System activity will appear here.</p>
+                        </td>
+                    </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
+
     </div>
 </div>
+
+<style>
+.header-icon {
+    width:42px;height:42px;
+    display:inline-flex;align-items:center;justify-content:center;
+    border-radius:11px;background:rgba(197,160,89,0.12);
+    color:var(--gold);font-size:1.15rem;
+}
+.bg-navy-light {
+    background: rgba(11,19,43,0.08);
+    color: var(--navy);
+    font-weight: 600;
+    padding: 0.4rem 0.7rem;
+}
+</style>
+
 {% endblock %}
