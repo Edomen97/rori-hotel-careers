@@ -1,4 +1,4 @@
-{% extends "admin/base_admin.html" %}
+{% extends "base_admin.html" %}
 
 {% block title %}Interview Management - Rori Hotel HR{% endblock %}
 
@@ -14,12 +14,10 @@
                 <span class="header-icon">
                     <i class="bi bi-calendar2-week"></i>
                 </span>
-
                 <h2 class="fw-bold text-navy mb-0">
                     Interview Management
                 </h2>
             </div>
-
             <p class="text-muted mb-0">
                 Schedule, monitor and manage candidate interviews.
             </p>
@@ -27,828 +25,436 @@
 
         <a href="{{ url_for('admin_interview_new') }}"
            class="btn btn-gold px-4">
-
             <i class="bi bi-plus-circle me-2"></i>
             Schedule Interview
-
         </a>
 
     </div>
-
 
     <!-- SUMMARY CARDS -->
     <div class="row g-3 mb-4">
 
         <div class="col-6 col-xl-3">
-
             <div class="summary-card">
-
                 <div class="summary-icon">
                     <i class="bi bi-calendar-check"></i>
                 </div>
-
                 <div>
-                    <div class="summary-label">
-                        Total Interviews
-                    </div>
-
-                    <div class="summary-value">
-                        {{ interviews|length }}
-                    </div>
+                    <div class="summary-label">Total Interviews</div>
+                    <div class="summary-value">{{ interviews|length }}</div>
                 </div>
-
             </div>
-
         </div>
 
-
         <div class="col-6 col-xl-3">
-
             <div class="summary-card">
-
                 <div class="summary-icon">
                     <i class="bi bi-clock"></i>
                 </div>
-
                 <div>
-                    <div class="summary-label">
-                        Scheduled
-                    </div>
-
+                    <div class="summary-label">Scheduled</div>
                     <div class="summary-value">
-
-                        {{ interviews
-                            |selectattr('status', 'equalto', 'Scheduled')
-                            |list
-                            |length
-                        }}
-
+                        {{ interviews|selectattr('status', 'equalto', 'Scheduled')|list|length }}
                     </div>
                 </div>
-
             </div>
-
         </div>
 
-
         <div class="col-6 col-xl-3">
-
             <div class="summary-card">
-
                 <div class="summary-icon">
                     <i class="bi bi-check-circle"></i>
                 </div>
-
                 <div>
-                    <div class="summary-label">
-                        Completed
-                    </div>
-
+                    <div class="summary-label">Completed</div>
                     <div class="summary-value">
-
-                        {{ interviews
-                            |selectattr('status', 'equalto', 'Completed')
-                            |list
-                            |length
-                        }}
-
+                        {{ interviews|selectattr('status', 'equalto', 'Completed')|list|length }}
                     </div>
                 </div>
-
             </div>
-
         </div>
 
-
         <div class="col-6 col-xl-3">
-
             <div class="summary-card">
-
                 <div class="summary-icon">
                     <i class="bi bi-x-circle"></i>
                 </div>
-
                 <div>
-                    <div class="summary-label">
-                        Cancelled
-                    </div>
-
+                    <div class="summary-label">Cancelled</div>
                     <div class="summary-value">
-
-                        {{ interviews
-                            |selectattr('status', 'equalto', 'Cancelled')
-                            |list
-                            |length
-                        }}
-
+                        {{ interviews|selectattr('status', 'equalto', 'Cancelled')|list|length }}
                     </div>
                 </div>
-
             </div>
-
         </div>
 
     </div>
 
-
     <!-- INTERVIEW TABLE -->
-
     <div class="card interview-card border-0 shadow-sm">
 
         <div class="card-header bg-white border-0 p-4">
-
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-
                 <div>
-                    <h5 class="fw-bold text-navy mb-1">
-                        Interview Schedule
-                    </h5>
-
-                    <small class="text-muted">
-                        Manage all candidate interviews
-                    </small>
+                    <h5 class="fw-bold text-navy mb-1">Interview Schedule</h5>
+                    <small class="text-muted">Manage all candidate interviews</small>
                 </div>
-
             </div>
-
         </div>
 
-
         <div class="table-responsive">
-
             <table class="table table-hover align-middle mb-0">
-
                 <thead>
-
                     <tr>
-
-                        <th class="ps-4">
-                            ID
-                        </th>
-
-                        <th>
-                            Candidate
-                        </th>
-
-                        <th>
-                            Position
-                        </th>
-
-                        <th>
-                            Date & Time
-                        </th>
-
-                        <th>
-                            Type
-                        </th>
-
-                        <th>
-                            Status
-                        </th>
-
-                        <th class="text-end pe-4">
-                            Actions
-                        </th>
-
+                        <th class="ps-4">ID</th>
+                        <th>Candidate</th>
+                        <th>Position</th>
+                        <th>Date & Time</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
                     </tr>
-
                 </thead>
-
-
                 <tbody>
-
                 {% for interview in interviews %}
-
                     <tr>
-
-                        <!-- ID -->
-
                         <td class="ps-4">
-
-                            <span class="interview-id">
-                                #{{ interview.id }}
-                            </span>
-
+                            <span class="interview-id">#{{ interview.id }}</span>
                         </td>
 
-
-                        <!-- CANDIDATE -->
-
                         <td>
-
-                            <div class="candidate-info">
-
-                                <div class="candidate-avatar">
-                                    {{ interview.application.full_name[:1]|upper }}
-                                </div>
-
-                                <div>
-
-                                    <div class="candidate-name">
-                                        {{ interview.application.full_name }}
+                            {% if interview.application %}
+                                <div class="candidate-info">
+                                    <div class="candidate-avatar">
+                                        {{ interview.application.full_name[:1]|upper }}
                                     </div>
-
-                                    <div class="candidate-email">
-                                        {{ interview.application.email }}
+                                    <div>
+                                        <div class="candidate-name">
+                                            {{ interview.application.full_name }}
+                                        </div>
+                                        <div class="candidate-email">
+                                            {{ interview.application.email }}
+                                        </div>
                                     </div>
-
                                 </div>
-
-                            </div>
-
-                        </td>
-
-
-                        <!-- JOB -->
-
-                        <td>
-
-                            <div class="job-title">
-                                {{ interview.application.job.title }}
-                            </div>
-
-                            {% if interview.application.job.department_name %}
-
-                                <small class="text-muted">
-                                    {{ interview.application.job.department_name }}
-                                </small>
-
+                            {% else %}
+                                <span class="text-muted">Deleted candidate</span>
                             {% endif %}
-
                         </td>
 
-
-                        <!-- DATE -->
+                        <td>
+                            {% if interview.application and interview.application.job %}
+                                <div class="job-title">
+                                    {{ interview.application.job.title }}
+                                </div>
+                                {% if interview.application.job.department_name %}
+                                    <small class="text-muted">
+                                        {{ interview.application.job.department_name }}
+                                    </small>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
 
                         <td>
-
                             {% if interview.scheduled_at %}
-
                                 <div class="schedule-date">
-
                                     <i class="bi bi-calendar3 me-1"></i>
-
                                     {{ interview.scheduled_at.strftime('%b %d, %Y') }}
-
                                 </div>
-
                                 <div class="schedule-time">
-
                                     <i class="bi bi-clock me-1"></i>
-
                                     {{ interview.scheduled_at.strftime('%I:%M %p') }}
-
                                 </div>
-
                             {% else %}
-
-                                <span class="text-muted">
-                                    Not scheduled
-                                </span>
-
+                                <span class="text-muted">Not scheduled</span>
                             {% endif %}
-
                         </td>
 
-
-                        <!-- TYPE -->
-
                         <td>
-
                             {% if interview.interview_type %}
-
                                 <span class="type-badge">
-
-                                    {% if interview.interview_type == 'Online' %}
-
+                                    {% if interview.interview_type in ['Online', 'Virtual'] %}
                                         <i class="bi bi-camera-video me-1"></i>
-
                                     {% elif interview.interview_type == 'Phone' %}
-
                                         <i class="bi bi-telephone me-1"></i>
-
                                     {% else %}
-
                                         <i class="bi bi-building me-1"></i>
-
                                     {% endif %}
-
                                     {{ interview.interview_type }}
-
                                 </span>
-
                             {% else %}
-
-                                <span class="text-muted">
-                                    N/A
-                                </span>
-
+                                <span class="text-muted">N/A</span>
                             {% endif %}
-
                         </td>
 
-
-                        <!-- STATUS -->
-
                         <td>
-
                             {% if interview.status == 'Scheduled' %}
-
                                 <span class="status-badge scheduled">
-                                    <i class="bi bi-clock-fill"></i>
-                                    Scheduled
+                                    <i class="bi bi-clock-fill"></i> Scheduled
                                 </span>
-
                             {% elif interview.status == 'Completed' %}
-
                                 <span class="status-badge completed">
-                                    <i class="bi bi-check-circle-fill"></i>
-                                    Completed
+                                    <i class="bi bi-check-circle-fill"></i> Completed
                                 </span>
-
                             {% elif interview.status == 'Cancelled' %}
-
                                 <span class="status-badge cancelled">
-                                    <i class="bi bi-x-circle-fill"></i>
-                                    Cancelled
+                                    <i class="bi bi-x-circle-fill"></i> Cancelled
                                 </span>
-
                             {% else %}
-
                                 <span class="status-badge default">
                                     {{ interview.status or 'Pending' }}
                                 </span>
-
                             {% endif %}
-
                         </td>
-
-
-                        <!-- ACTIONS -->
 
                         <td class="text-end pe-4">
+                            <a href="{{ url_for('admin_interview_edit', interview_id=interview.id) }}"
+                               class="btn btn-sm btn-outline-secondary me-1"
+                               title="Edit interview">
+                                <i class="bi bi-pencil"></i>
+                            </a>
 
-                            <button
-                                type="button"
-                                class="btn btn-sm btn-outline-navy details-btn"
-                                data-bs-toggle="modal"
-                                data-bs-target="#interviewModal{{ interview.id }}"
-                                title="View interview details"
-                            >
-
-                                <i class="bi bi-eye me-1"></i>
-                                Details
-
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-navy details-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#interviewModal{{ interview.id }}"
+                                    title="View details">
+                                <i class="bi bi-eye me-1"></i> Details
                             </button>
-
                         </td>
-
                     </tr>
 
-
-                    <!-- INTERVIEW DETAILS MODAL -->
-
-                    <div
-                        class="modal fade"
-                        id="interviewModal{{ interview.id }}"
-                        tabindex="-1"
-                        aria-labelledby="interviewModalLabel{{ interview.id }}"
-                        aria-hidden="true"
-                    >
-
+                    <!-- MODAL -->
+                    <div class="modal fade"
+                         id="interviewModal{{ interview.id }}"
+                         tabindex="-1"
+                         aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
-
                             <div class="modal-content interview-modal">
 
-
-                                <!-- MODAL HEADER -->
-
                                 <div class="modal-header">
-
                                     <div>
-
-                                        <h5
-                                            class="modal-title fw-bold text-navy"
-                                            id="interviewModalLabel{{ interview.id }}"
-                                        >
-
+                                        <h5 class="modal-title fw-bold text-navy">
                                             Interview #{{ interview.id }}
-
                                         </h5>
-
-                                        <small class="text-muted">
-                                            Interview details
-                                        </small>
-
+                                        <small class="text-muted">Interview details</small>
                                     </div>
-
-                                    <button
-                                        type="button"
-                                        class="btn-close"
-                                        data-bs-dismiss="modal"
-                                        aria-label="Close"
-                                    ></button>
-
+                                    <button type="button"
+                                            class="btn-close"
+                                            data-bs-dismiss="modal"></button>
                                 </div>
-
-
-                                <!-- MODAL BODY -->
 
                                 <div class="modal-body p-4">
 
-
-                                    <!-- CANDIDATE -->
-
+                                    {% if interview.application %}
                                     <div class="detail-profile mb-4">
-
                                         <div class="large-avatar">
                                             {{ interview.application.full_name[:1]|upper }}
                                         </div>
-
                                         <div>
-
                                             <h5 class="fw-bold text-navy mb-1">
-
                                                 {{ interview.application.full_name }}
-
                                             </h5>
-
                                             <div class="text-muted small">
-
                                                 {{ interview.application.email }}
-
                                             </div>
-
                                             {% if interview.application.phone %}
-
                                                 <div class="text-muted small">
-
                                                     {{ interview.application.phone }}
-
                                                 </div>
-
                                             {% endif %}
-
                                         </div>
-
                                     </div>
-
-
-                                    <!-- DETAILS GRID -->
+                                    {% endif %}
 
                                     <div class="detail-grid">
 
-
                                         <div class="detail-item">
-
-                                            <span class="detail-label">
-                                                Position
-                                            </span>
-
+                                            <span class="detail-label">Position</span>
                                             <span class="detail-value">
-                                                {{ interview.application.job.title }}
-                                            </span>
-
-                                        </div>
-
-
-                                        <div class="detail-item">
-
-                                            <span class="detail-label">
-                                                Scheduled
-                                            </span>
-
-                                            <span class="detail-value">
-
-                                                {% if interview.scheduled_at %}
-
-                                                    {{ interview.scheduled_at.strftime('%B %d, %Y') }}
-
-                                                    <br>
-
-                                                    <small class="text-muted">
-
-                                                        {{ interview.scheduled_at.strftime('%I:%M %p') }}
-
-                                                    </small>
-
+                                                {% if interview.application and interview.application.job %}
+                                                    {{ interview.application.job.title }}
                                                 {% else %}
-
-                                                    Not scheduled
-
+                                                    —
                                                 {% endif %}
-
                                             </span>
-
                                         </div>
 
-
                                         <div class="detail-item">
-
-                                            <span class="detail-label">
-                                                Duration
-                                            </span>
-
+                                            <span class="detail-label">Scheduled</span>
                                             <span class="detail-value">
-
-                                                {{ interview.duration_minutes or 0 }}
-                                                minutes
-
+                                                {% if interview.scheduled_at %}
+                                                    {{ interview.scheduled_at.strftime('%B %d, %Y') }}
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        {{ interview.scheduled_at.strftime('%I:%M %p') }}
+                                                    </small>
+                                                {% else %}
+                                                    Not scheduled
+                                                {% endif %}
                                             </span>
-
                                         </div>
 
+                                        <div class="detail-item">
+                                            <span class="detail-label">Duration</span>
+                                            <span class="detail-value">
+                                                {{ interview.duration_minutes or 0 }} minutes
+                                            </span>
+                                        </div>
 
                                         <div class="detail-item">
-
-                                            <span class="detail-label">
-                                                Interview Type
-                                            </span>
-
+                                            <span class="detail-label">Interview Type</span>
                                             <span class="detail-value">
                                                 {{ interview.interview_type or 'N/A' }}
                                             </span>
-
                                         </div>
 
-
                                         <div class="detail-item">
-
-                                            <span class="detail-label">
-                                                Interviewer
-                                            </span>
-
+                                            <span class="detail-label">Interviewer</span>
                                             <span class="detail-value">
-
                                                 {{ interview.interviewer_name or 'N/A' }}
-
                                             </span>
-
                                         </div>
 
-
                                         <div class="detail-item">
-
-                                            <span class="detail-label">
-                                                Location
-                                            </span>
-
+                                            <span class="detail-label">Location</span>
                                             <span class="detail-value">
-
                                                 {{ interview.location or 'N/A' }}
-
                                             </span>
-
                                         </div>
-
 
                                         <div class="detail-item">
-
-                                            <span class="detail-label">
-                                                Status
-                                            </span>
-
+                                            <span class="detail-label">Status</span>
                                             <span class="detail-value">
-
-                                                {% if interview.status == 'Scheduled' %}
-
-                                                    <span class="status-badge scheduled">
-                                                        Scheduled
-                                                    </span>
-
-                                                {% elif interview.status == 'Completed' %}
-
-                                                    <span class="status-badge completed">
-                                                        Completed
-                                                    </span>
-
-                                                {% elif interview.status == 'Cancelled' %}
-
-                                                    <span class="status-badge cancelled">
-                                                        Cancelled
-                                                    </span>
-
-                                                {% else %}
-
-                                                    <span class="status-badge default">
-                                                        {{ interview.status or 'Pending' }}
-                                                    </span>
-
-                                                {% endif %}
-
+                                                <span class="status-badge default">
+                                                    {{ interview.status or 'Pending' }}
+                                                </span>
                                             </span>
-
                                         </div>
-
 
                                         {% if interview.rating %}
-
                                         <div class="detail-item">
-
-                                            <span class="detail-label">
-                                                Rating
-                                            </span>
-
+                                            <span class="detail-label">Rating</span>
                                             <span class="detail-value rating">
-
                                                 <i class="bi bi-star-fill"></i>
-
                                                 {{ interview.rating }}/5
-
                                             </span>
-
                                         </div>
-
                                         {% endif %}
 
-
                                     </div>
-
-
-                                    <!-- NOTES -->
 
                                     {% if interview.notes %}
-
                                     <div class="notes-box mt-4">
-
-                                        <div class="detail-label mb-2">
-                                            Interview Notes
-                                        </div>
-
-                                        <div class="notes-text">
-                                            {{ interview.notes }}
-                                        </div>
-
+                                        <div class="detail-label mb-2">Interview Notes</div>
+                                        <div class="notes-text">{{ interview.notes }}</div>
                                     </div>
-
                                     {% endif %}
-
-
-                                    <!-- EVALUATION -->
 
                                     {% if interview.evaluation %}
-
                                     <div class="notes-box mt-3">
-
-                                        <div class="detail-label mb-2">
-                                            Evaluation
-                                        </div>
-
-                                        <div class="notes-text">
-                                            {{ interview.evaluation }}
-                                        </div>
-
+                                        <div class="detail-label mb-2">Evaluation</div>
+                                        <div class="notes-text">{{ interview.evaluation }}</div>
                                     </div>
-
                                     {% endif %}
 
-
-                                    <!-- DECISION -->
-
                                     {% if interview.decision %}
-
                                     <div class="notes-box mt-3">
-
-                                        <div class="detail-label mb-2">
-                                            Decision
-                                        </div>
-
+                                        <div class="detail-label mb-2">Decision</div>
                                         <div class="notes-text fw-semibold">
                                             {{ interview.decision }}
                                         </div>
-
                                     </div>
-
                                     {% endif %}
 
                                 </div>
 
-
-                                <!-- MODAL FOOTER -->
-
                                 <div class="modal-footer">
+                                    <form method="POST"
+                                          action="{{ url_for('admin_interview_status', interview_id=interview.id) }}"
+                                          class="d-flex gap-2 me-auto">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <select name="status" class="form-select form-select-sm" style="width:auto;">
+                                            {% for s in ['Scheduled', 'Completed', 'Cancelled', 'Rescheduled'] %}
+                                                <option value="{{ s }}" {% if interview.status == s %}selected{% endif %}>
+                                                    {{ s }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-gold">
+                                            Update
+                                        </button>
+                                    </form>
 
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-secondary"
-                                        data-bs-dismiss="modal"
-                                    >
-
+                                    <button type="button"
+                                            class="btn btn-outline-secondary"
+                                            data-bs-dismiss="modal">
                                         Close
-
                                     </button>
-
                                 </div>
 
                             </div>
-
                         </div>
-
                     </div>
-
 
                 {% else %}
 
-                    <!-- EMPTY STATE -->
-
                     <tr>
-
                         <td colspan="7" class="py-5">
-
                             <div class="empty-state text-center">
-
                                 <div class="empty-icon">
-
                                     <i class="bi bi-calendar-x"></i>
-
                                 </div>
-
                                 <h5 class="fw-bold text-navy mt-3">
                                     No Interviews Scheduled
                                 </h5>
-
                                 <p class="text-muted mb-4">
                                     There are currently no candidate interviews in the system.
                                 </p>
-
-                                <a
-                                    href="{{ url_for('admin_interview_new') }}"
-                                    class="btn btn-gold"
-                                >
-
+                                <a href="{{ url_for('admin_interview_new') }}"
+                                   class="btn btn-gold">
                                     <i class="bi bi-plus-circle me-2"></i>
                                     Schedule First Interview
-
                                 </a>
-
                             </div>
-
                         </td>
-
                     </tr>
 
                 {% endfor %}
-
                 </tbody>
-
             </table>
-
         </div>
-
     </div>
-
 </div>
 
-
 <style>
-
-/* ==============================
-   PAGE HEADER
-================================ */
-
 .header-icon {
-    width: 42px;
-    height: 42px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    width: 42px; height: 42px;
+    display: inline-flex; align-items: center; justify-content: center;
     border-radius: 11px;
     background: rgba(197, 160, 89, 0.12);
     color: var(--gold);
     font-size: 1.15rem;
 }
-
-
-/* ==============================
-   SUMMARY CARDS
-================================ */
-
 .summary-card {
     height: 100%;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    display: flex; align-items: center; gap: 1rem;
     padding: 1.1rem;
     background: #fff;
     border: 1px solid rgba(11, 19, 43, 0.07);
     border-radius: 14px;
     box-shadow: 0 5px 20px rgba(11, 19, 43, 0.05);
 }
-
-
 .summary-icon {
-    width: 42px;
-    height: 42px;
+    width: 42px; height: 42px;
     flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     border-radius: 11px;
     background: rgba(197, 160, 89, 0.12);
     color: var(--gold);
 }
-
-
 .summary-label {
     color: #6c757d;
     font-size: 0.72rem;
@@ -856,31 +462,14 @@
     font-weight: 700;
     letter-spacing: 0.5px;
 }
-
-
 .summary-value {
     color: var(--navy);
     font-size: 1.45rem;
     font-weight: 800;
     line-height: 1.2;
 }
-
-
-/* ==============================
-   TABLE
-================================ */
-
-.interview-card {
-    border-radius: 16px;
-    overflow: hidden;
-}
-
-
-.interview-card .table {
-    min-width: 1050px;
-}
-
-
+.interview-card { border-radius: 16px; overflow: hidden; }
+.interview-card .table { min-width: 1050px; }
 .interview-card thead th {
     background: #f8f9fa;
     color: #667085;
@@ -892,107 +481,33 @@
     padding: 0.9rem 0.75rem;
     white-space: nowrap;
 }
-
-
 .interview-card tbody td {
     padding: 1rem 0.75rem;
     border-color: #f0f1f3;
 }
+.interview-card tbody tr { transition: background-color 0.2s ease; }
+.interview-card tbody tr:hover { background: #fafafa; }
+.interview-id { color: var(--gold); font-weight: 700; }
 
-
-.interview-card tbody tr {
-    transition: background-color 0.2s ease;
-}
-
-
-.interview-card tbody tr:hover {
-    background: #fafafa;
-}
-
-
-.interview-id {
-    color: var(--gold);
-    font-weight: 700;
-}
-
-
-/* ==============================
-   CANDIDATE
-================================ */
-
-.candidate-info {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-}
-
-
-.candidate-avatar,
-.large-avatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.candidate-info { display: flex; align-items: center; gap: 0.7rem; }
+.candidate-avatar, .large-avatar {
+    display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
     border-radius: 50%;
     background: var(--navy);
     color: var(--gold);
     font-weight: 700;
 }
+.candidate-avatar { width: 38px; height: 38px; font-size: 0.9rem; }
+.candidate-name { color: var(--navy); font-size: 0.9rem; font-weight: 700; }
+.candidate-email { color: #8a9199; font-size: 0.72rem; margin-top: 2px; }
+.job-title { color: var(--navy); font-weight: 600; font-size: 0.86rem; }
 
-
-.candidate-avatar {
-    width: 38px;
-    height: 38px;
-    font-size: 0.9rem;
-}
-
-
-.candidate-name {
-    color: var(--navy);
-    font-size: 0.9rem;
-    font-weight: 700;
-}
-
-
-.candidate-email {
-    color: #8a9199;
-    font-size: 0.72rem;
-    margin-top: 2px;
-}
-
-
-.job-title {
-    color: var(--navy);
-    font-weight: 600;
-    font-size: 0.86rem;
-}
-
-
-/* ==============================
-   SCHEDULE
-================================ */
-
-.schedule-date {
-    color: var(--navy);
-    font-size: 0.84rem;
-    font-weight: 600;
-}
-
-
-.schedule-time {
-    color: #7b8490;
-    font-size: 0.75rem;
-    margin-top: 3px;
-}
-
-
-/* ==============================
-   BADGES
-================================ */
+.schedule-date { color: var(--navy); font-size: 0.84rem; font-weight: 600; }
+.schedule-time { color: #7b8490; font-size: 0.75rem; margin-top: 3px; }
 
 .type-badge {
-    display: inline-flex;
-    align-items: center;
+    display: inline-flex; align-items: center;
     padding: 0.4rem 0.65rem;
     border-radius: 7px;
     background: #f1f3f5;
@@ -1000,58 +515,20 @@
     font-size: 0.74rem;
     font-weight: 600;
 }
-
-
 .status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
+    display: inline-flex; align-items: center; gap: 0.35rem;
     padding: 0.4rem 0.7rem;
     border-radius: 50px;
     font-size: 0.72rem;
     font-weight: 700;
     white-space: nowrap;
 }
+.status-badge.scheduled { background: #fff3cd; color: #856404; }
+.status-badge.completed { background: #d1e7dd; color: #0f5132; }
+.status-badge.cancelled { background: #f8d7da; color: #842029; }
+.status-badge.default { background: #e9ecef; color: #495057; }
 
-
-.status-badge.scheduled {
-    background: #fff3cd;
-    color: #856404;
-}
-
-
-.status-badge.completed {
-    background: #d1e7dd;
-    color: #0f5132;
-}
-
-
-.status-badge.cancelled {
-    background: #f8d7da;
-    color: #842029;
-}
-
-
-.status-badge.default {
-    background: #e9ecef;
-    color: #495057;
-}
-
-
-/* ==============================
-   BUTTON
-================================ */
-
-.details-btn {
-    border-radius: 8px;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-
-/* ==============================
-   MODAL
-================================ */
+.details-btn { border-radius: 8px; font-size: 0.75rem; font-weight: 600; }
 
 .interview-modal {
     border: 0;
@@ -1059,59 +536,28 @@
     overflow: hidden;
     box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2);
 }
-
-
-.interview-modal .modal-header {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #edf0f2;
-}
-
-
-.interview-modal .modal-footer {
-    border-top: 1px solid #edf0f2;
-}
-
-
-/* ==============================
-   PROFILE
-================================ */
+.interview-modal .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #edf0f2; }
+.interview-modal .modal-footer { border-top: 1px solid #edf0f2; }
 
 .detail-profile {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    display: flex; align-items: center; gap: 1rem;
     padding: 1rem;
     background: #f8f9fa;
     border-radius: 12px;
 }
-
-
-.large-avatar {
-    width: 54px;
-    height: 54px;
-    font-size: 1.1rem;
-}
-
-
-/* ==============================
-   DETAILS
-================================ */
+.large-avatar { width: 54px; height: 54px; font-size: 1.1rem; }
 
 .detail-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
 }
-
-
 .detail-item {
     padding: 0.85rem;
     border: 1px solid #edf0f2;
     border-radius: 10px;
     background: #fff;
 }
-
-
 .detail-label {
     display: block;
     color: #8a9199;
@@ -1121,37 +567,20 @@
     letter-spacing: 0.4px;
     margin-bottom: 0.3rem;
 }
-
-
 .detail-value {
     display: block;
     color: var(--navy);
     font-size: 0.84rem;
     font-weight: 600;
 }
-
-
-.rating {
-    color: #b8871d;
-}
-
-
-.rating i {
-    margin-right: 3px;
-}
-
-
-/* ==============================
-   NOTES
-================================ */
+.rating { color: #b8871d; }
+.rating i { margin-right: 3px; }
 
 .notes-box {
     padding: 1rem;
     background: #f8f9fa;
     border-radius: 10px;
 }
-
-
 .notes-text {
     color: #495057;
     font-size: 0.84rem;
@@ -1159,54 +588,22 @@
     white-space: pre-line;
 }
 
-
-/* ==============================
-   EMPTY STATE
-================================ */
-
-.empty-state {
-    padding: 2rem 1rem;
-}
-
-
+.empty-state { padding: 2rem 1rem; }
 .empty-icon {
-    width: 70px;
-    height: 70px;
+    width: 70px; height: 70px;
     margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     border-radius: 50%;
     background: rgba(197, 160, 89, 0.1);
     color: var(--gold);
     font-size: 1.8rem;
 }
 
-
-/* ==============================
-   MOBILE
-================================ */
-
 @media (max-width: 767px) {
-
-    .admin-login-page {
-        padding: 1rem;
-    }
-
-    .detail-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .summary-card {
-        padding: 0.9rem;
-    }
-
-    .summary-value {
-        font-size: 1.2rem;
-    }
-
+    .detail-grid { grid-template-columns: 1fr; }
+    .summary-card { padding: 0.9rem; }
+    .summary-value { font-size: 1.2rem; }
 }
-
 </style>
 
 {% endblock %}
