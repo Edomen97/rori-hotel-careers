@@ -1,8 +1,171 @@
 {% extends "base_admin.html" %}
 
-{% block content %}
-<div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Interviews Management</h1>
-    <p>Interviews page loaded successfully.</p>
+{% block title %}
+    {{ 'Edit Interview' if interview else 'Schedule Interview' }} - Rori Hotel HR
+{% endblock %}
+
+{% block admin_content %}
+
+<div class="container-fluid px-0" style="max-width:900px;">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="header-icon">
+                    <i class="bi bi-calendar-plus"></i>
+                </span>
+                <h2 class="fw-bold text-navy mb-0">
+                    {{ 'Edit Interview' if interview else 'Schedule Interview' }}
+                </h2>
+            </div>
+            <p class="text-muted mb-0">
+                {{ 'Update interview details.' if interview else 'Set up a new candidate interview.' }}
+            </p>
+        </div>
+
+        <a href="{{ url_for('admin_interviews') }}"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm" style="border-radius:16px;">
+        <div class="card-body p-4">
+
+            <form method="POST"
+                  action="{{ url_for('admin_interview_edit', interview_id=interview.id) if interview else url_for('admin_interview_new') }}">
+
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                {% if not interview %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        Candidate <span class="text-danger">*</span>
+                    </label>
+                    <select name="application_id" class="form-select" required>
+                        <option value="">— Select candidate —</option>
+                        {% for app in applications %}
+                            <option value="{{ app.id }}"
+                                {% if selected_app_id == app.id %}selected{% endif %}>
+                                #{{ app.id }} — {{ app.full_name }}
+                                {% if app.job %} ({{ app.job.title }}){% endif %}
+                                — {{ app.email }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% else %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Candidate</label>
+                    <input type="text" class="form-control"
+                           value="{{ interview.application.full_name if interview.application else 'Unknown' }}"
+                           disabled>
+                </div>
+                {% endif %}
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            Date &amp; Time <span class="text-danger">*</span>
+                        </label>
+                        <input type="datetime-local"
+                               name="scheduled_at"
+                               class="form-control"
+                               required
+                               value="{{ interview.scheduled_at.strftime('%Y-%m-%dT%H:%M') if interview and interview.scheduled_at else '' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Duration (minutes)</label>
+                        <input type="number"
+                               name="duration_minutes"
+                               class="form-control"
+                               min="5" max="120"
+                               value="{{ interview.duration_minutes if interview else 30 }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Type</label>
+                        <select name="interview_type" class="form-select">
+                            {% set current_type = interview.interview_type if interview else 'In-person' %}
+                            <option value="In-person" {% if current_type == 'In-person' %}selected{% endif %}>In-person</option>
+                            <option value="Virtual"   {% if current_type in ['Virtual','Online'] %}selected{% endif %}>Virtual / Online</option>
+                            <option value="Phone"     {% if current_type == 'Phone' %}selected{% endif %}>Phone</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Interviewer</label>
+                        <input type="text"
+                               name="interviewer_name"
+                               class="form-control"
+                               placeholder="e.g. Mr. Abebe"
+                               value="{{ interview.interviewer_name if interview and interview.interviewer_name else '' }}">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Location / Meeting Link</label>
+                        <input type="text"
+                               name="location"
+                               class="form-control"
+                               placeholder="e.g. HR Office, 2nd floor or https://meet.google.com/..."
+                               value="{{ interview.location if interview and interview.location else '' }}">
+                    </div>
+
+                    {% if interview %}
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Status</label>
+                        <select name="status" class="form-select">
+                            {% for s in ['Scheduled', 'Completed', 'Cancelled', 'Rescheduled'] %}
+                                <option value="{{ s }}" {% if interview.status == s %}selected{% endif %}>
+                                    {{ s }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Notes</label>
+                        <textarea name="notes"
+                                  class="form-control"
+                                  rows="4"
+                                  placeholder="Any preparation notes for the candidate or interviewer...">{{ interview.notes if interview and interview.notes else '' }}</textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{{ url_for('admin_interviews') }}"
+                       class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-gold px-4">
+                        <i class="bi bi-check2-circle me-1"></i>
+                        {{ 'Update Interview' if interview else 'Schedule Interview' }}
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
 </div>
+
+<style>
+.header-icon {
+    width: 42px; height: 42px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 11px;
+    background: rgba(197, 160, 89, 0.12);
+    color: var(--gold);
+    font-size: 1.15rem;
+}
+.form-label { color: var(--navy); font-size: 0.85rem; }
+.form-control, .form-select { border-radius: 10px; padding: 0.6rem 0.85rem; }
+.form-control:focus, .form-select:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 0.2rem rgba(197, 160, 89, 0.15);
+}
+</style>
+
 {% endblock %}
