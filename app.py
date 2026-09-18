@@ -68,6 +68,19 @@ except ImportError:
 
 
 # ============================================================
+# ENVIRONMENT DETECTION
+# ============================================================
+
+IS_PRODUCTION = (
+    os.environ.get("FLASK_ENV", "").lower() == "production"
+    or os.environ.get("RENDER") == "true"
+    or os.environ.get("RENDER_SERVICE_ID") is not None
+    or os.environ.get("ENVIRONMENT", "").lower() == "production"
+    or os.environ.get("APP_ENV", "").lower() == "production"
+)
+
+
+# ============================================================
 # CONFIGURATION
 # ============================================================
 
@@ -78,11 +91,32 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 
 class Config:
 
-    SECRET_KEY = os.environ.get(
-        "SECRET_KEY",
-        "change-this-secret-key-in-production-rori-2026"
-    )
+    # --------------------------------------------------------
+    # SECRET KEY
+    # --------------------------------------------------------
+    SECRET_KEY = os.environ.get("SECRET_KEY")
 
+    if not SECRET_KEY:
+        if IS_PRODUCTION:
+            # Ephemeral random key. Sessions will not persist across
+            # restarts. Set SECRET_KEY env var in production.
+            SECRET_KEY = secrets.token_hex(32)
+            print(
+                "[SECURITY WARNING] SECRET_KEY is not set. "
+                "Generated an ephemeral key. Sessions will NOT "
+                "persist across restarts. Please set the "
+                "SECRET_KEY environment variable in production."
+            )
+        else:
+            SECRET_KEY = "dev-only-insecure-secret-do-not-use-in-prod"
+            print(
+                "[SECURITY] Using default development SECRET_KEY. "
+                "Set SECRET_KEY for production."
+            )
+
+    # --------------------------------------------------------
+    # DATABASE
+    # --------------------------------------------------------
     DATABASE_URL = os.environ.get("DATABASE_URL")
 
     if DATABASE_URL:
@@ -178,20 +212,45 @@ class Config:
         or "admin"
     )
 
-    HR_PASSWORD_HASH = os.environ.get(
-        "HR_PASSWORD_HASH"
+    HR_PASSWORD_HASH = os.environ.get("HR_PASSWORD_HASH")
+    HR_PASSWORD = (
+        os.environ.get("HR_PASSWORD")
+        or os.environ.get("ADMIN_PASSWORD")
     )
 
-    if not HR_PASSWORD_HASH:
+    if not HR_PASSWORD_HASH and not HR_PASSWORD:
 
-        raw_password = (
-            os.environ.get("HR_PASSWORD")
-            or os.environ.get("ADMIN_PASSWORD")
-            or "RoriHR2026"
-        )
+        if IS_PRODUCTION:
+
+            # Generate a random unknown password so admin cannot
+            # log in until env credentials are configured. This
+            # prevents the app from running with default creds.
+            _random = secrets.token_hex(32)
+            HR_PASSWORD_HASH = generate_password_hash(_random)
+
+            print(
+                "[SECURITY WARNING] Neither HR_PASSWORD_HASH nor "
+                "HR_PASSWORD is set. Generated a random unknown "
+                "password. Admin login will NOT work until you set "
+                "one of these environment variables."
+            )
+
+        else:
+
+            HR_PASSWORD = "RoriHR2026"
+            HR_PASSWORD_HASH = generate_password_hash(
+                HR_PASSWORD
+            )
+
+            print(
+                "[SECURITY] Using default development password. "
+                "DO NOT use this password in production."
+            )
+
+    elif not HR_PASSWORD_HASH:
 
         HR_PASSWORD_HASH = generate_password_hash(
-            raw_password
+            HR_PASSWORD
         )
 
     # ========================================================
@@ -286,9 +345,13 @@ else:
 
 
 # ============================================================
-# TEMPLATE LOADER  (FIXED)
+# TEMPLATE LOADER  (FIXED + DIAGNOSTICS)
 # ============================================================
 
+# Search paths for Jinja.  templates/ root MUST come first so that
+# lookups like "admin/interviews.html" resolve.  Subdirectories are
+# added afterwards so that bare names like "base_admin.html"
+# (when the file lives in templates/admin/) also resolve.
 template_dirs = [
     TEMPLATES_DIR,
     os.path.join(TEMPLATES_DIR, "careers"),
@@ -303,49 +366,134 @@ existing_template_dirs = [
     if os.path.isdir(d)
 ]
 
-app.jinja_loader = jinja2.ChoiceLoader([
-    jinja2.FileSystemLoader(d)
-    for d in existing_template_dirs
-])
+# Robust loader: a single FileSystemLoader with all existing roots.
+# Jinja will try each root in order for every template lookup.
+if existing_template_dirs:
+
+    _loader = jinja2.FileSystemLoader(
+        existing_template_dirs,
+        followlinks=True
+    )
+
+else:
+
+    # Fallback — should never happen, but keep Flask usable.
+    _loader = jinja2.FileSystemLoader(
+        [TEMPLATES_DIR]
+    )
+
+# Set both places so the environment definitely picks up the loader.
+app.jinja_options = dict(app.jinja_options)
+app.jinja_options["loader"] = _loader
+app.jinja_loader = _loader
+
+# Force re-creation of the jinja environment so the new loader is used.
+if "jinja_env" in app.__dict__:
+    del app.__dict__["jinja_env"]
+
+# ------------------------------------------------------------
+# Startup diagnostics
+# ------------------------------------------------------------
 
 print("======================================")
-print("[TEMPLATES] Search paths:")
+print("[TEMPLATES] BASE_DIR        :", BASE_DIR)
+print("[TEMPLATES] TEMPLATES_DIR   :", TEMPLATES_DIR)
+print("[TEMPLATES] exists          :", os.path.isdir(TEMPLATES_DIR))
+print("[TEMPLATES] IS_PRODUCTION   :", IS_PRODUCTION)
+print("[TEMPLATES] Search paths    :")
 for _d in existing_template_dirs:
     print("   -", _d)
 
-_admin_dir = os.path.join(TEMPLATES_DIR, "admin")
-if os.path.isdir(_admin_dir):
-    print("[TEMPLATES] Contents of templates/admin:")
-    try:
-        for _f in sorted(os.listdir(_admin_dir)):
-            print("   *", _f)
-    except Exception:
-        pass
-else:
+if not os.path.isdir(TEMPLATES_DIR):
+
     print(
-        "[TEMPLATES] WARNING: templates/admin directory "
-        "does not exist at:",
-        _admin_dir
+        "[TEMPLATES] CRITICAL: templates directory does not exist!"
     )
+
+else:
+
+    print("[TEMPLATES] Full template tree:")
+    for _root, _dirs, _files in os.walk(TEMPLATES_DIR):
+        for _f in sorted(_files):
+            if _f.endswith(".html"):
+                _rel = os.path.relpath(
+                    os.path.join(_root, _f),
+                    BASE_DIR
+                )
+                print("   [HTML]", _rel)
+
+# ------------------------------------------------------------
+# Critical lookups — verify Jinja can find each one
+# ------------------------------------------------------------
+
+_critical_templates = [
+    "admin/interviews.html",
+    "admin/interview_form.html",
+    "admin/base_admin.html",
+    "base_admin.html",
+    "admin/audit_log.html",
+    "admin/talent_pool.html",
+    "admin/dashboard.html",
+    "admin/candidates.html",
+    "admin/jobs.html",
+    "admin/job_form.html",
+    "admin/candidate_detail.html",
+]
+
+print("[TEMPLATES] Critical lookups:")
+
+for _tpl in _critical_templates:
+
+    try:
+
+        app.jinja_env.get_template(_tpl)
+        print(f"   OK      {_tpl}")
+
+    except jinja2.TemplateNotFound as _e:
+
+        print(
+            f"   MISSING {_tpl}  "
+            f"(exc.name={getattr(_e, 'name', None)})"
+        )
+
+    except Exception as _e:
+
+        print(f"   ERROR   {_tpl}  (exc={_e})")
+
 print("======================================")
 
 
 # ============================================================
-# SAFE RENDER  (TemplateNotFound -> friendly fallback)
+# SAFE RENDER  (reports the ACTUAL missing template)
 # ============================================================
 
 def safe_render(template_name, **context):
     """
     Wraps render_template so that a missing template returns
-    a helpful fallback page instead of a 500 error.
+    a helpful fallback page instead of a 500.
+
+    IMPORTANT: If the requested template exists but its parent
+    (via {% extends %}) is missing, Jinja raises TemplateNotFound
+    for the PARENT. This function logs both the requested name
+    and the actual missing one.
     """
+
     try:
+
         return render_template(template_name, **context)
-    except jinja2.TemplateNotFound:
+
+    except jinja2.TemplateNotFound as exc:
+
+        actual_missing = (
+            getattr(exc, "name", None)
+            or getattr(exc, "message", None)
+            or str(exc)
+        )
 
         print(
-            f"[TEMPLATE MISSING] {template_name} "
-            f"— returning fallback view."
+            f"[TEMPLATE MISSING] "
+            f"requested={template_name} "
+            f"actual_missing={actual_missing}"
         )
 
         return f"""
@@ -364,22 +512,29 @@ def safe_render(template_name, **context):
                     text-align: center;
                 }}
                 .box {{
-                    max-width: 560px;
+                    max-width: 640px;
                     margin: 0 auto;
                     background: rgba(255,255,255,0.04);
                     border: 1px solid rgba(197,160,89,0.3);
                     border-radius: 16px;
                     padding: 40px 30px;
                 }}
-                h1 {{
-                    color: #c5a059;
-                    margin-top: 0;
-                }}
+                h1 {{ color: #c5a059; margin-top: 0; }}
                 code {{
                     background: rgba(0,0,0,0.35);
                     padding: 3px 8px;
                     border-radius: 6px;
                     color: #ffd97d;
+                }}
+                .row {{
+                    margin: 10px 0;
+                    font-size: 14px;
+                }}
+                .k {{
+                    color: #8a9199;
+                    display: inline-block;
+                    min-width: 150px;
+                    text-align: left;
                 }}
                 a {{
                     display: inline-block;
@@ -396,19 +551,20 @@ def safe_render(template_name, **context):
         <body>
             <div class="box">
                 <h1>Template Missing</h1>
-                <p>
-                    The template
+                <div class="row">
+                    <span class="k">Requested:</span>
                     <code>{template_name}</code>
-                    was not found on the server.
+                </div>
+                <div class="row">
+                    <span class="k">Actually missing:</span>
+                    <code>{actual_missing}</code>
+                </div>
+                <p style="color:#8a9199;font-size:13px;margin-top:20px;">
+                    If "Actually missing" differs from "Requested",
+                    the parent template (via
+                    <code>{{% extends %}}</code>) is the one missing.
                 </p>
-                <p style="color:#8a9199;font-size:13px;">
-                    Create it under
-                    <code>templates/{template_name}</code>
-                    and redeploy.
-                </p>
-                <a href="/admin/dashboard">
-                    ← Back to Dashboard
-                </a>
+                <a href="/admin/dashboard">← Back to Dashboard</a>
             </div>
         </body>
         </html>
@@ -3908,7 +4064,7 @@ def admin_candidate_detail(app_id):
             application_id=app_id
         )
         .order_by(
-            Interview.scheduled_at.desc()
+            Interview.scheduled_at.asc()
         )
         .all()
     )
@@ -4810,11 +4966,11 @@ def admin_job_edit(job_id):
 
 @app.route(
     "/admin/job/<int:job_id>/toggle",
-    methods=["GET", "POST"]
+    methods=["POST"]
 )
 @app.route(
     "/hr/job/<int:job_id>/toggle",
-    methods=["GET", "POST"]
+    methods=["POST"]
 )
 @admin_required
 def admin_job_toggle(job_id):
@@ -4872,16 +5028,16 @@ def admin_job_toggle(job_id):
 
 
 # ============================================================
-# DELETE JOB
+# DELETE JOB  (POST-only for CSRF safety)
 # ============================================================
 
 @app.route(
     "/admin/job/<int:job_id>/delete",
-    methods=["POST", "GET"]
+    methods=["POST"]
 )
 @app.route(
     "/hr/job/<int:job_id>/delete",
-    methods=["POST", "GET"]
+    methods=["POST"]
 )
 @admin_required
 def admin_job_delete(job_id):
@@ -4970,7 +5126,7 @@ def admin_job_delete(job_id):
 
 
 # ============================================================
-# INTERVIEWS  (LIST)
+# INTERVIEWS  (LIST) — ascending by scheduled_at
 # ============================================================
 
 @app.route("/admin/interviews")
@@ -4980,7 +5136,7 @@ def admin_interviews():
 
     interviews = (
         Interview.query
-        .order_by(Interview.scheduled_at.desc())
+        .order_by(Interview.scheduled_at.asc())
         .all()
     )
 
@@ -5480,6 +5636,57 @@ def admin_audit_log():
 
 
 # ============================================================
+# TEMPLATE DEBUG ROUTE
+# ============================================================
+
+@app.route("/admin/debug/templates")
+@admin_required
+def admin_debug_templates():
+
+    import json
+
+    info = {
+        "BASE_DIR": BASE_DIR,
+        "TEMPLATES_DIR": TEMPLATES_DIR,
+        "TEMPLATES_DIR_exists": os.path.isdir(TEMPLATES_DIR),
+        "IS_PRODUCTION": IS_PRODUCTION,
+        "existing_template_dirs": existing_template_dirs,
+        "loader": str(app.jinja_loader),
+        "os_walk": {},
+        "jinja_lookups": {},
+    }
+
+    if os.path.isdir(TEMPLATES_DIR):
+
+        for root, dirs, files in os.walk(TEMPLATES_DIR):
+
+            rel = os.path.relpath(root, TEMPLATES_DIR)
+            info["os_walk"][rel] = sorted(files)
+
+    for tpl in _critical_templates:
+
+        try:
+
+            app.jinja_env.get_template(tpl)
+            info["jinja_lookups"][tpl] = "FOUND"
+
+        except jinja2.TemplateNotFound as e:
+
+            info["jinja_lookups"][tpl] = f"MISSING: {e}"
+
+        except Exception as e:
+
+            info["jinja_lookups"][tpl] = f"ERROR: {e}"
+
+    return (
+        "<pre style='padding:20px;font-size:13px;"
+        "background:#0b132b;color:#fff;'>"
+        + json.dumps(info, indent=2)
+        + "</pre>"
+    )
+
+
+# ============================================================
 # DATABASE MIGRATION
 # ============================================================
 
@@ -5657,30 +5864,44 @@ def migrate_existing_database():
 
 def seed_default_data():
 
-    admin = (
-        AdminUser.query
-        .filter_by(
-            username=app.config[
-                "HR_USERNAME"
-            ]
+    # --------------------------------------------------------
+    # Seed admin ONLY when a valid HR_PASSWORD_HASH exists.
+    # In production without configured credentials, we skip
+    # seeding so no default/insecure admin is created.
+    # --------------------------------------------------------
+
+    admin_username = app.config.get("HR_USERNAME")
+    admin_hash = app.config.get("HR_PASSWORD_HASH")
+
+    if not admin_username or not admin_hash:
+
+        print(
+            "[SEED] Skipping admin seed — HR_USERNAME "
+            "or HR_PASSWORD_HASH is not configured."
         )
-        .first()
-    )
 
-    if not admin:
+    else:
 
-        db.session.add(
-            AdminUser(
-
-                username=app.config[
-                    "HR_USERNAME"
-                ],
-
-                password_hash=app.config[
-                    "HR_PASSWORD_HASH"
-                ]
+        admin = (
+            AdminUser.query
+            .filter_by(
+                username=admin_username
             )
+            .first()
         )
+
+        if not admin:
+
+            db.session.add(
+                AdminUser(
+                    username=admin_username,
+                    password_hash=admin_hash
+                )
+            )
+
+            print(
+                f"[SEED] Created admin user: {admin_username}"
+            )
 
     departments = [
 
@@ -5801,9 +6022,15 @@ def init_db_safe():
 @app.errorhandler(404)
 def page_not_found(error):
 
-    return render_template(
-        "404.html"
-    ), 404
+    try:
+
+        return render_template(
+            "404.html"
+        ), 404
+
+    except jinja2.TemplateNotFound:
+
+        return "<h1>404 Not Found</h1>", 404
 
 
 @app.errorhandler(413)
@@ -5845,9 +6072,18 @@ def internal_server_error(error):
         "======================================"
     )
 
-    return render_template(
-        "500.html"
-    ), 500
+    try:
+
+        return render_template(
+            "500.html"
+        ), 500
+
+    except jinja2.TemplateNotFound:
+
+        return (
+            "<h1>500 Internal Server Error</h1>"
+            "<p>The error has been logged.</p>"
+        ), 500
 
 
 # ============================================================
