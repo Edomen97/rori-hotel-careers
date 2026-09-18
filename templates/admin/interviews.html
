@@ -1,4 +1,4 @@
-{% extends "base_admin.html" %}
+{% extends "admin/base_admin.html" %}
 
 {% block title %}Interview Management - Rori Hotel HR{% endblock %}
 
@@ -1210,4 +1210,3 @@
 </style>
 
 {% endblock %}
-  
