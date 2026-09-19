@@ -1,0 +1,160 @@
+# ============================================================
+# NEW INTERVIEW
+# ============================================================
+
+@app.route("/admin/interview/new", methods=["GET", "POST"])
+@app.route("/admin/interviews/new", methods=["GET", "POST"])
+@app.route("/hr/interview/new", methods=["GET", "POST"])
+@app.route("/hr/interviews/new", methods=["GET", "POST"])
+@admin_required
+def admin_interview_new():
+
+    applications = (
+        Application.query
+        .order_by(Application.id.desc())
+        .all()
+    )
+
+    form = InterviewForm()
+
+    form.application_id.choices = [
+        (
+            a.id,
+            f"#{a.id} — {a.full_name} "
+            f"({a.job.title if a.job else 'No job'})"
+        )
+        for a in applications
+    ]
+
+    if form.validate_on_submit():
+
+        # --------------------------------------------------
+        # Parse datetime-local ("YYYY-MM-DDTHH:MM")
+        # --------------------------------------------------
+        raw_when = (form.scheduled_at.data or "").strip()
+
+        try:
+            scheduled_at = datetime.strptime(
+                raw_when,
+                "%Y-%m-%dT%H:%M"
+            )
+        except (ValueError, TypeError):
+            flash(
+                "Invalid date/time. Use the date picker.",
+                "danger"
+            )
+            return safe_render(
+                "admin/interview_form.html",
+                form=form,
+                applications=applications,
+                interview=None,
+                selected_app_id=None
+            )
+
+        # --------------------------------------------------
+        # Validate candidate against DB
+        # --------------------------------------------------
+        application = Application.query.get(
+            form.application_id.data
+        )
+
+        if not application:
+            flash(
+                "Selected candidate does not exist.",
+                "danger"
+            )
+            return safe_render(
+                "admin/interview_form.html",
+                form=form,
+                applications=applications,
+                interview=None,
+                selected_app_id=None
+            )
+
+        # --------------------------------------------------
+        # Validate interview_type
+        # --------------------------------------------------
+        allowed_types = {"In-person", "Virtual", "Phone"}
+        itype = form.interview_type.data or "In-person"
+
+        if itype not in allowed_types:
+            itype = "In-person"
+
+        try:
+
+            interview = Interview(
+                application_id=form.application_id.data,
+                scheduled_at=scheduled_at,
+                duration_minutes=(
+                    form.duration_minutes.data or 30
+                ),
+                interview_type=itype,
+                interviewer_name=(
+                    (form.interviewer_name.data or "").strip()
+                    or None
+                ),
+                location=(
+                    (form.location.data or "").strip()
+                    or None
+                ),
+                notes=(
+                    (form.notes.data or "").strip()
+                    or None
+                ),
+                status="Scheduled"
+            )
+
+            db.session.add(interview)
+            db.session.commit()
+
+            apply_interview_side_effects(
+                application,
+                interview,
+                event="scheduled",
+                extra_note=interview.notes
+            )
+
+            log_audit(
+                "Interview Scheduled",
+                (
+                    f"Scheduled interview for "
+                    f"{application.full_name} "
+                    f"on {scheduled_at}"
+                ),
+                "Interview",
+                interview.id
+            )
+
+            flash(
+                "Interview scheduled successfully.",
+                "success"
+            )
+
+            return redirect(url_for("admin_interviews"))
+
+        except Exception:
+
+            db.session.rollback()
+            app.logger.exception(
+                "Error creating interview"
+            )
+            flash(
+                "Could not schedule interview.",
+                "danger"
+            )
+
+    elif form.errors:
+
+        for field, errs in form.errors.items():
+
+            for e in errs:
+
+                flash(f"{field}: {e}", "danger")
+
+    return safe_render(
+        "admin/interview_form.html",
+        form=form,
+        applications=applications,
+        interview=None,
+        selected_app_id=None
+    )
