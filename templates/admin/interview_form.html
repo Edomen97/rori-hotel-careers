@@ -30,8 +30,9 @@
 
             <form method="POST" novalidate>
 
-                {# Real CSRF token — from CSRFProtect(app), not from a form object #}
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                {# CSRF token — works because CSRFProtect(app) is registered
+                   and the route passes form=form #}
+                {{ form.hidden_tag() }}
 
                 <!-- CANDIDATE -->
                 <div class="mb-3">
@@ -40,99 +41,67 @@
                     </label>
 
                     {% if interview %}
-                        {# Edit: read-only display + hidden id (backend ignores it) #}
                         <input type="text" class="form-control" disabled
                                value="{{ interview.application.full_name if interview.application else 'Unknown candidate' }}">
                         <input type="hidden" name="application_id"
                                value="{{ interview.application_id }}">
                     {% else %}
-                        <select name="application_id" class="form-select" required>
-                            <option value="">— Select candidate —</option>
-                            {% for a in applications %}
-                                <option value="{{ a.id }}"
-                                    {% if selected_app_id == a.id %}selected{% endif %}>
-                                    #{{ a.id }} — {{ a.full_name }}
-                                    {% if a.job %} ({{ a.job.title }}){% endif %}
-                                </option>
-                            {% endfor %}
-                        </select>
+                        {{ form.application_id(class="form-select") }}
+                    {% endif %}
+
+                    {% if form.application_id.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.application_id.errors|join(', ') }}
+                        </div>
                     {% endif %}
                 </div>
 
                 <div class="row g-3">
 
-                    <!-- DATE & TIME -->
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">
                             Date &amp; Time <span class="text-danger">*</span>
                         </label>
-                        <input type="datetime-local"
-                               name="scheduled_at"
-                               class="form-control"
-                               required
-                               value="{{ interview.scheduled_at.strftime('%Y-%m-%dT%H:%M') if interview and interview.scheduled_at else '' }}">
+                        {{ form.scheduled_at(class="form-control", type="datetime-local") }}
+                        {% if form.scheduled_at.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.scheduled_at.errors|join(', ') }}
+                            </div>
+                        {% endif %}
                     </div>
 
-                    <!-- DURATION -->
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">
-                            Duration (minutes)
-                        </label>
-                        <input type="number"
-                               name="duration_minutes"
-                               class="form-control"
-                               min="5" max="120"
-                               value="{{ interview.duration_minutes if interview and interview.duration_minutes else 30 }}">
+                        <label class="form-label fw-semibold">Duration (minutes)</label>
+                        {{ form.duration_minutes(class="form-control", min="5", max="120") }}
+                        {% if form.duration_minutes.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ form.duration_minutes.errors|join(', ') }}
+                            </div>
+                        {% endif %}
                     </div>
 
-                    <!-- TYPE -->
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">
-                            Interview Type
-                        </label>
-                        {% set _t = interview.interview_type if interview and interview.interview_type else 'In-person' %}
-                        <select name="interview_type" class="form-select">
-                            <option value="In-person" {% if _t == 'In-person' %}selected{% endif %}>In-person</option>
-                            <option value="Virtual"   {% if _t == 'Virtual'   %}selected{% endif %}>Virtual</option>
-                            <option value="Phone"     {% if _t == 'Phone'     %}selected{% endif %}>Phone</option>
-                        </select>
+                        <label class="form-label fw-semibold">Interview Type</label>
+                        {{ form.interview_type(class="form-select") }}
                     </div>
 
-                    <!-- INTERVIEWER -->
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">
-                            Interviewer
-                        </label>
-                        <input type="text"
-                               name="interviewer_name"
-                               class="form-control"
-                               placeholder="e.g. Mr. Abebe"
-                               value="{{ interview.interviewer_name if interview and interview.interviewer_name else '' }}">
+                        <label class="form-label fw-semibold">Interviewer</label>
+                        {{ form.interviewer_name(class="form-control", placeholder="e.g. Mr. Abebe") }}
                     </div>
 
-                    <!-- LOCATION -->
                     <div class="col-12">
-                        <label class="form-label fw-semibold">
-                            Location / Meeting Link
-                        </label>
-                        <input type="text"
-                               name="location"
-                               class="form-control"
-                               placeholder="e.g. HR Office, 2nd floor or https://meet.google.com/..."
-                               value="{{ interview.location if interview and interview.location else '' }}">
+                        <label class="form-label fw-semibold">Location / Meeting Link</label>
+                        {{ form.location(class="form-control", placeholder="e.g. HR Office, 2nd floor or https://meet.google.com/...") }}
                     </div>
 
-                    <!-- STATUS (edit only) -->
                     {% if interview %}
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Status
-                            </label>
+                            <label class="form-label fw-semibold">Status</label>
                             {% set _s = interview.status or 'Scheduled' %}
                             <select name="status" class="form-select">
                                 {% for st in ['Scheduled', 'Completed', 'Cancelled', 'Rescheduled'] %}
-                                    <option value="{{ st }}"
-                                        {% if _s == st %}selected{% endif %}>
+                                    <option value="{{ st }}" {% if _s == st %}selected{% endif %}>
                                         {{ st }}
                                     </option>
                                 {% endfor %}
@@ -140,24 +109,15 @@
                         </div>
                     {% endif %}
 
-                    <!-- NOTES -->
                     <div class="col-12">
-                        <label class="form-label fw-semibold">
-                            Notes
-                        </label>
-                        <textarea name="notes"
-                                  class="form-control"
-                                  rows="4"
-                                  placeholder="Preparation notes for the candidate or interviewer...">{{ interview.notes if interview and interview.notes else '' }}</textarea>
+                        <label class="form-label fw-semibold">Notes</label>
+                        {{ form.notes(class="form-control", rows="4", placeholder="Preparation notes for the candidate or interviewer...") }}
                     </div>
 
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-4">
-                    <a href="{{ url_for('admin_interviews') }}"
-                       class="btn btn-outline-secondary">
-                        Cancel
-                    </a>
+                    <a href="{{ url_for('admin_interviews') }}" class="btn btn-outline-secondary">Cancel</a>
                     <button type="submit" class="btn btn-gold px-4">
                         <i class="bi bi-check2-circle me-1"></i>
                         {{ 'Update Interview' if interview else 'Schedule Interview' }}
@@ -172,23 +132,10 @@
 </div>
 
 <style>
-.header-icon {
-    width: 42px; height: 42px;
-    display: inline-flex; align-items: center; justify-content: center;
-    border-radius: 11px;
-    background: rgba(197, 160, 89, 0.12);
-    color: var(--gold);
-    font-size: 1.15rem;
-}
-.form-label { color: var(--navy); font-size: 0.85rem; }
-.form-control, .form-select {
-    border-radius: 10px;
-    padding: 0.6rem 0.85rem;
-}
-.form-control:focus, .form-select:focus {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 0.2rem rgba(197, 160, 89, 0.15);
-}
+.header-icon{width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px;background:rgba(197,160,89,0.12);color:var(--gold);font-size:1.15rem;}
+.form-label{color:var(--navy);font-size:0.85rem;}
+.form-control,.form-select{border-radius:10px;padding:0.6rem 0.85rem;}
+.form-control:focus,.form-select:focus{border-color:var(--gold);box-shadow:0 0 0 0.2rem rgba(197,160,89,0.15);}
 </style>
 
 {% endblock %}
