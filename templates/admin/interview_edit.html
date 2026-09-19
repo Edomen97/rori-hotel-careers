@@ -1,0 +1,231 @@
+# ============================================================
+# EDIT INTERVIEW
+# ============================================================
+
+@app.route(
+    "/admin/interview/<int:interview_id>/edit",
+    methods=["GET", "POST"]
+)
+@app.route(
+    "/admin/interviews/<int:interview_id>/edit",
+    methods=["GET", "POST"]
+)
+@app.route(
+    "/hr/interview/<int:interview_id>/edit",
+    methods=["GET", "POST"]
+)
+@app.route(
+    "/hr/interviews/<int:interview_id>/edit",
+    methods=["GET", "POST"]
+)
+@admin_required
+def admin_interview_edit(interview_id):
+
+    interview = Interview.query.get_or_404(interview_id)
+
+    applications = (
+        Application.query
+        .order_by(Application.id.desc())
+        .all()
+    )
+
+    form = InterviewForm()
+
+    form.application_id.choices = [
+        (
+            a.id,
+            f"#{a.id} — {a.full_name} "
+            f"({a.job.title if a.job else 'No job'})"
+        )
+        for a in applications
+    ]
+
+    # Make sure the interview's own application is always a
+    # valid choice, even if it was deleted from the list.
+    current_ids = {a.id for a in applications}
+
+    if interview.application_id not in current_ids:
+
+        app_obj = Application.query.get(interview.application_id)
+
+        form.application_id.choices.append(
+            (
+                interview.application_id,
+                (
+                    f"#{interview.application_id} — "
+                    f"{app_obj.full_name if app_obj else 'Missing candidate'}"
+                )
+            )
+        )
+
+    if request.method == "GET":
+
+        form.application_id.data = interview.application_id
+
+        form.scheduled_at.data = (
+            interview.scheduled_at.strftime("%Y-%m-%dT%H:%M")
+            if interview.scheduled_at
+            else ""
+        )
+
+        form.duration_minutes.data = (
+            interview.duration_minutes or 30
+        )
+        form.interview_type.data = (
+            interview.interview_type or "In-person"
+        )
+        form.interviewer_name.data = (
+            interview.interviewer_name or ""
+        )
+        form.location.data = interview.location or ""
+        form.notes.data = interview.notes or ""
+
+    if form.validate_on_submit():
+
+        raw_when = (form.scheduled_at.data or "").strip()
+
+        try:
+            new_when = datetime.strptime(
+                raw_when,
+                "%Y-%m-%dT%H:%M"
+            )
+        except (ValueError, TypeError):
+            flash(
+                "Invalid date/time. Use the date picker.",
+                "danger"
+            )
+            return safe_render(
+                "admin/interview_form.html",
+                form=form,
+                applications=applications,
+                interview=interview,
+                selected_app_id=interview.application_id
+            )
+
+        old_status = interview.status
+        old_when = interview.scheduled_at
+
+        new_status = (
+            request.form.get("status", interview.status)
+            or interview.status
+        )
+
+        allowed_status = {
+            "Scheduled", "Completed", "Cancelled", "Rescheduled"
+        }
+
+        if new_status not in allowed_status:
+            new_status = interview.status
+
+        allowed_types = {"In-person", "Virtual", "Phone"}
+        itype = form.interview_type.data or interview.interview_type
+
+        if itype not in allowed_types:
+            itype = interview.interview_type
+
+        try:
+
+            # --------------------------------------------------
+            # SECURITY:
+            # interview.application_id is NEVER read from form.
+            # It stays exactly as it is in the DB, so tampering
+            # the hidden input has no effect.
+            # --------------------------------------------------
+
+            interview.scheduled_at = new_when
+            interview.duration_minutes = (
+                form.duration_minutes.data or 30
+            )
+            interview.interview_type = itype
+            interview.interviewer_name = (
+                (form.interviewer_name.data or "").strip()
+                or None
+            )
+            interview.location = (
+                (form.location.data or "").strip()
+                or None
+            )
+            interview.notes = (
+                (form.notes.data or "").strip()
+                or None
+            )
+            interview.status = new_status
+
+            db.session.commit()
+
+            event = None
+
+            if (
+                new_status == "Cancelled"
+                and old_status != "Cancelled"
+            ):
+                event = "cancelled"
+            elif (
+                new_status == "Completed"
+                and old_status != "Completed"
+            ):
+                event = "completed"
+            elif interview.scheduled_at != old_when:
+                event = "rescheduled"
+
+            if event:
+
+                application = (
+                    interview.application
+                    or Application.query.get(
+                        interview.application_id
+                    )
+                )
+
+                if application:
+
+                    apply_interview_side_effects(
+                        application,
+                        interview,
+                        event=event,
+                        extra_note=interview.notes
+                    )
+
+            log_audit(
+                "Interview Updated",
+                (
+                    f"Updated interview #{interview.id} "
+                    f"for application #{interview.application_id}"
+                ),
+                "Interview",
+                interview.id
+            )
+
+            flash(
+                "Interview updated successfully.",
+                "success"
+            )
+
+            return redirect(url_for("admin_interviews"))
+
+        except Exception:
+
+            db.session.rollback()
+            app.logger.exception(
+                "Error updating interview"
+            )
+            flash(
+                "Could not update interview.",
+                "danger"
+            )
+
+    elif form.errors:
+
+        for field, errs in form.errors.items():
+
+            for e in errs:
+
+                flash(f"{field}: {e}", "danger")
+
+    return safe_render(
+        "admin/interview_form.html",
+        form=form,
+        applications=applications,
+        interview=interview,
+        selected_app_id=interview.application_id
+    )
