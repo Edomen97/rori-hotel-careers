@@ -6,51 +6,36 @@
 
 <div class="container-fluid px-0">
 
-    <!-- PAGE HEADER -->
+    <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="header-icon">
-                    <i class="bi bi-calendar2-week"></i>
-                </span>
-                <h2 class="fw-bold text-navy mb-0">
-                    Interview Management
-                </h2>
+                <span class="header-icon"><i class="bi bi-calendar2-week"></i></span>
+                <h2 class="fw-bold text-navy mb-0">Interview Management</h2>
             </div>
             <p class="text-muted mb-0">
                 Schedule, monitor and manage candidate interviews.
             </p>
         </div>
-
-        <a href="{{ url_for('admin_interview_new') }}"
-           class="btn btn-gold px-4">
-            <i class="bi bi-plus-circle me-2"></i>
-            Schedule Interview
+        <a href="{{ url_for('admin_interview_new') }}" class="btn btn-gold px-4">
+            <i class="bi bi-plus-circle me-2"></i> Schedule Interview
         </a>
-
     </div>
 
     <!-- SUMMARY CARDS -->
     <div class="row g-3 mb-4">
-
         <div class="col-6 col-xl-3">
             <div class="summary-card">
-                <div class="summary-icon">
-                    <i class="bi bi-calendar-check"></i>
-                </div>
+                <div class="summary-icon"><i class="bi bi-calendar-check"></i></div>
                 <div>
                     <div class="summary-label">Total Interviews</div>
                     <div class="summary-value">{{ interviews|length }}</div>
                 </div>
             </div>
         </div>
-
         <div class="col-6 col-xl-3">
             <div class="summary-card">
-                <div class="summary-icon">
-                    <i class="bi bi-clock"></i>
-                </div>
+                <div class="summary-icon"><i class="bi bi-clock"></i></div>
                 <div>
                     <div class="summary-label">Scheduled</div>
                     <div class="summary-value">
@@ -59,12 +44,9 @@
                 </div>
             </div>
         </div>
-
         <div class="col-6 col-xl-3">
             <div class="summary-card">
-                <div class="summary-icon">
-                    <i class="bi bi-check-circle"></i>
-                </div>
+                <div class="summary-icon"><i class="bi bi-check-circle"></i></div>
                 <div>
                     <div class="summary-label">Completed</div>
                     <div class="summary-value">
@@ -73,12 +55,9 @@
                 </div>
             </div>
         </div>
-
         <div class="col-6 col-xl-3">
             <div class="summary-card">
-                <div class="summary-icon">
-                    <i class="bi bi-x-circle"></i>
-                </div>
+                <div class="summary-icon"><i class="bi bi-x-circle"></i></div>
                 <div>
                     <div class="summary-label">Cancelled</div>
                     <div class="summary-value">
@@ -87,12 +66,10 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- TABLE -->
     <div class="card interview-card border-0 shadow-sm">
-
         <div class="card-header bg-white border-0 p-4">
             <h5 class="fw-bold text-navy mb-1">Interview Schedule</h5>
             <small class="text-muted">Manage all candidate interviews</small>
@@ -111,10 +88,8 @@
                         <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
-
                 <tbody>
                 {% for interview in interviews %}
-
                     {% set app = interview.application %}
                     {% set job = app.job if app else None %}
 
@@ -150,9 +125,7 @@
                             {% if job %}
                                 <div class="job-title">{{ job.title or '—' }}</div>
                                 {% if job.department_name %}
-                                    <small class="text-muted">
-                                        {{ job.department_name }}
-                                    </small>
+                                    <small class="text-muted">{{ job.department_name }}</small>
                                 {% endif %}
                             {% else %}
                                 <span class="text-muted">—</span>
@@ -216,13 +189,11 @@
                         </td>
 
                         <td class="text-end pe-4">
-
                             <a href="{{ url_for('admin_interview_edit', interview_id=interview.id) }}"
                                class="btn btn-sm btn-outline-secondary me-1"
                                title="Edit interview">
                                 <i class="bi bi-pencil"></i>
                             </a>
-
                             <button type="button"
                                     class="btn btn-sm btn-outline-navy details-btn"
                                     data-bs-toggle="modal"
@@ -230,7 +201,6 @@
                                     title="View details">
                                 <i class="bi bi-eye me-1"></i> Details
                             </button>
-
                         </td>
                     </tr>
 
@@ -238,16 +208,13 @@
                     <div class="modal fade"
                          id="interviewModal{{ interview.id }}"
                          tabindex="-1"
-                         aria-labelledby="interviewModalLabel{{ interview.id }}"
                          aria-hidden="true">
-
                         <div class="modal-dialog modal-dialog-centered modal-lg">
                             <div class="modal-content interview-modal">
 
                                 <div class="modal-header">
                                     <div>
-                                        <h5 class="modal-title fw-bold text-navy"
-                                            id="interviewModalLabel{{ interview.id }}">
+                                        <h5 class="modal-title fw-bold text-navy">
                                             Interview #{{ interview.id }}
                                         </h5>
                                         <small class="text-muted">Interview details</small>
@@ -273,9 +240,7 @@
                                                     {{ app.email or '—' }}
                                                 </div>
                                                 {% if app.phone %}
-                                                    <div class="text-muted small">
-                                                        {{ app.phone }}
-                                                    </div>
+                                                    <div class="text-muted small">{{ app.phone }}</div>
                                                 {% endif %}
                                             </div>
                                         </div>
@@ -286,12 +251,9 @@
                                     {% endif %}
 
                                     <div class="detail-grid">
-
                                         <div class="detail-item">
                                             <span class="detail-label">Position</span>
-                                            <span class="detail-value">
-                                                {{ job.title if job else '—' }}
-                                            </span>
+                                            <span class="detail-value">{{ job.title if job else '—' }}</span>
                                         </div>
 
                                         <div class="detail-item">
@@ -353,7 +315,6 @@
                                                 </span>
                                             </div>
                                         {% endif %}
-
                                     </div>
 
                                     {% if interview.notes %}
@@ -373,9 +334,7 @@
                                     {% if interview.decision %}
                                         <div class="notes-box mt-3">
                                             <div class="detail-label mb-2">Decision</div>
-                                            <div class="notes-text fw-semibold">
-                                                {{ interview.decision }}
-                                            </div>
+                                            <div class="notes-text fw-semibold">{{ interview.decision }}</div>
                                         </div>
                                     {% endif %}
 
@@ -383,11 +342,11 @@
 
                                 <div class="modal-footer d-flex justify-content-between flex-wrap gap-2">
 
-                                    <!-- STATUS UPDATE (real CSRF token) -->
                                     <form method="POST"
                                           action="{{ url_for('admin_interview_status', interview_id=interview.id) }}"
                                           class="d-flex gap-2 flex-wrap">
 
+                                        {# Real CSRF token — from CSRFProtect(app) #}
                                         <input type="hidden"
                                                name="csrf_token"
                                                value="{{ csrf_token() }}">
@@ -418,7 +377,6 @@
                                             data-bs-dismiss="modal">
                                         Close
                                     </button>
-
                                 </div>
 
                             </div>
@@ -426,18 +384,15 @@
                     </div>
 
                 {% else %}
-
                     <tr>
                         <td colspan="7" class="py-5">
                             <div class="empty-state text-center">
                                 <div class="empty-icon mx-auto">
                                     <i class="bi bi-calendar-x"></i>
                                 </div>
-                                <h5 class="fw-bold text-navy mt-3">
-                                    No Interviews Scheduled
-                                </h5>
+                                <h5 class="fw-bold text-navy mt-3">No Interviews Scheduled</h5>
                                 <p class="text-muted mb-4">
-                                    There are currently no candidate interviews in the system.
+                                    There are no candidate interviews in the system yet.
                                 </p>
                                 <a href="{{ url_for('admin_interview_new') }}"
                                    class="btn btn-gold">
@@ -447,208 +402,56 @@
                             </div>
                         </td>
                     </tr>
-
                 {% endfor %}
                 </tbody>
             </table>
         </div>
-
     </div>
 
 </div>
 
 <style>
-/* PAGE HEADER */
-.header-icon {
-    width: 42px; height: 42px;
-    display: inline-flex; align-items: center; justify-content: center;
-    border-radius: 11px;
-    background: rgba(197, 160, 89, 0.12);
-    color: var(--gold);
-    font-size: 1.15rem;
-}
-
-/* SUMMARY CARDS */
-.summary-card {
-    height: 100%;
-    display: flex; align-items: center; gap: 1rem;
-    padding: 1.1rem;
-    background: #fff;
-    border: 1px solid rgba(11, 19, 43, 0.07);
-    border-radius: 14px;
-    box-shadow: 0 5px 20px rgba(11, 19, 43, 0.05);
-}
-.summary-icon {
-    width: 42px; height: 42px;
-    flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 11px;
-    background: rgba(197, 160, 89, 0.12);
-    color: var(--gold);
-}
-.summary-label {
-    color: #6c757d;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-.summary-value {
-    color: var(--navy);
-    font-size: 1.45rem;
-    font-weight: 800;
-    line-height: 1.2;
-}
-
-/* TABLE */
-.interview-card { border-radius: 16px; overflow: hidden; }
-.interview-card .table { min-width: 1050px; }
-.interview-card thead th {
-    background: #f8f9fa;
-    color: #667085;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 700;
-    border-bottom: 1px solid #e9ecef;
-    padding: 0.9rem 0.75rem;
-    white-space: nowrap;
-}
-.interview-card tbody td {
-    padding: 1rem 0.75rem;
-    border-color: #f0f1f3;
-}
-.interview-id { color: var(--gold); font-weight: 700; }
-
-/* CANDIDATE */
-.candidate-info { display: flex; align-items: center; gap: 0.7rem; }
-.candidate-avatar, .large-avatar {
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    border-radius: 50%;
-    background: var(--navy);
-    color: var(--gold);
-    font-weight: 700;
-}
-.candidate-avatar { width: 38px; height: 38px; font-size: 0.9rem; }
-.candidate-name { color: var(--navy); font-size: 0.9rem; font-weight: 700; }
-.candidate-email { color: #8a9199; font-size: 0.72rem; margin-top: 2px; }
-.job-title { color: var(--navy); font-weight: 600; font-size: 0.86rem; }
-
-/* SCHEDULE */
-.schedule-date { color: var(--navy); font-size: 0.84rem; font-weight: 600; }
-.schedule-time { color: #7b8490; font-size: 0.75rem; margin-top: 3px; }
-
-/* BADGES */
-.type-badge {
-    display: inline-flex; align-items: center;
-    padding: 0.4rem 0.65rem;
-    border-radius: 7px;
-    background: #f1f3f5;
-    color: #495057;
-    font-size: 0.74rem;
-    font-weight: 600;
-}
-.status-badge {
-    display: inline-flex; align-items: center; gap: 0.35rem;
-    padding: 0.4rem 0.7rem;
-    border-radius: 50px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    white-space: nowrap;
-}
-.status-badge.scheduled { background: #fff3cd; color: #856404; }
-.status-badge.completed { background: #d1e7dd; color: #0f5132; }
-.status-badge.cancelled { background: #f8d7da; color: #842029; }
-.status-badge.default   { background: #e9ecef; color: #495057; }
-
-/* BUTTONS */
-.details-btn { border-radius: 8px; font-size: 0.75rem; font-weight: 600; }
-
-/* MODAL */
-.interview-modal {
-    border: 0;
-    border-radius: 18px;
-    overflow: hidden;
-    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.2);
-}
-.interview-modal .modal-header {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #edf0f2;
-}
-.interview-modal .modal-footer {
-    border-top: 1px solid #edf0f2;
-}
-
-/* PROFILE */
-.detail-profile {
-    display: flex; align-items: center; gap: 1rem;
-    padding: 1rem;
-    background: #f8f9fa;
-    border-radius: 12px;
-}
-.large-avatar { width: 54px; height: 54px; font-size: 1.1rem; }
-
-/* DETAILS GRID */
-.detail-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-}
-.detail-item {
-    padding: 0.85rem;
-    border: 1px solid #edf0f2;
-    border-radius: 10px;
-    background: #fff;
-}
-.detail-label {
-    display: block;
-    color: #8a9199;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.4px;
-    margin-bottom: 0.3rem;
-}
-.detail-value {
-    display: block;
-    color: var(--navy);
-    font-size: 0.84rem;
-    font-weight: 600;
-}
-.rating { color: #b8871d; }
-.rating i { margin-right: 3px; }
-
-/* NOTES */
-.notes-box {
-    padding: 1rem;
-    background: #f8f9fa;
-    border-radius: 10px;
-}
-.notes-text {
-    color: #495057;
-    font-size: 0.84rem;
-    line-height: 1.6;
-    white-space: pre-line;
-}
-
-/* EMPTY STATE */
-.empty-state { padding: 2rem 1rem; }
-.empty-icon {
-    width: 70px; height: 70px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 50%;
-    background: rgba(197, 160, 89, 0.1);
-    color: var(--gold);
-    font-size: 1.8rem;
-}
-
-/* MOBILE */
-@media (max-width: 767px) {
-    .detail-grid { grid-template-columns: 1fr; }
-    .summary-card { padding: 0.9rem; }
-    .summary-value { font-size: 1.2rem; }
-}
+.header-icon{width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px;background:rgba(197,160,89,0.12);color:var(--gold);font-size:1.15rem;}
+.summary-card{height:100%;display:flex;align-items:center;gap:1rem;padding:1.1rem;background:#fff;border:1px solid rgba(11,19,43,0.07);border-radius:14px;box-shadow:0 5px 20px rgba(11,19,43,0.05);}
+.summary-icon{width:42px;height:42px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:11px;background:rgba(197,160,89,0.12);color:var(--gold);}
+.summary-label{color:#6c757d;font-size:0.72rem;text-transform:uppercase;font-weight:700;letter-spacing:0.5px;}
+.summary-value{color:var(--navy);font-size:1.45rem;font-weight:800;line-height:1.2;}
+.interview-card{border-radius:16px;overflow:hidden;}
+.interview-card .table{min-width:1050px;}
+.interview-card thead th{background:#f8f9fa;color:#667085;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;border-bottom:1px solid #e9ecef;padding:0.9rem 0.75rem;white-space:nowrap;}
+.interview-card tbody td{padding:1rem 0.75rem;border-color:#f0f1f3;}
+.interview-id{color:var(--gold);font-weight:700;}
+.candidate-info{display:flex;align-items:center;gap:0.7rem;}
+.candidate-avatar,.large-avatar{display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;background:var(--navy);color:var(--gold);font-weight:700;}
+.candidate-avatar{width:38px;height:38px;font-size:0.9rem;}
+.candidate-name{color:var(--navy);font-size:0.9rem;font-weight:700;}
+.candidate-email{color:#8a9199;font-size:0.72rem;margin-top:2px;}
+.job-title{color:var(--navy);font-weight:600;font-size:0.86rem;}
+.schedule-date{color:var(--navy);font-size:0.84rem;font-weight:600;}
+.schedule-time{color:#7b8490;font-size:0.75rem;margin-top:3px;}
+.type-badge{display:inline-flex;align-items:center;padding:0.4rem 0.65rem;border-radius:7px;background:#f1f3f5;color:#495057;font-size:0.74rem;font-weight:600;}
+.status-badge{display:inline-flex;align-items:center;gap:0.35rem;padding:0.4rem 0.7rem;border-radius:50px;font-size:0.72rem;font-weight:700;white-space:nowrap;}
+.status-badge.scheduled{background:#fff3cd;color:#856404;}
+.status-badge.completed{background:#d1e7dd;color:#0f5132;}
+.status-badge.cancelled{background:#f8d7da;color:#842029;}
+.status-badge.default{background:#e9ecef;color:#495057;}
+.details-btn{border-radius:8px;font-size:0.75rem;font-weight:600;}
+.interview-modal{border:0;border-radius:18px;overflow:hidden;box-shadow:0 25px 70px rgba(0,0,0,0.2);}
+.interview-modal .modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid #edf0f2;}
+.interview-modal .modal-footer{border-top:1px solid #edf0f2;}
+.detail-profile{display:flex;align-items:center;gap:1rem;padding:1rem;background:#f8f9fa;border-radius:12px;}
+.large-avatar{width:54px;height:54px;font-size:1.1rem;}
+.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
+.detail-item{padding:0.85rem;border:1px solid #edf0f2;border-radius:10px;background:#fff;}
+.detail-label{display:block;color:#8a9199;font-size:0.7rem;text-transform:uppercase;font-weight:700;letter-spacing:0.4px;margin-bottom:0.3rem;}
+.detail-value{display:block;color:var(--navy);font-size:0.84rem;font-weight:600;}
+.rating{color:#b8871d;}
+.rating i{margin-right:3px;}
+.notes-box{padding:1rem;background:#f8f9fa;border-radius:10px;}
+.notes-text{color:#495057;font-size:0.84rem;line-height:1.6;white-space:pre-line;}
+.empty-state{padding:2rem 1rem;}
+.empty-icon{width:70px;height:70px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(197,160,89,0.1);color:var(--gold);font-size:1.8rem;}
+@media (max-width:767px){.detail-grid{grid-template-columns:1fr;}.summary-card{padding:0.9rem;}.summary-value{font-size:1.2rem;}}
 </style>
 
 {% endblock %}
