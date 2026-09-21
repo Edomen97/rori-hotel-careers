@@ -227,7 +227,13 @@
 
         <!-- Login Form -->
         <form method="POST" action="{{ url_for('admin_login') }}">
-            
+
+            {# ================================================ #}
+            {# CSRF TOKEN — REQUIRED by Flask-WTF CSRFProtect #}
+            {# DO NOT REMOVE THIS LINE                       #}
+            {# ================================================ #}
+            {{ form.hidden_tag() }}
+
             <!-- Username Input -->
             <div class="mb-4">
                 <label for="username" class="form-label-custom">Username</label>
