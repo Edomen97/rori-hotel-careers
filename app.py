@@ -22,7 +22,7 @@ from flask import (
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, CSRFError
 
 from wtforms import (
     StringField,
@@ -95,16 +95,25 @@ class Config:
     # --------------------------------------------------------
     # SECRET KEY
     # --------------------------------------------------------
+    # Production: SECRET_KEY MUST be set as an environment
+    # variable (Render → Environment → SECRET_KEY). If it is
+    # missing, the app REFUSES to start — this prevents the
+    # multi-worker CSRF issue where each gunicorn worker would
+    # otherwise invent its own random key.
+    #
+    # Development: A safe local fallback is used so dev runs work.
+    # --------------------------------------------------------
     SECRET_KEY = os.environ.get("SECRET_KEY")
 
     if not SECRET_KEY:
         if IS_PRODUCTION:
-            SECRET_KEY = secrets.token_hex(32)
-            print(
-                "[SECURITY WARNING] SECRET_KEY is not set. "
-                "Generated an ephemeral key. Sessions will NOT "
-                "persist across restarts. Please set the "
-                "SECRET_KEY environment variable in production."
+            # Hard fail — do not silently generate a random key.
+            raise RuntimeError(
+                "SECRET_KEY must be set in production. "
+                "Add it in Render → Environment → SECRET_KEY "
+                "(use a long random hex string, e.g. 64 chars). "
+                "Do NOT run production without it — CSRF will break "
+                "across multiple gunicorn workers."
             )
         else:
             SECRET_KEY = "dev-only-insecure-secret-do-not-use-in-prod"
@@ -318,6 +327,26 @@ mail = Mail(app)
 # enforces CSRF validation on every POST request.
 # ============================================================
 csrf = CSRFProtect(app)
+
+
+# ============================================================
+# CSRF ERROR HANDLER
+# ============================================================
+# When a CSRF token is missing or expired, show a friendly
+# flash message and redirect the user back where they came
+# from, instead of returning a bare 400 page.
+# ============================================================
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    """Friendly message when CSRF token is missing or expired."""
+    print(f"[CSRF ERROR] {e.description} on {request.path}")
+    flash(
+        "የፎርሙ ጊዜ አልፏል ወይም የደህንነት ቶከን አልተገኘም። "
+        "እባክዎን እንደገና ይሞክሩ።",
+        "danger"
+    )
+    return redirect(request.referrer or url_for("home"))
 
 
 # ============================================================
@@ -3938,8 +3967,6 @@ def admin_interview_new():
 
     form = InterviewForm()
 
-    # Choices MUST be set before validate_on_submit so that the
-    # submitted application_id is validated against real DB rows.
     form.application_id.choices = [
         (
             a.id,
@@ -4120,8 +4147,6 @@ def admin_interview_edit(interview_id):
         for a in applications
     ]
 
-    # Ensure the interview's own application_id is always a valid
-    # choice — even if the application was deleted from the list.
     current_ids = {a.id for a in applications}
 
     if interview.application_id not in current_ids:
@@ -4216,12 +4241,6 @@ def admin_interview_edit(interview_id):
             itype = interview.interview_type
 
         try:
-
-            # --------------------------------------------------
-            # SECURITY:
-            # interview.application_id is NEVER read from form.
-            # It stays exactly as it is in DB.
-            # --------------------------------------------------
 
             interview.scheduled_at = new_when
             interview.duration_minutes = (
