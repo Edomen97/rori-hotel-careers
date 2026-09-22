@@ -1,29 +1,457 @@
 {% extends "base_admin.html" %}
 
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}HR Analytics Dashboard — Rori Hotel Hawassa{% endblock %}
 
 {% block admin_content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">HR / Admin Dashboard</h1>
-</div>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 
-<div class="row mt-4">
-    <div class="col-md-4 mb-3">
-        <div class="card bg-primary text-white p-3 shadow-sm">
-            <h5>አጠቃላይ ማመልከቻዎች</h5>
-            <h3>{{ total_applications if total_applications is defined else 0 }}</h3>
+<div class="dash-wrapper">
+
+    <!-- ============================================================
+         PAGE HEADER
+    ============================================================ -->
+    <div class="dash-header">
+        <div class="dash-header-left">
+            <div class="dash-header-caption">
+                <span class="dash-header-line"></span>
+                RORI HOTEL HAWASSA — HR ANALYTICS
+            </div>
+            <h1 class="dash-header-title">HR Dashboard</h1>
+            <p class="dash-header-subtitle">
+                Real-time recruitment insights, pipeline analytics and candidate metrics
+            </p>
+        </div>
+        <div class="dash-header-actions">
+            <a href="{{ url_for('admin_candidates') }}" class="dash-btn dash-btn-outline">
+                <i class="bi bi-people"></i> Candidates
+            </a>
+            <a href="{{ url_for('admin_jobs') }}" class="dash-btn dash-btn-outline">
+                <i class="bi bi-briefcase"></i> Jobs
+            </a>
+            <a href="{{ url_for('admin_interviews') }}" class="dash-btn dash-btn-gold">
+                <i class="bi bi-calendar-check"></i> Interviews
+            </a>
         </div>
     </div>
+
+    <!-- ============================================================
+         FILTERS
+    ============================================================ -->
+    <form method="GET" action="{{ url_for('admin_dashboard') }}" class="dash-filters">
+        <div class="dash-filter-item">
+            <label>From</label>
+            <input type="date"
+                   name="date_from"
+                   class="dash-input"
+                   value="{{ filters.date_from }}">
+        </div>
+        <div class="dash-filter-item">
+            <label>To</label>
+            <input type="date"
+                   name="date_to"
+                   class="dash-input"
+                   value="{{ filters.date_to }}">
+        </div>
+        <div class="dash-filter-item">
+            <label>Department</label>
+            <select name="department" class="dash-input">
+                <option value="">All Departments</option>
+                {% for d in all_departments %}
+                <option value="{{ d.id }}"
+                    {% if filters.department == d.id %}selected{% endif %}>
+                    {{ d.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="dash-filter-item">
+            <label>Job Position</label>
+            <select name="job" class="dash-input">
+                <option value="">All Positions</option>
+                {% for j in all_jobs %}
+                <option value="{{ j.id }}"
+                    {% if filters.job == j.id %}selected{% endif %}>
+                    {{ j.title }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="dash-filter-item">
+            <label>Status</label>
+            <select name="status" class="dash-input">
+                <option value="">All Statuses</option>
+                {% for s in ['NEW','UNDER REVIEW','SHORTLISTED','INTERVIEW','SELECTED','HIRED','REJECTED'] %}
+                <option value="{{ s }}"
+                    {% if filters.status == s %}selected{% endif %}>
+                    {{ s }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="dash-filter-item">
+            <label>Education</label>
+            <select name="education" class="dash-input">
+                <option value="">All Education</option>
+                {% for e in education_choices %}
+                <option value="{{ e }}"
+                    {% if filters.education == e %}selected{% endif %}>
+                    {{ e }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="dash-filter-actions">
+            <button type="submit" class="dash-btn dash-btn-gold">
+                <i class="bi bi-funnel-fill"></i> Apply
+            </button>
+            <a href="{{ url_for('admin_dashboard') }}" class="dash-btn dash-btn-ghost">
+                <i class="bi bi-arrow-counterclockwise"></i> Reset
+            </a>
+        </div>
+    </form>
+
+    <!-- ============================================================
+         KPI CARDS
+    ============================================================ -->
+    <div class="dash-kpi-grid">
+
+        <div class="dash-kpi dash-kpi-blue">
+            <div class="dash-kpi-icon"><i class="bi bi-people-fill"></i></div>
+            <div class="dash-kpi-body">
+                <div class="dash-kpi-value">{{ total_applications }}</div>
+                <div class="dash-kpi-label">Total Applicants</div>
+            </div>
+        </div>
+
+        <div class="dash-kpi dash-kpi-cyan">
+            <div class="dash-kpi-icon"><i class="bi bi-stars"></i></div>
+            <div class="dash-kpi-body">
+                <div class="dash-kpi-value">{{ new_applications }}</div>
+                <div class="dash-kpi-label">New Applications</div>
+            </div>
+        </div>
+
+        <div class="dash-kpi dash-kpi-amber">
+            <div class="dash-kpi-icon"><i class="bi bi-hourglass-split"></i></div>
+            <div class="dash-kpi-body">
+                <div class="dash-kpi-value">{{ under_review }}</div>
+                <div class="dash-kpi-label">Under Review</div>
+            </div>
+        </div>
+
+        <div class="dash-kpi dash-kpi-purple">
+            <div class="dash-kpi-icon"><i class="bi bi-list-check"></i></div>
+            <div class="dash-kpi-body">
+                <div class="dash-kpi-value">{{ shortlisted }}</div>
+                <div class="dash-kpi-label">Shortlisted</div>
+            </div>
+        </div>
+
+        <div class="dash-kpi dash-kpi-pink">
+            <div class="dash-kpi-icon"><i class="bi bi-calendar-check-fill"></i></div>
+            <div class="dash-kpi-body">
+                <div class="dash-kpi-value">{{ interviews_count }}</div>
+                <div class="dash-kpi-label">Interviews</div>
+            </div>
+        </div>
+
+        <div class="dash-kpi dash-kpi-gold">
+            <div class="dash-kpi-icon"><i class="bi bi-award-fill"></i></div>
+            <div class="dash-kpi-body">
+                <div class="dash-kpi-value">{{ selected }}</div>
+                <div class="dash-kpi-label">Selected</div>
+            </div>
+        </div>
+
+        <div class="dash-kpi dash-kpi-green">
+            <div class="dash-kpi-icon"><i class="bi bi-patch-check-fill"></i></div>
+            <div class="dash-kpi-body">
+                <div class="dash-kpi-value">{{ hired }}</div>
+                <div class="dash-kpi-label">Hired</div>
+            </div>
+        </div>
+
+        <div class="dash-kpi dash-kpi-red">
+            <div class="dash-kpi-icon"><i class="bi bi-x-octagon-fill"></i></div>
+            <div class="dash-kpi-body">
+                <div class="dash-kpi-value">{{ rejected }}</div>
+                <div class="dash-kpi-label">Rejected</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+         ROW 1 — TIMELINE + STATUS
+    ============================================================ -->
+    <div class="dash-charts-grid">
+
+        <div class="dash-chart-card dash-chart-wide">
+            <div class="dash-chart-header">
+                <div>
+                    <h3>Applications Over Time</h3>
+                    <span class="dash-chart-sub">Monthly trend</span>
+                </div>
+                <span class="dash-chart-badge">Trend</span>
+            </div>
+            <div class="dash-chart-body">
+                <canvas id="chartTimeline"></canvas>
+            </div>
+        </div>
+
+        <div class="dash-chart-card">
+            <div class="dash-chart-header">
+                <div>
+                    <h3>Status Distribution</h3>
+                    <span class="dash-chart-sub">Pipeline breakdown</span>
+                </div>
+            </div>
+            <div class="dash-chart-body">
+                <canvas id="chartStatus"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+         ROW 2 — DEPARTMENT + EDUCATION
+    ============================================================ -->
+    <div class="dash-charts-grid">
+
+        <div class="dash-chart-card">
+            <div class="dash-chart-header">
+                <div>
+                    <h3>Applications by Department</h3>
+                    <span class="dash-chart-sub">Where talent is coming from</span>
+                </div>
+            </div>
+            <div class="dash-chart-body">
+                <canvas id="chartDept"></canvas>
+            </div>
+        </div>
+
+        <div class="dash-chart-card">
+            <div class="dash-chart-header">
+                <div>
+                    <h3>Applications by Education</h3>
+                    <span class="dash-chart-sub">Academic background</span>
+                </div>
+            </div>
+            <div class="dash-chart-body">
+                <canvas id="chartEdu"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+         ROW 3 — JOBS + INTERVIEWS
+    ============================================================ -->
+    <div class="dash-charts-grid">
+
+        <div class="dash-chart-card dash-chart-wide">
+            <div class="dash-chart-header">
+                <div>
+                    <h3>Applications by Job Position</h3>
+                    <span class="dash-chart-sub">Top 10 most applied positions</span>
+                </div>
+            </div>
+            <div class="dash-chart-body">
+                <canvas id="chartJobs"></canvas>
+            </div>
+        </div>
+
+        <div class="dash-chart-card">
+            <div class="dash-chart-header">
+                <div>
+                    <h3>Interview Analytics</h3>
+                    <span class="dash-chart-sub">Scheduled vs Completed</span>
+                </div>
+            </div>
+            <div class="dash-chart-body">
+                <canvas id="chartInterviews"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+         ROW 4 — TALENT POOL
+    ============================================================ -->
+    <div class="dash-charts-grid">
+
+        <div class="dash-chart-card">
+            <div class="dash-chart-header">
+                <div>
+                    <h3>Talent Pool — Education</h3>
+                    <span class="dash-chart-sub">{{ talent_pool_count }} candidate{{ '' if talent_pool_count == 1 else 's' }} joined</span>
+                </div>
+            </div>
+            <div class="dash-chart-body">
+                <canvas id="chartTalent"></canvas>
+            </div>
+        </div>
+
+        <div class="dash-chart-card">
+            <div class="dash-chart-header">
+                <div>
+                    <h3>Talent Pool — Locations</h3>
+                    <span class="dash-chart-sub">Geographic distribution</span>
+                </div>
+            </div>
+            <div class="dash-chart-body">
+                <canvas id="chartTalentLoc"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+         RECENT APPLICATIONS TABLE
+    ============================================================ -->
+    <div class="dash-table-card">
+
+        <div class="dash-table-header">
+            <div>
+                <h3>Recent Applications</h3>
+                <span class="dash-chart-sub">Latest submissions</span>
+            </div>
+            <a href="{{ url_for('admin_candidates') }}" class="dash-btn dash-btn-outline">
+                View All <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="dash-table-wrap">
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>Applicant</th>
+                        <th>Job Title</th>
+                        <th>Department</th>
+                        <th>Education</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th class="dash-table-action">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in recent_applications %}
+                    <tr>
+                        <td>
+                            <div class="dash-applicant">
+                                <div class="dash-applicant-avatar">
+                                    {{ (app.full_name or '?')[:1]|upper }}
+                                </div>
+                                <div>
+                                    <div class="dash-applicant-name">
+                                        {{ app.full_name }}
+                                    </div>
+                                    <div class="dash-applicant-ref">
+                                        {{ app.reference_no or '—' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="dash-cell-main">
+                                {{ app.job.title if app.job else '—' }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="dash-dept-tag">
+                                {{ app.job.department_name if app.job else '—' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="dash-cell-muted">
+                                {{ app.education or '—' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="dash-cell-muted">
+                                {{ app.submitted_at.strftime('%b %d, %Y') if app.submitted_at else '—' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="dash-status dash-status-{{ app.status|lower|replace(' ', '-') }}">
+                                {{ app.status }}
+                            </span>
+                        </td>
+                        <td class="dash-table-action">
+                            <a href="{{ url_for('admin_candidate_detail', app_id=app.id) }}"
+                               class="dash-action-btn"
+                               title="View candidate details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="dash-table-empty">
+                            <i class="bi bi-inbox"></i>
+                            <div>No applications found</div>
+                            <small>Try adjusting your filters</small>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
 </div>
+
+<!-- ============================================================
+     DATA FOR CHARTS (SERVER INJECTED)
+     ============================================================ -->
+<script id="dash-data" type="application/json">
+{
+    "timeline": {
+        "labels": {{ time_series.keys()|list|tojson }},
+        "values": {{ time_series.values()|list|tojson }}
+    },
+    "status": {
+        "labels": ["NEW","UNDER REVIEW","SHORTLISTED","INTERVIEW","SELECTED","HIRED","REJECTED"],
+        "values": [
+            {{ status_counts["NEW"] }},
+            {{ status_counts["UNDER REVIEW"] }},
+            {{ status_counts["SHORTLISTED"] }},
+            {{ status_counts["INTERVIEW"] }},
+            {{ status_counts["SELECTED"] }},
+            {{ status_counts["HIRED"] }},
+            {{ status_counts["REJECTED"] }}
+        ]
+    },
+    "dept": {
+        "labels": {{ dept_breakdown.keys()|list|tojson }},
+        "values": {{ dept_breakdown.values()|list|tojson }}
+    },
+    "edu": {
+        "labels": {{ edu_breakdown.keys()|list|tojson }},
+        "values": {{ edu_breakdown.values()|list|tojson }}
+    },
+    "jobs": {
+        "labels": {{ job_breakdown.keys()|list|tojson }},
+        "values": {{ job_breakdown.values()|list|tojson }}
+    },
+    "interviews": {
+        "labels": {{ interview_stats.keys()|list|tojson }},
+        "values": {{ interview_stats.values()|list|tojson }}
+    },
+    "talent": {
+        "labels": {{ talent_edu.keys()|list|tojson }},
+        "values": {{ talent_edu.values()|list|tojson }}
+    },
+    "talentLoc": {
+        "labels": {{ talent_loc.keys()|list|tojson }},
+        "values": {{ talent_loc.values()|list|tojson }}
+    }
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
 {% endblock %}
- 
