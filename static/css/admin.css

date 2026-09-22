@@ -121,11 +121,8 @@
 
 /* ================================================================
    ADMIN DASHBOARD — DARK MODE FIX
-   Added to override white backgrounds from Bootstrap / inline styles
-   Preserves Rori Hotel navy + gold luxury design
 ================================================================ */
 
-/* ---- Admin Cards & Table Dark Mode Fix ---- */
 .stat-card,
 .card,
 .bg-white,
@@ -172,10 +169,8 @@ tbody tr:hover {
 
 /* ================================================================
    BOOTSTRAP DARK MODE OVERRIDES
-   Extra fixes for Bootstrap classes that stay white
 ================================================================ */
 
-/* ---- Card Header (Bootstrap .card-header default is white) ---- */
 .card-header {
     background-color: #17264a !important;
     color: #ffffff !important;
@@ -196,20 +191,17 @@ tbody tr:hover {
     color: #94a3b8 !important;
 }
 
-/* ---- Card Body (in case bg-white was applied) ---- */
 .card-body {
     background-color: #111c38 !important;
     color: #ffffff !important;
 }
 
-/* ---- Card Footer ---- */
 .card-footer {
     background-color: #17264a !important;
     border-top: 1px solid rgba(212, 175, 55, 0.2) !important;
     color: #ffffff !important;
 }
 
-/* ---- Bootstrap .table with no background ---- */
 .table {
     --bs-table-bg: transparent !important;
     --bs-table-color: #e2e8f0 !important;
@@ -220,7 +212,6 @@ tbody tr:hover {
     background-color: transparent !important;
 }
 
-/* ---- Bootstrap .table-light variants ---- */
 .table-light,
 .table > :not(caption) > * > * {
     background-color: #111c38 !important;
@@ -233,20 +224,17 @@ tbody tr:hover {
     color: #e2e8f0 !important;
 }
 
-/* ---- Bootstrap table header ---- */
 .table thead th {
     background-color: #1a2b56 !important;
     color: #d4af37 !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* ---- Bootstrap hover rows ---- */
 .table-hover > tbody > tr:hover > * {
     background-color: #17264a !important;
     color: #ffffff !important;
 }
 
-/* ---- Striped rows ---- */
 .table-striped > tbody > tr:nth-of-type(odd) > * {
     background-color: #0f1a33 !important;
     color: #e2e8f0 !important;
@@ -257,7 +245,6 @@ tbody tr:hover {
     color: #e2e8f0 !important;
 }
 
-/* ---- Bootstrap badges (dark friendly) ---- */
 .badge {
     color: #ffffff !important;
 }
@@ -292,24 +279,20 @@ tbody tr:hover {
     color: #ffffff !important;
 }
 
-/* ---- Bootstrap alert inside cards ---- */
 .card .alert {
     background-color: #17264a !important;
     border-color: rgba(212, 175, 55, 0.3) !important;
     color: #e2e8f0 !important;
 }
 
-/* ---- Bootstrap table border-less tables ---- */
 .table-borderless > :not(caption) > * > * {
     border-bottom-width: 0 !important;
 }
 
-/* ---- Table wrapper ---- */
 .table-responsive {
     background-color: #111c38 !important;
 }
 
-/* ---- Modal content (in case it's used) ---- */
 .modal-content {
     background-color: #111c38 !important;
     color: #ffffff !important;
@@ -328,7 +311,6 @@ tbody tr:hover {
     color: #e2e8f0 !important;
 }
 
-/* ---- Close button visibility on dark ---- */
 .btn-close {
     filter: invert(1) brightness(2) !important;
     opacity: 0.7 !important;
@@ -338,14 +320,12 @@ tbody tr:hover {
     opacity: 1 !important;
 }
 
-/* ---- Bootstrap list-group in admin (if any) ---- */
 .list-group-item {
     background-color: #111c38 !important;
     color: #e2e8f0 !important;
     border-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-/* ---- Pagination (if any) ---- */
 .page-link {
     background-color: #111c38 !important;
     color: #d4af37 !important;
@@ -363,7 +343,6 @@ tbody tr:hover {
     border-color: #d4af37 !important;
 }
 
-/* ---- Forms in admin (search/filters) ---- */
 .form-control,
 .form-select {
     background-color: #0f1a33 !important;
@@ -383,13 +362,11 @@ tbody tr:hover {
     box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25) !important;
 }
 
-/* ---- Dark select dropdown ---- */
 .form-select option {
     background-color: #0b132b !important;
     color: #ffffff !important;
 }
 
-/* ---- Responsive — ensure mobile doesn't break ---- */
 @media (max-width: 767px) {
     .table-responsive {
         background-color: #111c38 !important;
@@ -415,12 +392,13 @@ tbody tr:hover {
         font-size: 0.8rem !important;
         padding: 0.6rem 0.5rem !important;
     }
-}/* ================================================================
+}
+
+
+/* ================================================================
    SUMMARY CARDS DARK MODE FIX
-   (Interview Management + Dashboard + Candidates pages)
 ================================================================ */
 
-/* ---- Summary Card base ---- */
 .summary-card {
     background-color: #111c38 !important;
     border: 1px solid rgba(197, 160, 89, 0.25) !important;
@@ -440,7 +418,6 @@ tbody tr:hover {
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* ---- Icon inside summary card ---- */
 .summary-icon {
     background-color: rgba(197, 160, 89, 0.15) !important;
     color: #C5A059 !important;
@@ -454,7 +431,6 @@ tbody tr:hover {
     font-size: 1.15rem;
 }
 
-/* ---- Label (small text) ---- */
 .summary-label {
     color: #94a3b8 !important;
     font-size: 0.72rem;
@@ -464,7 +440,6 @@ tbody tr:hover {
     margin-bottom: 0.2rem;
 }
 
-/* ---- Value (big number) — CRITICAL FIX ---- */
 .summary-value {
     color: #ffffff !important;
     font-size: 1.55rem;
@@ -473,7 +448,6 @@ tbody tr:hover {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-/* ---- Fallback for other card variants ---- */
 .interview-card {
     background-color: #111c38 !important;
     border: 1px solid rgba(197, 160, 89, 0.2) !important;
@@ -492,10 +466,6 @@ tbody tr:hover {
 .interview-card .card-header .text-muted {
     color: #94a3b8 !important;
 }
-
-/* ================================================================
-   INTERVIEWS TABLE — DARK MODE
-================================================================ */
 
 .interview-card .table,
 .interview-card .table tbody,
@@ -530,7 +500,6 @@ table.table tbody tr:hover td {
     background-color: #17264a !important;
 }
 
-/* Table inner text elements */
 .interview-card .table .candidate-name,
 .interview-card .table .job-title,
 .interview-card .table .interview-id {
@@ -541,10 +510,6 @@ table.table tbody tr:hover td {
 .interview-card .table .text-muted {
     color: #94a3b8 !important;
 }
-
-/* ================================================================
-   GENERIC .card FIX — covers most interview/dashboard pages
-================================================================ */
 
 .card {
     background-color: #111c38 !important;
@@ -577,27 +542,173 @@ table.table tbody tr:hover td {
     color: #94a3b8 !important;
 }
 
-/* ================================================================
-   RESPONSIVE — make sure mobile works too
-================================================================ */
-
 @media (max-width: 767px) {
     .summary-card {
         padding: 0.85rem !important;
         border-radius: 12px !important;
     }
-    
+
     .summary-value {
         font-size: 1.3rem !important;
     }
-    
+
     .summary-label {
         font-size: 0.65rem !important;
     }
-    
+
     .summary-icon {
         width: 36px !important;
         height: 36px !important;
         font-size: 1rem !important;
     }
+}
+
+
+/* ================================================================
+   AGGRESSIVE FIX — Catches ANY summary/stat/card element
+   Applies dark mode regardless of class name
+================================================================ */
+
+/* ---- Any element with summary/stat/kpi in class name ---- */
+[class*="summary"],
+[class*="stat-"],
+[class*="stat_"],
+[class*="kpi-"],
+[class*="-stat"],
+[class*="-kpi"] {
+    background-color: #111c38 !important;
+    background: #111c38 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(197, 160, 89, 0.25) !important;
+}
+
+/* ---- All children of summary/stat cards ---- */
+[class*="summary"] *,
+[class*="stat-"] *,
+[class*="kpi-"] * {
+    background-color: transparent !important;
+    color: #ffffff !important;
+}
+
+/* ---- Numbers — force white with shadow ---- */
+[class*="summary"] h1,
+[class*="summary"] h2,
+[class*="summary"] h3,
+[class*="summary"] h4,
+[class*="summary"] h5,
+[class*="summary"] h6,
+[class*="summary"] .number,
+[class*="summary"] .value,
+[class*="summary"] strong,
+[class*="summary"] b {
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* ---- Labels — muted gray ---- */
+[class*="summary"] label,
+[class*="summary"] small,
+[class*="summary"] .label,
+[class*="summary"] .text-muted {
+    color: #94a3b8 !important;
+}
+
+/* ---- Icons inside summary cards ---- */
+[class*="summary"] i {
+    color: #C5A059 !important;
+}
+
+/* ---- Icon containers ---- */
+[class*="summary-icon"],
+[class*="summary"] [class*="icon"],
+[class*="stat"] [class*="icon"] {
+    background-color: rgba(197, 160, 89, 0.15) !important;
+    color: #C5A059 !important;
+}
+
+/* ---- Force kill inline white backgrounds ---- */
+[class*="summary"][style*="background"],
+[class*="summary"] [style*="background: white"],
+[class*="summary"] [style*="background: #fff"],
+[class*="summary"] [style*="background-color: white"],
+[class*="summary"] [style*="background-color: #fff"],
+[class*="summary"] [style*="background:#fff"],
+[class*="summary"] [style*="background:white"] {
+    background-color: #111c38 !important;
+    background: #111c38 !important;
+}
+
+/* ================================================================
+   BOOTSTRAP WHITE CLASS OVERRIDES — Force dark
+================================================================ */
+
+.bg-white,
+.bg-light,
+.bg-body,
+.bg-body-tertiary {
+    background-color: #111c38 !important;
+    color: #ffffff !important;
+}
+
+.text-dark,
+.text-black,
+.text-body {
+    color: #ffffff !important;
+}
+
+/* ================================================================
+   SPECIFIC SUMMARY CARD FIX
+================================================================ */
+
+.summary-card,
+.stat-card,
+.stat-box,
+.summary-box,
+.kpi-card,
+.kpi-box,
+.interview-summary {
+    background-color: #111c38 !important;
+    background: #111c38 !important;
+    border: 1px solid rgba(197, 160, 89, 0.25) !important;
+    color: #ffffff !important;
+    border-radius: 14px !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.summary-card h1,
+.summary-card h2,
+.summary-card h3,
+.summary-card h4,
+.summary-card h5,
+.summary-card h6,
+.summary-card .h1,
+.summary-card .h2,
+.summary-card .h3,
+.summary-card .h4,
+.summary-card .h5,
+.summary-card .h6,
+.stat-card h1,
+.stat-card h2,
+.stat-card h3,
+.stat-card h4,
+.stat-card h5,
+.stat-card h6,
+.stat-box h1,
+.stat-box h2,
+.stat-box h3,
+.stat-box h4,
+.stat-box h5,
+.stat-box h6 {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+}
+
+.summary-card p,
+.summary-card .text-muted,
+.summary-card small,
+.stat-card p,
+.stat-card .text-muted,
+.stat-card small {
+    color: #94a3b8 !important;
 }
