@@ -31,42 +31,29 @@ main.py-4 { padding-top: 0 !important; }
     z-index: -2;
     background-image: url("{{ url_for('static', filename='images/rori-hotel-hero.png') }}");
     background-size: cover;
-    background-position: center 35%;
+    background-position: center 45%;
     background-repeat: no-repeat;
     animation: heroZoom 30s ease-in-out infinite alternate;
 }
 
 @keyframes heroZoom {
     0%   { transform: scale(1.0); }
-    100% { transform: scale(1.06); }
+    100% { transform: scale(1.04); }
 }
 
-/* ---- Cinematic overlay (surgical — dark only where text is) ---- */
+/* ---- Lighter cinematic overlay — image clearly visible ---- */
 .hero-overlay {
     position: absolute;
     inset: 0;
     z-index: -1;
     background:
-        /* Main left-to-right gradient */
         linear-gradient(
-            100deg,
-            rgba(11, 19, 43, 0.88) 0%,
-            rgba(11, 19, 43, 0.70) 22%,
-            rgba(11, 19, 43, 0.35) 48%,
-            rgba(11, 19, 43, 0.08) 72%,
+            95deg,
+            rgba(11, 19, 43, 0.72) 0%,
+            rgba(11, 19, 43, 0.55) 18%,
+            rgba(11, 19, 43, 0.25) 42%,
+            rgba(11, 19, 43, 0.05) 68%,
             rgba(11, 19, 43, 0) 100%
-        ),
-        /* Light top fade — blend with navbar */
-        linear-gradient(
-            to bottom,
-            rgba(11, 19, 43, 0.35) 0%,
-            rgba(11, 19, 43, 0) 12%
-        ),
-        /* Light bottom fade — blend into next section */
-        linear-gradient(
-            to top,
-            rgba(11, 19, 43, 0.5) 0%,
-            rgba(11, 19, 43, 0) 18%
         );
 }
 
@@ -114,6 +101,7 @@ main.py-4 { padding-top: 0 !important; }
     color: var(--accent-gold, #C5A059);
     margin: 0 0 1.75rem;
     line-height: 1;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
     animation: heroFadeUp 0.9s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -135,9 +123,10 @@ main.py-4 { padding-top: 0 !important; }
     font-weight: 500;
     font-style: italic;
     letter-spacing: 0.4px;
-    color: rgba(255, 255, 255, 0.68);
+    color: rgba(255, 255, 255, 0.85);
     margin: 0 0 1rem;
     line-height: 1.2;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
     animation: heroFadeUp 0.9s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -150,7 +139,7 @@ main.py-4 { padding-top: 0 !important; }
     letter-spacing: -0.02em;
     color: #ffffff;
     margin: 0 0 1.35rem;
-    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.65);
     animation: heroFadeUp 1s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -161,6 +150,7 @@ main.py-4 { padding-top: 0 !important; }
     font-style: italic;
     font-weight: 700;
     padding-bottom: 0.1em;
+    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.7);
 }
 
 .hero-headline-gold::after {
@@ -188,6 +178,7 @@ main.py-4 { padding-top: 0 !important; }
     color: var(--accent-gold, #C5A059);
     margin: 0 0 1.25rem;
     line-height: 1.3;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
     animation: heroFadeUp 0.9s 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -197,9 +188,10 @@ main.py-4 { padding-top: 0 !important; }
     font-size: 1rem;
     font-weight: 300;
     line-height: 1.8;
-    color: rgba(237, 242, 244, 0.85);
+    color: rgba(237, 242, 244, 0.95);
     max-width: 500px;
     margin: 0 0 2.25rem;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
     animation: heroFadeUp 0.9s 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -233,12 +225,12 @@ main.py-4 { padding-top: 0 !important; }
     background: linear-gradient(135deg, #D4B46A 0%, var(--accent-gold, #C5A059) 100%);
     color: var(--primary-navy, #0B132B) !important;
     border: 1px solid transparent;
-    box-shadow: 0 12px 28px rgba(197, 160, 89, 0.25);
+    box-shadow: 0 12px 28px rgba(197, 160, 89, 0.35);
 }
 
 .hero-btn-primary:hover {
     transform: translateY(-3px);
-    box-shadow: 0 18px 40px rgba(197, 160, 89, 0.42);
+    box-shadow: 0 18px 40px rgba(197, 160, 89, 0.5);
     color: var(--primary-navy, #0B132B) !important;
 }
 
@@ -252,15 +244,15 @@ main.py-4 { padding-top: 0 !important; }
 }
 
 .hero-btn-secondary {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(11, 19, 43, 0.55);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     color: #ffffff !important;
-    border: 1px solid rgba(197, 160, 89, 0.5);
+    border: 1px solid rgba(197, 160, 89, 0.55);
 }
 
 .hero-btn-secondary:hover {
-    background: rgba(197, 160, 89, 0.15);
+    background: rgba(197, 160, 89, 0.2);
     border-color: var(--accent-gold, #C5A059);
     transform: translateY(-3px);
     color: #ffffff !important;
@@ -285,66 +277,114 @@ main.py-4 { padding-top: 0 !important; }
 
 /* ============ RESPONSIVE ============ */
 @media (max-width: 991px) {
-    .luxury-hero { min-height: 80vh; padding: 3rem 0 3.5rem; }
+    .luxury-hero { min-height: 82vh; padding: 3rem 0 3.5rem; }
     .hero-content { max-width: 100%; padding-left: 1.75rem; }
-    .hero-image { background-position: center 30%; }
     .hero-description { max-width: 100%; }
 }
 
+/* =========================================================
+   MOBILE — Image full on top, text below (perfect readability)
+========================================================= */
 @media (max-width: 767px) {
+
+    /* ---- Restructure: image on top, text below ---- */
     .luxury-hero {
-        min-height: 100vh;
-        min-height: 100svh;
-        align-items: flex-end;
-        padding: 4rem 0 3rem;
+        min-height: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0;
+        overflow: visible;
+        isolation: auto;
     }
 
+    /* ---- Image as its own block (full image visible) ---- */
     .hero-image {
-        /* Keep the top of the building visible */
-        background-position: center 22%;
+        position: relative;
+        inset: auto;
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        height: auto;
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        animation: none;
+        z-index: 1;
     }
 
+    /* ---- No overlay on mobile — text moves to solid background ---- */
     .hero-overlay {
-        background:
-            linear-gradient(
-                to bottom,
-                rgba(11, 19, 43, 0.35) 0%,
-                rgba(11, 19, 43, 0.08) 22%,
-                rgba(11, 19, 43, 0.35) 45%,
-                rgba(11, 19, 43, 0.82) 72%,
-                rgba(11, 19, 43, 0.96) 100%
-            );
+        display: none;
     }
 
-    .hero-content { padding-left: 1.25rem; }
+    /* ---- Text container on solid navy ---- */
+    .hero-container {
+        position: relative;
+        z-index: 2;
+        background: var(--primary-navy, #0B132B);
+        padding: 2.5rem 1.5rem 3rem;
+        width: 100%;
+    }
+
+    .hero-content {
+        max-width: 100%;
+        padding-left: 1.25rem;
+    }
 
     .hero-caption {
         padding-left: 2.75rem;
         font-size: 0.62rem;
         letter-spacing: 3.5px;
         margin-bottom: 1.2rem;
+        text-shadow: none;
     }
-    .hero-caption::before { width: 30px; }
+    .hero-caption::before {
+        width: 30px;
+    }
 
-    .hero-brand { font-size: 1.1rem; margin-bottom: 0.75rem; }
+    .hero-brand {
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+        text-shadow: none;
+    }
 
-    .hero-headline { margin-bottom: 1rem; }
-    .hero-headline-gold::after { width: 70px; height: 1.5px; }
+    .hero-headline {
+        margin-bottom: 1rem;
+        text-shadow: none;
+    }
+    .hero-headline-gold {
+        text-shadow: none;
+    }
+    .hero-headline-gold::after {
+        width: 70px;
+        height: 1.5px;
+    }
 
     .hero-subheadline {
         font-size: 0.72rem;
         letter-spacing: 3.5px;
         margin-bottom: 1rem;
+        text-shadow: none;
     }
 
     .hero-description {
         font-size: 0.92rem;
         line-height: 1.7;
         margin-bottom: 1.75rem;
+        text-shadow: none;
+        max-width: 100%;
     }
 
-    .hero-actions { flex-direction: column; gap: 0.65rem; }
-    .hero-btn { width: 100%; padding: 0.95rem 1.75rem; font-size: 0.78rem; }
+    .hero-actions {
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+
+    .hero-btn {
+        width: 100%;
+        padding: 0.95rem 1.75rem;
+        font-size: 0.78rem;
+    }
 }
 
 @media (max-width: 400px) {
