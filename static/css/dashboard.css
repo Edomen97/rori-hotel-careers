@@ -158,12 +158,12 @@
 }
 
 /* ============================================================
-   FILTERS
+   FILTERS — FIXED FOR MOBILE DATE INPUTS
 ============================================================ */
 
 .dash-filters {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) auto;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 0.85rem;
     padding: 1.1rem 1.25rem;
     background: var(--dash-navy-mid);
@@ -188,17 +188,20 @@
     color: var(--dash-gold);
 }
 
+/* ---- Input base ---- */
 .dash-input {
     background: var(--dash-navy-deep);
     color: var(--dash-text);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--dash-radius-sm);
-    padding: 0.55rem 0.75rem;
+    padding: 0.6rem 0.75rem;
     font-size: 0.85rem;
     font-family: inherit;
     transition: var(--dash-transition);
     width: 100%;
     min-width: 0;
+    min-height: 42px;
+    color-scheme: dark;
 }
 
 .dash-input:focus {
@@ -218,9 +221,52 @@
     color: var(--dash-text);
 }
 
-/* Fix Chrome autofill / date picker text color */
+/* ---- DATE INPUT — CRITICAL FIX ---- */
 .dash-input[type="date"] {
     color-scheme: dark;
+    color: var(--dash-text) !important;
+    background-color: var(--dash-navy-deep) !important;
+    position: relative;
+    padding: 0.6rem 0.75rem;
+    font-family: inherit;
+}
+
+/* Make the native calendar icon gold */
+.dash-input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(75%) sepia(35%) saturate(500%) hue-rotate(5deg) brightness(95%);
+    cursor: pointer;
+    opacity: 0.9;
+    padding: 2px;
+    margin-left: 4px;
+}
+
+.dash-input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* Firefox date picker */
+.dash-input[type="date"]::-moz-calendar-picker-indicator {
+    filter: invert(75%) sepia(35%) saturate(500%) hue-rotate(5deg);
+    cursor: pointer;
+}
+
+/* Force date input to show value even if empty */
+.dash-input[type="date"]:invalid,
+.dash-input[type="date"]:required:invalid {
+    color: var(--dash-text-muted);
+}
+
+/* DateTime text visible */
+.dash-input[type="date"]::-webkit-datetime-edit,
+.dash-input[type="date"]::-webkit-datetime-edit-text,
+.dash-input[type="date"]::-webkit-datetime-edit-month-field,
+.dash-input[type="date"]::-webkit-datetime-edit-day-field,
+.dash-input[type="date"]::-webkit-datetime-edit-year-field {
+    color: var(--dash-text) !important;
+}
+
+.dash-input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    color: var(--dash-text) !important;
 }
 
 .dash-filter-actions {
@@ -233,7 +279,6 @@
 @media (min-width: 992px) {
     .dash-filter-actions {
         grid-column: auto;
-        grid-row: 1;
     }
 }
 
@@ -315,7 +360,6 @@
     color: var(--dash-text-muted);
 }
 
-/* Color-coded KPI accents */
 .dash-kpi-blue::before { background: #3B82F6; }
 .dash-kpi-blue .dash-kpi-icon { color: #60A5FA; background: rgba(59, 130, 246, 0.12); }
 
@@ -508,7 +552,6 @@
     width: 80px;
 }
 
-/* Applicant cell */
 .dash-applicant {
     display: flex;
     align-items: center;
@@ -560,7 +603,6 @@
     font-size: 0.82rem;
 }
 
-/* Department tag */
 .dash-dept-tag {
     display: inline-block;
     padding: 0.25rem 0.7rem;
@@ -573,7 +615,6 @@
     white-space: nowrap;
 }
 
-/* Status pills */
 .dash-status {
     display: inline-block;
     padding: 0.3rem 0.7rem;
@@ -628,7 +669,6 @@
     border-color: rgba(239, 68, 68, 0.4);
 }
 
-/* Action button */
 .dash-action-btn {
     display: inline-flex;
     align-items: center;
@@ -650,7 +690,6 @@
     border-color: var(--dash-gold);
 }
 
-/* Empty table state */
 .dash-table-empty {
     text-align: center;
     padding: 3rem 1rem;
@@ -677,7 +716,7 @@
 }
 
 /* ============================================================
-   RESPONSIVE
+   RESPONSIVE — DESKTOP / TABLET
 ============================================================ */
 
 @media (max-width: 1200px) {
@@ -709,111 +748,249 @@
     }
 }
 
+/* ============================================================
+   MOBILE — CRITICAL FIXES
+============================================================ */
+
 @media (max-width: 767px) {
     .dash-wrapper {
-        padding: 1rem 0.85rem;
+        padding: 1rem 0.75rem;
     }
 
+    /* ---- HEADER ---- */
     .dash-header {
         flex-direction: column;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
+        gap: 0.85rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1.25rem;
     }
 
     .dash-header-title {
-        font-size: 1.6rem;
+        font-size: 1.55rem;
     }
 
+    .dash-header-subtitle {
+        font-size: 0.82rem;
+    }
+
+    .dash-header-actions {
+        width: 100%;
+        gap: 0.5rem;
+    }
+
+    .dash-header-actions .dash-btn {
+        flex: 1;
+        padding: 0.55rem 0.75rem;
+        font-size: 0.72rem;
+    }
+
+    /* ---- FILTERS ---- */
     .dash-filters {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
+        gap: 0.7rem;
         padding: 1rem;
+        margin-bottom: 1.25rem;
     }
 
-    .dash-filter-item:nth-child(n+3) {
-        grid-column: span 2;
+    .dash-filter-item {
+        width: 100%;
+    }
+
+    .dash-filter-item label {
+        font-size: 0.65rem;
+    }
+
+    .dash-input {
+        padding: 0.7rem 0.85rem;
+        font-size: 0.9rem;
+        min-height: 46px;
+    }
+
+    /* Date input on mobile — extra care */
+    .dash-input[type="date"] {
+        padding: 0.7rem 0.85rem !important;
+        min-height: 46px !important;
+        font-size: 0.9rem !important;
+    }
+
+    .dash-input[type="date"]::-webkit-calendar-picker-indicator {
+        width: 22px;
+        height: 22px;
     }
 
     .dash-filter-actions {
-        grid-column: span 2;
+        flex-direction: row;
+        gap: 0.5rem;
+        margin-top: 0.25rem;
     }
 
     .dash-filter-actions .dash-btn {
         flex: 1;
         justify-content: center;
+        padding: 0.7rem 1rem;
+        font-size: 0.8rem;
     }
 
+    /* ---- KPI CARDS — 2 columns compact ---- */
     .dash-kpi-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
+        gap: 0.65rem;
+        margin-bottom: 1.25rem;
     }
 
     .dash-kpi {
-        padding: 0.85rem 0.9rem;
-        gap: 0.75rem;
+        padding: 0.75rem 0.85rem;
+        gap: 0.65rem;
+        border-radius: 12px;
     }
 
     .dash-kpi-icon {
-        width: 38px;
-        height: 38px;
-        font-size: 1.1rem;
-        border-radius: 10px;
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+        border-radius: 9px;
     }
 
     .dash-kpi-value {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
+        margin-bottom: 0.2rem;
     }
 
     .dash-kpi-label {
-        font-size: 0.62rem;
-        letter-spacing: 0.8px;
+        font-size: 0.6rem;
+        letter-spacing: 0.6px;
+        line-height: 1.2;
+    }
+
+    /* ---- CHARTS ---- */
+    .dash-charts-grid {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+        margin-bottom: 1rem;
     }
 
     .dash-chart-card {
         min-height: 300px;
-        padding: 1rem;
+        padding: 0.95rem 1rem;
+        border-radius: 14px;
+    }
+
+    .dash-chart-header {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.65rem;
     }
 
     .dash-chart-header h3 {
         font-size: 1.05rem;
     }
 
+    .dash-chart-sub {
+        font-size: 0.68rem;
+    }
+
     .dash-chart-body {
         min-height: 220px;
     }
 
+    /* ---- TABLE ---- */
     .dash-table-header {
         padding: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
     }
 
     .dash-table-header h3 {
         font-size: 1.05rem;
     }
 
+    .dash-table-header .dash-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
     .dash-table thead th,
     .dash-table tbody td {
-        padding: 0.7rem 0.7rem;
-        font-size: 0.8rem;
+        padding: 0.65rem 0.7rem;
+        font-size: 0.78rem;
+    }
+
+    .dash-table {
+        min-width: 720px;
     }
 }
 
+/* ============================================================
+   VERY SMALL MOBILE
+============================================================ */
+
 @media (max-width: 480px) {
-    .dash-kpi-grid {
-        grid-template-columns: 1fr;
+    .dash-wrapper {
+        padding: 0.85rem 0.6rem;
+    }
+
+    .dash-header-title {
+        font-size: 1.35rem;
+    }
+
+    .dash-header-caption {
+        font-size: 0.6rem;
+        letter-spacing: 2.5px;
+    }
+
+    .dash-header-actions .dash-btn i {
+        display: none;
     }
 
     .dash-kpi {
-        padding: 0.9rem 1rem;
+        padding: 0.7rem;
     }
 
-    .dash-filters {
-        grid-template-columns: 1fr;
+    .dash-kpi-value {
+        font-size: 1.3rem;
     }
 
-    .dash-filter-item {
-        grid-column: span 1 !important;
+    .dash-kpi-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
     }
 
-    .dash-filter-actions {
-        grid-column: span 1 !important;
+    .dash-kpi-label {
+        font-size: 0.55rem;
+    }
+
+    .dash-chart-body {
+        min-height: 200px;
+    }
+
+    .dash-chart-header h3 {
+        font-size: 0.95rem;
+    }
+}
+
+/* ============================================================
+   BASE_ADMIN OVERRIDES — reduce sidebar space on mobile
+   (only applies when dashboard is loaded)
+============================================================ */
+
+@media (max-width: 767px) {
+    /* If the base_admin sidebar is present, compact it */
+    body:has(.dash-wrapper) .admin-sidebar,
+    body:has(.dash-wrapper) .sidebar {
+        max-width: 60px;
+        min-width: 60px;
+        overflow-x: hidden;
+    }
+
+    body:has(.dash-wrapper) .admin-sidebar .nav-link span,
+    body:has(.dash-wrapper) .sidebar .nav-link span {
+        display: none;
+    }
+
+    body:has(.dash-wrapper) .admin-sidebar .nav-link,
+    body:has(.dash-wrapper) .sidebar .nav-link {
+        justify-content: center;
+        padding: 0.75rem 0.5rem;
     }
 }
