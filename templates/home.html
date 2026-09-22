@@ -2,706 +2,691 @@
 {% block title %}Rori Hotel Hawassa - Careers | Home{% endblock %}
 
 {% block extra_css %}
-<link href="{{ url_for('static', filename='css/careers.css') }}" rel="stylesheet" />  
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />  
+<link href="{{ url_for('static', filename='css/careers.css') }}" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-<style>  
-    /* ===== LUXURY DARK THEME ===== */  
-    .luxury-hero {  
-        position: relative;  
-        min-height: 85vh;  
-        background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 40%, var(--primary-navy) 100%);  
-        display: flex;  
-        align-items: center;  
-        overflow: hidden;  
-    }  
-    .luxury-hero::before {  
-        content: '';  
-        position: absolute;  
-        top: 0;  
-        left: 0;  
-        right: 0;  
-        bottom: 0;  
-        background: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;  
-        opacity: 0.2;  
-        z-index: 0;  
-    }  
-    .luxury-hero::after {  
-        content: '';  
-        position: absolute;  
-        top: 0;  
-        left: 0;  
-        right: 0;  
-        bottom: 0;  
-        background: radial-gradient(ellipse at center, transparent 30%, rgba(11, 19, 43, 0.85) 100%);  
-        z-index: 1;  
-    }  
-    .luxury-hero .container {  
-        position: relative;  
-        z-index: 2;  
-        padding: 5rem 0;  
-    }  
-    .luxury-hero .gold-line {  
-        width: 80px;  
-        height: 2px;  
-        background: linear-gradient(90deg, var(--accent-gold), transparent);  
-        margin-bottom: 1.5rem;  
-    }  
-    .luxury-hero h1 {  
-        font-family: 'Cormorant Garamond', serif;  
-        font-size: 4.2rem;  
-        font-weight: 700;  
-        color: #fff;  
-        line-height: 1.1;  
-        letter-spacing: -0.02em;  
-    }  
-    .luxury-hero h1 .gold-text {  
-        color: var(--accent-gold);  
-        display: block;  
-        font-style: italic;  
-    }  
-    .luxury-hero .subtitle {  
-        font-family: 'Cormorant Garamond', serif;  
-        font-size: 1.3rem;  
-        font-weight: 400;  
-        color: var(--gold-light);  
-        letter-spacing: 3px;  
-        text-transform: uppercase;  
-        margin-bottom: 0.5rem;  
-    }  
-    .luxury-hero .description {  
-        font-size: 1.05rem;  
-        color: var(--text-main);  
-        max-width: 520px;  
-        line-height: 1.8;  
-    }  
-    .luxury-hero .btn-group-custom {  
-        display: flex;  
-        gap: 1rem;  
-        flex-wrap: wrap;  
-        margin-top: 2rem;  
-    }  
-    .btn-luxury-primary {  
-        background: var(--accent-gold);  
-        color: var(--primary-navy) !important;  
-        border: none;  
-        padding: 0.9rem 2.5rem;  
-        border-radius: 50px;  
-        font-weight: 600;  
-        font-size: 0.9rem;  
-        text-transform: uppercase;  
-        letter-spacing: 1px;  
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);  
-        text-decoration: none;  
-        display: inline-block;  
-    }  
-    .btn-luxury-primary:hover {  
-        background: var(--gold-light);  
-        transform: translateY(-3px);  
-        box-shadow: 0 20px 40px rgba(197, 160, 89, 0.3);  
-    }  
-    .btn-luxury-secondary {  
-        background: rgba(255,255,255,0.06);  
-        backdrop-filter: blur(20px);  
-        -webkit-backdrop-filter: blur(20px);  
-        border: 1px solid var(--border-gold);  
-        color: #fff !important;  
-        padding: 0.9rem 2.5rem;  
-        border-radius: 50px;  
-        font-weight: 600;  
-        font-size: 0.9rem;  
-        text-transform: uppercase;  
-        letter-spacing: 1px;  
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);  
-        text-decoration: none;  
-        display: inline-block;  
-    }  
-    .btn-luxury-secondary:hover {  
-        background: rgba(197, 160, 89, 0.15);  
-        border-color: var(--accent-gold);  
-        transform: translateY(-3px);  
-    }  
+<style>
+/* =========================================================
+   Reset main padding for full-bleed hero
+========================================================= */
+main.py-4 { padding-top: 0 !important; }
 
-    /* ===== GLASS CARD ===== */  
-    .glass-card {  
-        background: var(--card-bg);  
-        backdrop-filter: blur(20px);  
-        -webkit-backdrop-filter: blur(20px);  
-        border: 1px solid var(--border-gold);  
-        border-radius: 24px;  
-        padding: 2rem;  
-        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);  
-        height: 100%;  
-        position: relative;  
-        overflow: hidden;  
-    }  
-    .glass-card::before {  
-        content: '';  
-        position: absolute;  
-        top: 0;  
-        left: 0;  
-        right: 0;  
-        bottom: 0;  
-        background: linear-gradient(135deg, rgba(197, 160, 89, 0.08), transparent 50%);  
-        opacity: 0;  
-        transition: opacity 0.5s ease;  
-    }  
-    .glass-card:hover::before {  
-        opacity: 1;  
-    }  
-    .glass-card:hover {  
-        transform: translateY(-8px);  
-        border-color: var(--accent-gold);  
-        box-shadow: 0 30px 60px rgba(0,0,0,0.4);  
-    }  
-    .glass-card .icon-wrap {  
-        width: 56px;  
-        height: 56px;  
-        border-radius: 16px;  
-        background: rgba(197, 160, 89, 0.12);  
-        display: flex;  
-        align-items: center;  
-        justify-content: center;  
-        font-size: 1.8rem;  
-        color: var(--accent-gold);  
-        margin-bottom: 1.2rem;  
-        transition: all 0.4s ease;  
-    }  
-    .glass-card:hover .icon-wrap {  
-        background: var(--accent-gold);  
-        color: var(--primary-navy);  
-        transform: scale(1.05);  
-    }  
-    .glass-card h4 {  
-        color: #fff;  
-        font-family: 'Cormorant Garamond', serif;  
-        font-weight: 600;  
-        font-size: 1.4rem;  
-        margin-bottom: 0.5rem;  
-    }  
-    .glass-card p {  
-        color: var(--text-muted);  
-        font-size: 0.95rem;  
-        line-height: 1.6;  
-        margin-bottom: 0;  
-    }  
+/* =========================================================
+   HERO — Cinematic Luxury
+========================================================= */
+.luxury-hero {
+    position: relative;
+    min-height: 88vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    isolation: isolate;
+    padding: 3rem 0 4rem;
+}
 
-    /* ===== SECTION HEADERS ===== */  
-    .section-dark {  
-        background: var(--primary-navy);  
-        padding: 5rem 0;  
-        position: relative;  
-    }  
-    .section-dark .section-label {  
-        font-size: 0.75rem;  
-        text-transform: uppercase;  
-        letter-spacing: 4px;  
-        color: var(--accent-gold);  
-        font-weight: 600;  
-        margin-bottom: 0.5rem;  
-    }  
-    .section-dark .section-title {  
-        font-family: 'Cormorant Garamond', serif;  
-        font-size: 3rem;  
-        font-weight: 700;  
-        color: #fff;  
-        margin-bottom: 1rem;  
-    }  
-    .section-dark .section-subtitle {  
-        color: var(--text-muted);  
-        font-size: 1.1rem;  
-        max-width: 600px;  
-        margin: 0 auto 2rem;  
-        line-height: 1.8;  
-    }  
+/* ---- Background image ---- */
+.hero-image {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background-image: url("{{ url_for('static', filename='images/rori-hotel-hero.jpg') }}");
+    background-size: cover;
+    background-position: center 35%;
+    background-repeat: no-repeat;
+    animation: heroZoom 30s ease-in-out infinite alternate;
+}
 
-    /* ===== SEARCH BOX ===== */  
-    .search-box {  
-        background: rgba(255,255,255,0.04);  
-        backdrop-filter: blur(20px);  
-        -webkit-backdrop-filter: blur(20px);  
-        border: 1px solid var(--border-gold);  
-        border-radius: 60px;  
-        padding: 0.5rem;  
-        display: flex;  
-        flex-wrap: wrap;  
-        gap: 0.5rem;  
-        max-width: 900px;  
-        margin: 0 auto;  
-    }  
-    .search-box .form-control,  
-    .search-box .form-select {  
-        background: transparent !important;  
-        border: none !important;  
-        color: #fff !important;  
-        padding: 0.8rem 1.2rem;  
-        border-radius: 40px;  
-        flex: 1;  
-        min-width: 150px;  
-    }  
-    .search-box .form-control::placeholder {  
-        color: rgba(255,255,255,0.4);  
-    }  
-    .search-box .form-control:focus,  
-    .search-box .form-select:focus {  
-        box-shadow: none !important;  
-        background: rgba(255,255,255,0.05) !important;  
-    }  
-    .search-box .form-select option {  
-        background: var(--primary-dark);  
-        color: #fff;  
-    }  
-    .search-box .btn-search {  
-        background: var(--accent-gold);  
-        color: var(--primary-navy);  
-        border: none;  
-        padding: 0.8rem 2.5rem;  
-        border-radius: 40px;  
-        font-weight: 600;  
-        transition: all 0.3s ease;  
-        white-space: nowrap;  
-    }  
-    .search-box .btn-search:hover {  
-        background: var(--gold-light);  
-        transform: scale(1.02);  
-    }  
+@keyframes heroZoom {
+    0%   { transform: scale(1.0); }
+    100% { transform: scale(1.06); }
+}
 
-    /* ===== FEATURED AREAS ===== */  
-    .area-grid {  
-        display: grid;  
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));  
-        gap: 1.5rem;  
-    }  
-    .area-card {  
-        background: var(--card-bg);  
-        border: 1px solid var(--border-gold);  
-        border-radius: 20px;  
-        padding: 1.8rem 1.5rem;  
-        text-align: center;  
-        transition: all 0.4s ease;  
-    }  
-    .area-card:hover {  
-        background: rgba(197, 160, 89, 0.08);  
-        border-color: var(--accent-gold);  
-        transform: translateY(-4px);  
-    }  
-    .area-card .area-icon {  
-        font-size: 2rem;  
-        color: var(--accent-gold);  
-        margin-bottom: 0.8rem;  
-        display: block;  
-    }  
-    .area-card h6 {  
-        color: #fff;  
-        font-weight: 600;  
-        margin-bottom: 0.4rem;  
-    }  
-    .area-card p {  
-        color: var(--text-muted);  
-        font-size: 0.85rem;  
-        margin-bottom: 0;  
-        line-height: 1.5;  
-    }  
+/* ---- Cinematic overlay (surgical — dark only where text is) ---- */
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        /* Main left-to-right gradient */
+        linear-gradient(
+            100deg,
+            rgba(11, 19, 43, 0.88) 0%,
+            rgba(11, 19, 43, 0.70) 22%,
+            rgba(11, 19, 43, 0.35) 48%,
+            rgba(11, 19, 43, 0.08) 72%,
+            rgba(11, 19, 43, 0) 100%
+        ),
+        /* Light top fade — blend with navbar */
+        linear-gradient(
+            to bottom,
+            rgba(11, 19, 43, 0.35) 0%,
+            rgba(11, 19, 43, 0) 12%
+        ),
+        /* Light bottom fade — blend into next section */
+        linear-gradient(
+            to top,
+            rgba(11, 19, 43, 0.5) 0%,
+            rgba(11, 19, 43, 0) 18%
+        );
+}
 
-    /* ===== WHY RORI ===== */  
-    .why-grid {  
-        display: grid;  
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));  
-        gap: 2rem;  
-    }  
-    .why-item {  
-        text-align: center;  
-        padding: 1.5rem;  
-    }  
-    .why-item .why-icon {  
-        font-size: 2.5rem;  
-        color: var(--accent-gold);  
-        margin-bottom: 1rem;  
-        display: block;  
-    }  
-    .why-item h5 {  
-        font-family: 'Cormorant Garamond', serif;  
-        font-weight: 600;  
-        color: #fff;  
-        margin-bottom: 0.5rem;  
-    }  
-    .why-item p {  
-        color: var(--text-muted);  
-        font-size: 0.95rem;  
-        line-height: 1.6;  
-        margin-bottom: 0;  
-    }  
+.hero-container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+}
 
-    /* ===== CTA SECTION ===== */  
-    .cta-section {  
-        background: linear-gradient(135deg, var(--primary-navy) 0%, #1a1a2e 100%);  
-        padding: 4rem 0;  
-        text-align: center;  
-        position: relative;  
-        overflow: hidden;  
-        border-top: 1px solid var(--border-gold);  
-    }  
-    .cta-section::before {  
-        content: '';  
-        position: absolute;  
-        top: -50%;  
-        left: -50%;  
-        width: 200%;  
-        height: 200%;  
-        background: radial-gradient(ellipse at center, rgba(197,160,89,0.05), transparent 60%);  
-        animation: shimmer 20s infinite alternate;  
-    }  
-    @keyframes shimmer {  
-        0% { transform: translate(0, 0); }  
-        100% { transform: translate(10%, 10%); }  
-    }  
-    .cta-section .container {  
-        position: relative;  
-        z-index: 1;  
-    }  
-    .cta-section h2 {  
-        font-family: 'Cormorant Garamond', serif;  
-        font-size: 3rem;  
-        font-weight: 700;  
-        color: #fff;  
-    }  
-    .cta-section h2 .gold-text {  
-        color: var(--accent-gold);  
-        font-style: italic;  
-    }  
-    .cta-section p {  
-        color: var(--text-muted);  
-        font-size: 1.1rem;  
-        max-width: 600px;  
-        margin: 1rem auto 2rem;  
-        line-height: 1.8;  
-    }  
-    .cta-section .btn-group {  
-        display: flex;  
-        gap: 1rem;  
-        justify-content: center;  
-        flex-wrap: wrap;  
-    }  
+/* ---- Content block ---- */
+.hero-content {
+    position: relative;
+    max-width: 700px;
+    padding-left: 2rem;
+}
 
-    /* ===== SOCIAL LINKS ===== */  
-    .social-links {  
-        display: flex;  
-        gap: 1rem;  
-        justify-content: center;  
-        flex-wrap: wrap;  
-        margin-top: 1.5rem;  
-    }  
-    .social-links a {  
-        display: inline-flex;  
-        align-items: center;  
-        gap: 0.5rem;  
-        color: var(--text-muted);  
-        text-decoration: none;  
-        font-size: 0.9rem;  
-        transition: all 0.3s ease;  
-        padding: 0.3rem 0.8rem;  
-        border-radius: 30px;  
-        background: rgba(255,255,255,0.04);  
-        border: 1px solid var(--border-gold);  
-    }  
-    .social-links a:hover {  
-        color: var(--gold-light);  
-        background: rgba(197, 160, 89, 0.1);  
-        border-color: var(--accent-gold);  
-    }  
-    .social-links a i {  
-        font-size: 1.2rem;  
-        color: var(--accent-gold);  
-    }  
+/* Subtle vertical gold accent line */
+.hero-content::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.35rem;
+    bottom: 0.35rem;
+    width: 1px;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(197, 160, 89, 0.4) 15%,
+        rgba(197, 160, 89, 0.75) 50%,
+        rgba(197, 160, 89, 0.4) 85%,
+        transparent 100%
+    );
+}
 
-    /* ===== HR CONTACT ===== */  
-    .hr-contact {  
-        background: var(--card-bg);  
-        border: 1px solid var(--border-gold);  
-        border-radius: 20px;  
-        padding: 2rem;  
-        text-align: center;  
-        max-width: 500px;  
-        margin: 2rem auto 0;  
-    }  
-    .hr-contact h5 {  
-        color: #fff;  
-        font-family: 'Cormorant Garamond', serif;  
-        font-weight: 600;  
-        margin-bottom: 0.5rem;  
-    }  
-    .hr-contact p {  
-        color: var(--text-muted);  
-        font-size: 0.9rem;  
-        margin-bottom: 0.5rem;  
-    }  
-    .hr-contact .contact-detail {  
-        color: var(--text-main);  
-        font-size: 0.95rem;  
-    }  
-    .hr-contact .contact-detail i {  
-        color: var(--accent-gold);  
-        margin-right: 0.5rem;  
-    }  
+/* ---- Caption ---- */
+.hero-caption {
+    display: inline-block;
+    position: relative;
+    padding-left: 3.25rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--accent-gold, #C5A059);
+    margin: 0 0 1.75rem;
+    line-height: 1;
+    animation: heroFadeUp 0.9s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
 
-    /* ===== RESPONSIVE ===== */  
-    @media (max-width: 992px) {  
-        .luxury-hero h1 { font-size: 3.5rem; }  
-        .section-dark .section-title, .cta-section h2 { font-size: 2.5rem; }  
-    }  
-    @media (max-width: 768px) {  
-        .luxury-hero { min-height: 80vh; }  
-        .luxury-hero h1 { font-size: 2.8rem; }  
-        .luxury-hero .subtitle { font-size: 1.1rem; }  
-        .search-box { border-radius: 30px; padding: 0.8rem; flex-direction: column; }  
-        .search-box .form-control, .search-box .form-select, .search-box .btn-search { width: 100%; border-radius: 30px; }  
-        .area-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }  
-        .why-grid { grid-template-columns: 1fr 1fr; }  
-        .section-dark .section-title, .cta-section h2 { font-size: 2.2rem; }  
-        .glass-card { padding: 1.5rem; }  
-    }  
-    @media (max-width: 480px) {  
-        .luxury-hero h1 { font-size: 2.2rem; }  
-        .luxury-hero .description { font-size: 1rem; }  
-        .btn-luxury-primary, .btn-luxury-secondary { width: 100%; text-align: center; padding: 0.8rem; }  
-        .luxury-hero .btn-group-custom { flex-direction: column; }  
-        .why-grid { grid-template-columns: 1fr; }  
-        .area-grid { grid-template-columns: 1fr 1fr; }  
-        .cta-section .btn-group { flex-direction: column; align-items: center; }  
-        .cta-section .btn-group .btn-luxury-primary, .cta-section .btn-group .btn-luxury-secondary { width: 100%; }  
-    }  
-</style>  
-{% endblock %}  
+.hero-caption::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 1px;
+    background: var(--accent-gold, #C5A059);
+}
+
+/* ---- Brand (understated) ---- */
+.hero-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: 0.4px;
+    color: rgba(255, 255, 255, 0.68);
+    margin: 0 0 1rem;
+    line-height: 1.2;
+    animation: heroFadeUp 0.9s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ---- Main headline ---- */
+.hero-headline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.5rem, 6vw, 5.2rem);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    margin: 0 0 1.35rem;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+    animation: heroFadeUp 1s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-headline-gold {
+    display: block;
+    position: relative;
+    color: var(--accent-gold, #C5A059);
+    font-style: italic;
+    font-weight: 700;
+    padding-bottom: 0.1em;
+}
+
+.hero-headline-gold::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        var(--accent-gold, #C5A059) 0%,
+        rgba(197, 160, 89, 0.3) 70%,
+        transparent 100%
+    );
+}
+
+/* ---- Supporting subheadline ---- */
+.hero-subheadline {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--accent-gold, #C5A059);
+    margin: 0 0 1.25rem;
+    line-height: 1.3;
+    animation: heroFadeUp 0.9s 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ---- Description ---- */
+.hero-description {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: rgba(237, 242, 244, 0.85);
+    max-width: 500px;
+    margin: 0 0 2.25rem;
+    animation: heroFadeUp 0.9s 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ---- CTA ---- */
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    animation: heroFadeUp 0.9s 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1rem 2.1rem;
+    border-radius: 50px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    text-decoration: none;
+    line-height: 1;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+}
+
+.hero-btn-primary {
+    background: linear-gradient(135deg, #D4B46A 0%, var(--accent-gold, #C5A059) 100%);
+    color: var(--primary-navy, #0B132B) !important;
+    border: 1px solid transparent;
+    box-shadow: 0 12px 28px rgba(197, 160, 89, 0.25);
+}
+
+.hero-btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px rgba(197, 160, 89, 0.42);
+    color: var(--primary-navy, #0B132B) !important;
+}
+
+.hero-btn-primary i {
+    font-size: 0.95rem;
+    transition: transform 0.3s ease;
+}
+
+.hero-btn-primary:hover i {
+    transform: translateX(4px);
+}
+
+.hero-btn-secondary {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: #ffffff !important;
+    border: 1px solid rgba(197, 160, 89, 0.5);
+}
+
+.hero-btn-secondary:hover {
+    background: rgba(197, 160, 89, 0.15);
+    border-color: var(--accent-gold, #C5A059);
+    transform: translateY(-3px);
+    color: #ffffff !important;
+}
+
+@keyframes heroFadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-image,
+    .hero-caption,
+    .hero-brand,
+    .hero-headline,
+    .hero-subheadline,
+    .hero-description,
+    .hero-actions {
+        animation: none !important;
+    }
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 991px) {
+    .luxury-hero { min-height: 80vh; padding: 3rem 0 3.5rem; }
+    .hero-content { max-width: 100%; padding-left: 1.75rem; }
+    .hero-image { background-position: center 30%; }
+    .hero-description { max-width: 100%; }
+}
+
+@media (max-width: 767px) {
+    .luxury-hero {
+        min-height: 100vh;
+        min-height: 100svh;
+        align-items: flex-end;
+        padding: 4rem 0 3rem;
+    }
+
+    .hero-image {
+        /* Keep the top of the building visible */
+        background-position: center 22%;
+    }
+
+    .hero-overlay {
+        background:
+            linear-gradient(
+                to bottom,
+                rgba(11, 19, 43, 0.35) 0%,
+                rgba(11, 19, 43, 0.08) 22%,
+                rgba(11, 19, 43, 0.35) 45%,
+                rgba(11, 19, 43, 0.82) 72%,
+                rgba(11, 19, 43, 0.96) 100%
+            );
+    }
+
+    .hero-content { padding-left: 1.25rem; }
+
+    .hero-caption {
+        padding-left: 2.75rem;
+        font-size: 0.62rem;
+        letter-spacing: 3.5px;
+        margin-bottom: 1.2rem;
+    }
+    .hero-caption::before { width: 30px; }
+
+    .hero-brand { font-size: 1.1rem; margin-bottom: 0.75rem; }
+
+    .hero-headline { margin-bottom: 1rem; }
+    .hero-headline-gold::after { width: 70px; height: 1.5px; }
+
+    .hero-subheadline {
+        font-size: 0.72rem;
+        letter-spacing: 3.5px;
+        margin-bottom: 1rem;
+    }
+
+    .hero-description {
+        font-size: 0.92rem;
+        line-height: 1.7;
+        margin-bottom: 1.75rem;
+    }
+
+    .hero-actions { flex-direction: column; gap: 0.65rem; }
+    .hero-btn { width: 100%; padding: 0.95rem 1.75rem; font-size: 0.78rem; }
+}
+
+@media (max-width: 400px) {
+    .hero-caption {
+        font-size: 0.58rem;
+        letter-spacing: 2.5px;
+        padding-left: 2.25rem;
+    }
+    .hero-caption::before { width: 22px; }
+    .hero-headline-gold::after { width: 55px; }
+}
+
+/* =========================================================
+   EXISTING SECTIONS — UNCHANGED
+========================================================= */
+.section-dark { background: var(--primary-navy); padding: 5rem 0; position: relative; }
+.section-dark .section-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 4px; color: var(--accent-gold); font-weight: 600; margin-bottom: 0.5rem; }
+.section-dark .section-title { font-family: 'Cormorant Garamond', serif; font-size: 3rem; font-weight: 700; color: #fff; margin-bottom: 1rem; }
+.section-dark .section-subtitle { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto 2rem; line-height: 1.8; }
+
+.search-box { background: rgba(255,255,255,0.04); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border-gold); border-radius: 60px; padding: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem; max-width: 900px; margin: 0 auto; }
+.search-box .form-control, .search-box .form-select { background: transparent !important; border: none !important; color: #fff !important; padding: 0.8rem 1.2rem; border-radius: 40px; flex: 1; min-width: 150px; }
+.search-box .form-control::placeholder { color: rgba(255,255,255,0.4); }
+.search-box .form-control:focus, .search-box .form-select:focus { box-shadow: none !important; background: rgba(255,255,255,0.05) !important; }
+.search-box .form-select option { background: var(--primary-dark); color: #fff; }
+.search-box .btn-search { background: var(--accent-gold); color: var(--primary-navy); border: none; padding: 0.8rem 2.5rem; border-radius: 40px; font-weight: 600; transition: all 0.3s ease; white-space: nowrap; }
+.search-box .btn-search:hover { background: var(--gold-light); transform: scale(1.02); }
+
+.area-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; }
+.area-card { background: var(--card-bg); border: 1px solid var(--border-gold); border-radius: 20px; padding: 1.8rem 1.5rem; text-align: center; transition: all 0.4s ease; }
+.area-card:hover { background: rgba(197, 160, 89, 0.08); border-color: var(--accent-gold); transform: translateY(-4px); }
+.area-card .area-icon { font-size: 2rem; color: var(--accent-gold); margin-bottom: 0.8rem; display: block; }
+.area-card h6 { color: #fff; font-weight: 600; margin-bottom: 0.4rem; }
+.area-card p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0; line-height: 1.5; }
+
+.why-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 2rem; }
+.why-item { text-align: center; padding: 1.5rem; }
+.why-item .why-icon { font-size: 2.5rem; color: var(--accent-gold); margin-bottom: 1rem; display: block; }
+.why-item h5 { font-family: 'Cormorant Garamond', serif; font-weight: 600; color: #fff; margin-bottom: 0.5rem; }
+.why-item p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 0; }
+
+.cta-section { background: linear-gradient(135deg, var(--primary-navy) 0%, #1a1a2e 100%); padding: 4rem 0; text-align: center; position: relative; overflow: hidden; border-top: 1px solid var(--border-gold); }
+.cta-section::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at center, rgba(197,160,89,0.05), transparent 60%); animation: shimmer 20s infinite alternate; }
+@keyframes shimmer { 0% { transform: translate(0, 0); } 100% { transform: translate(10%, 10%); } }
+.cta-section .container { position: relative; z-index: 1; }
+.cta-section h2 { font-family: 'Cormorant Garamond', serif; font-size: 3rem; font-weight: 700; color: #fff; }
+.cta-section h2 .gold-text { color: var(--accent-gold); font-style: italic; }
+.cta-section p { color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 1rem auto 2rem; line-height: 1.8; }
+.cta-section .btn-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+.btn-luxury-primary { background: var(--accent-gold); color: var(--primary-navy) !important; border: none; padding: 0.9rem 2.5rem; border-radius: 50px; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); text-decoration: none; display: inline-block; }
+.btn-luxury-primary:hover { background: var(--gold-light); transform: translateY(-3px); box-shadow: 0 20px 40px rgba(197, 160, 89, 0.3); }
+.btn-luxury-secondary { background: rgba(255,255,255,0.06); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border-gold); color: #fff !important; padding: 0.9rem 2.5rem; border-radius: 50px; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); text-decoration: none; display: inline-block; }
+.btn-luxury-secondary:hover { background: rgba(197, 160, 89, 0.15); border-color: var(--accent-gold); transform: translateY(-3px); }
+
+.social-links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem; }
+.social-links a { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: all 0.3s ease; padding: 0.3rem 0.8rem; border-radius: 30px; background: rgba(255,255,255,0.04); border: 1px solid var(--border-gold); }
+.social-links a:hover { color: var(--gold-light); background: rgba(197, 160, 89, 0.1); border-color: var(--accent-gold); }
+.social-links a i { font-size: 1.2rem; color: var(--accent-gold); }
+
+.hr-contact { background: var(--card-bg); border: 1px solid var(--border-gold); border-radius: 20px; padding: 2rem; text-align: center; max-width: 500px; margin: 2rem auto 0; }
+.hr-contact h5 { color: #fff; font-family: 'Cormorant Garamond', serif; font-weight: 600; margin-bottom: 0.5rem; }
+.hr-contact p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem; }
+.hr-contact .contact-detail { color: var(--text-main); font-size: 0.95rem; }
+.hr-contact .contact-detail i { color: var(--accent-gold); margin-right: 0.5rem; }
+
+@media (max-width: 992px) {
+    .section-dark .section-title, .cta-section h2 { font-size: 2.5rem; }
+}
+@media (max-width: 768px) {
+    .search-box { border-radius: 30px; padding: 0.8rem; flex-direction: column; }
+    .search-box .form-control, .search-box .form-select, .search-box .btn-search { width: 100%; border-radius: 30px; }
+    .area-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .why-grid { grid-template-columns: 1fr 1fr; }
+    .section-dark .section-title, .cta-section h2 { font-size: 2.2rem; }
+}
+@media (max-width: 480px) {
+    .why-grid { grid-template-columns: 1fr; }
+    .area-grid { grid-template-columns: 1fr 1fr; }
+    .cta-section .btn-group { flex-direction: column; align-items: center; }
+    .cta-section .btn-group .btn-luxury-primary,
+    .cta-section .btn-group .btn-luxury-secondary { width: 100%; }
+}
+</style>
+{% endblock %}
 
 {% block content %}
 
-<!-- ===== HERO SECTION ===== -->  
-<section class="luxury-hero">  
-    <div class="container">  
-        <div class="row align-items-center">  
-            <div class="col-lg-7">  
-                <div class="gold-line"></div>  
-                <p class="subtitle">Rori Hotel Hawassa</p>  
-                <h1>  
-                    Where Service<br>  
-                    <span class="gold-text">and Culture Meet</span>  
-                </h1>  
-                <p class="description mt-4">  
-                    Build Your Career With Us  
-                </p>  
-                <p class="description">  
-                    At Rori Hotel Hawassa, exceptional hospitality begins with exceptional people.  
-                    Join a professional team where talent is valued, careers are developed,  
-                    and every contribution matters.  
-                </p>  
-                <div class="btn-group-custom">  
-                    <a href="{{ url_for('jobs') }}" class="btn-luxury-primary">Explore Careers</a>  
-                    <a href="{{ url_for('jobs') }}" class="btn-luxury-secondary">View Vacancies</a>  
-                </div>  
-            </div>  
-            <div class="col-lg-5 d-none d-lg-block">  
-                <div style="text-align: right; opacity: 0.3;">  
-                    <i class="bi bi-building" style="font-size: 12rem; color: var(--accent-gold);"></i>  
-                </div>  
-            </div>  
-        </div>  
-    </div>  
-</section>  
+<!-- ============================================================
+     HERO SECTION
+============================================================ -->
+<section class="luxury-hero">
 
-<!-- ===== SEARCH JOBS ===== -->  
-<section class="section-dark">  
-    <div class="container">  
-        <div class="text-center">  
-            <p class="section-label">Find Your Next Opportunity</p>  
-            <h2 class="section-title">Search Our Current Opportunities</h2>  
-            <p class="section-subtitle">Discover where your skills can make a difference.</p>  
-        </div>  
+    <div class="hero-image" role="img" aria-label="Rori Hotel Hawassa"></div>
+    <div class="hero-overlay"></div>
 
-        <form action="{{ url_for('jobs') }}" method="GET" class="search-box">  
-            <input type="text" name="q" class="form-control" placeholder="Search by Position" aria-label="Search jobs">  
-            <select name="department" class="form-select">  
-                <option value="">All Departments</option>  
-                {% for dept in all_departments %}  
-                <option value="{{ dept.id }}">{{ dept.name }}</option>  
-                {% endfor %}  
-            </select>  
-            <select name="type" class="form-select">  
-                <option value="">All Positions</option>  
-                <option value="Full-time">Full-time</option>  
-                <option value="Part-time">Part-time</option>  
-                <option value="Contract">Contract</option>  
-            </select>  
-            <button type="submit" class="btn-search">Search Jobs</button>  
-        </form>  
-    </div>  
-</section>  
+    <div class="container hero-container">
+        <div class="hero-content">
 
-<!-- ===== FEATURED CAREER AREAS ===== -->  
-<section class="section-dark" style="padding-top: 0;">  
-    <div class="container">  
-        <div class="text-center">  
-            <p class="section-label">Career Areas</p>  
-            <h2 class="section-title">Featured Career Areas</h2>  
-        </div>  
+            <span class="hero-caption">
+                Welcome to Rori Hotel Careers
+            </span>
 
-        <div class="area-grid">  
-            <div class="area-card">  
-                <i class="bi bi-door-open-fill area-icon"></i>  
-                <h6>Front Office</h6>  
-                <p>Create memorable first impressions and deliver outstanding guest experiences.</p>  
-            </div>  
-            <div class="area-card">  
-                <i class="bi bi-cup-hot-fill area-icon"></i>  
-                <h6>Food &amp; Beverage</h6>  
-                <p>Bring passion, creativity, and exceptional service to every dining experience.</p>  
-            </div>  
-            <div class="area-card">  
-                <i class="bi bi-stars area-icon"></i>  
-                <h6>Housekeeping</h6>  
-                <p>Maintain the highest standards of comfort, cleanliness, and guest care.</p>  
-            </div>  
-            <div class="area-card">  
-                <i class="bi bi-fire area-icon"></i>  
-                <h6>Kitchen &amp; Culinary</h6>  
-                <p>Turn creativity and expertise into exceptional culinary experiences.</p>  
-            </div>  
-            <div class="area-card">  
-                <i class="bi bi-tools area-icon"></i>  
-                <h6>Engineering &amp; Maintenance</h6>  
-                <p>Keep our hotel operating safely, efficiently, and reliably.</p>  
-            </div>  
-            <div class="area-card">  
-                <i class="bi bi-cash-stack area-icon"></i>  
-                <h6>Finance &amp; Administration</h6>  
-                <p>Support excellence through accurate, professional, and responsible operations.</p>  
-            </div>  
-            <div class="area-card">  
-                <i class="bi bi-shield-lock-fill area-icon"></i>  
-                <h6>Security</h6>  
-                <p>Protect our guests, colleagues, and property with professionalism and care.</p>  
-            </div>  
-            <div class="area-card">  
-                <i class="bi bi-flower1 area-icon"></i>  
-                <h6>Spa &amp; Wellness</h6>  
-                <p>Create exceptional moments of relaxation, wellbeing, and personal care.</p>  
-            </div>  
-        </div>  
-    </div>  
-</section>  
+            <p class="hero-brand">
+                Rori Hotel Hawassa
+            </p>
 
-<!-- ===== WHY RORI ===== -->  
-<section class="section-dark" style="padding-top: 0;">  
-    <div class="container">  
-        <div class="text-center">  
-            <p class="section-label">Why Rori</p>  
-            <h2 class="section-title">Why Build Your Career With Rori?</h2>  
-        </div>  
+            <h1 class="hero-headline">
+                Where Service
+                <span class="hero-headline-gold">and Culture Meet</span>
+            </h1>
 
-        <div class="why-grid">  
-            <div class="why-item">  
-                <i class="bi bi-graph-up-arrow why-icon"></i>  
-                <h5>Professional Growth</h5>  
-                <p>Develop your skills and grow through meaningful career opportunities.</p>  
-            </div>  
-            <div class="why-item">  
-                <i class="bi bi-book why-icon"></i>  
-                <h5>Learning &amp; Development</h5>  
-                <p>Strengthen your professional knowledge through continuous learning and training.</p>  
-            </div>  
-            <div class="why-item">  
-                <i class="bi bi-award why-icon"></i>  
-                <h5>A Culture of Excellence</h5>  
-                <p>Be part of a team committed to quality, professionalism, and exceptional service.</p>  
-            </div>  
-            <div class="why-item">  
-                <i class="bi bi-people why-icon"></i>  
-                <h5>Teamwork &amp; Respect</h5>  
-                <p>Work in an environment where people, collaboration, and mutual respect matter.</p>  
-            </div>  
-        </div>  
-    </div>  
-</section>  
+            <p class="hero-subheadline">
+                Build Your Career With Us
+            </p>
 
-<!-- ===== CTA SECTION ===== -->  
-<section class="cta-section">  
-    <div class="container">  
-        <h2>  
-            Your Career <span class="gold-text">Starts Here</span>  
-        </h2>  
-        <p>  
-            Whether you are beginning your hospitality career or looking for your next professional challenge,  
-            Rori Hotel Hawassa welcomes talented people who are ready to make a difference.  
-        </p>  
-        <div class="btn-group">  
-            <a href="{{ url_for('jobs') }}" class="btn-luxury-primary">View All Vacancies</a>  
-            <a href="{{ url_for('talent_pool') }}" class="btn-luxury-secondary">Submit Your Application</a>  
-        </div>  
-    </div>  
-</section>  
+            <p class="hero-description">
+                Exceptional hospitality begins with exceptional people.
+                Join a professional team where talent is valued, careers
+                are developed, and every contribution matters.
+            </p>
 
-<!-- ===== CONNECT & HR CONTACT ===== -->  
-<section class="section-dark" style="padding-top: 3rem; padding-bottom: 4rem;">  
-    <div class="container">  
-        <div class="text-center">  
-            <p class="section-label">Connect</p>  
-            <h2 class="section-title">Connect With Rori Hotel Hawassa</h2>  
-        </div>  
+            <div class="hero-actions">
+                <a href="{{ url_for('jobs') }}" class="hero-btn hero-btn-primary">
+                    Explore Careers
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                <a href="{{ url_for('jobs') }}" class="hero-btn hero-btn-secondary">
+                    <i class="bi bi-briefcase"></i>
+                    View Vacancies
+                </a>
+            </div>
 
-        <div class="social-links">  
-            <a href="http://www.rorihotel.com"  
-               target="_blank"  
-               rel="noopener noreferrer"  
-               aria-label="Rori Hotel Website">  
-                <i class="bi bi-globe2"></i> Official Website  
-            </a>  
-            <a href="https://www.facebook.com/profile.php?id=100071793383934"  
-               target="_blank"  
-               rel="noopener noreferrer"  
-               aria-label="Rori Hotel Facebook">  
-                <i class="bi bi-facebook"></i> Facebook  
-            </a>  
-            <a href="https://www.instagram.com/rorihotelhawassa/"  
-               target="_blank"  
-               rel="noopener noreferrer"  
-               aria-label="Rori Hotel Instagram">  
-                <i class="bi bi-instagram"></i> Instagram  
-            </a>  
-            <a href="https://www.tiktok.com/@rorihotel"  
-               target="_blank"  
-               rel="noopener noreferrer"  
-               aria-label="Rori Hotel TikTok">  
-                <i class="bi bi-tiktok"></i> TikTok  
-            </a>  
-            <a href="https://www.linkedin.com/company/rorihotelhawassa/"  
-               target="_blank"  
-               rel="noopener noreferrer"  
-               aria-label="Rori Hotel LinkedIn">  
-                <i class="bi bi-linkedin"></i> LinkedIn  
-            </a>  
-            <a href="https://t.me/RorihotelhawassaLK"  
-               target="_blank"  
-               rel="noopener noreferrer"  
-               aria-label="Rori Hotel Telegram">  
-                <i class="bi bi-telegram"></i> Telegram  
-            </a>  
-        </div>  
+        </div>
+    </div>
 
-        <div class="hr-contact">  
-            <h5>Human Resources</h5>  
-            <p>HR Team — For career opportunities and recruitment inquiries:</p>  
-            <div class="contact-detail">  
-                <i class="bi bi-envelope-fill"></i> ashr@rorihotel.com  
-            </div>  
-            <div class="contact-detail mt-1">  
-                <i class="bi bi-telephone-fill"></i> +251 915 976 742  
-            </div>  
-        </div>  
+</section>
 
-        <div class="text-center mt-4">  
-            <p style="color: var(--text-muted); font-size: 0.9rem; letter-spacing: 2px; font-family: 'Cormorant Garamond', serif;">  
-                Rori Hotel Hawassa — Where Service and Culture Meet  
-            </p>  
-        </div>  
-    </div>  
-</section>  
+<!-- ============================================================
+     SEARCH JOBS
+============================================================ -->
+<section class="section-dark">
+    <div class="container">
+        <div class="text-center">
+            <p class="section-label">Find Your Next Opportunity</p>
+            <h2 class="section-title">Search Our Current Opportunities</h2>
+            <p class="section-subtitle">Discover where your skills can make a difference.</p>
+        </div>
+
+        <form action="{{ url_for('jobs') }}" method="GET" class="search-box">
+            <input type="text" name="q" class="form-control" placeholder="Search by Position" aria-label="Search jobs">
+            <select name="department" class="form-select">
+                <option value="">All Departments</option>
+                {% for dept in all_departments %}
+                <option value="{{ dept.id }}">{{ dept.name }}</option>
+                {% endfor %}
+            </select>
+            <select name="type" class="form-select">
+                <option value="">All Positions</option>
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Contract">Contract</option>
+            </select>
+            <button type="submit" class="btn-search">Search Jobs</button>
+        </form>
+    </div>
+</section>
+
+<!-- ============================================================
+     FEATURED CAREER AREAS
+============================================================ -->
+<section class="section-dark" style="padding-top: 0;">
+    <div class="container">
+        <div class="text-center">
+            <p class="section-label">Career Areas</p>
+            <h2 class="section-title">Featured Career Areas</h2>
+        </div>
+
+        <div class="area-grid">
+            <div class="area-card">
+                <i class="bi bi-door-open-fill area-icon"></i>
+                <h6>Front Office</h6>
+                <p>Create memorable first impressions and deliver outstanding guest experiences.</p>
+            </div>
+            <div class="area-card">
+                <i class="bi bi-cup-hot-fill area-icon"></i>
+                <h6>Food &amp; Beverage</h6>
+                <p>Bring passion, creativity, and exceptional service to every dining experience.</p>
+            </div>
+            <div class="area-card">
+                <i class="bi bi-stars area-icon"></i>
+                <h6>Housekeeping</h6>
+                <p>Maintain the highest standards of comfort, cleanliness, and guest care.</p>
+            </div>
+            <div class="area-card">
+                <i class="bi bi-fire area-icon"></i>
+                <h6>Kitchen &amp; Culinary</h6>
+                <p>Turn creativity and expertise into exceptional culinary experiences.</p>
+            </div>
+            <div class="area-card">
+                <i class="bi bi-tools area-icon"></i>
+                <h6>Engineering &amp; Maintenance</h6>
+                <p>Keep our hotel operating safely, efficiently, and reliably.</p>
+            </div>
+            <div class="area-card">
+                <i class="bi bi-cash-stack area-icon"></i>
+                <h6>Finance &amp; Administration</h6>
+                <p>Support excellence through accurate, professional, and responsible operations.</p>
+            </div>
+            <div class="area-card">
+                <i class="bi bi-shield-lock-fill area-icon"></i>
+                <h6>Security</h6>
+                <p>Protect our guests, colleagues, and property with professionalism and care.</p>
+            </div>
+            <div class="area-card">
+                <i class="bi bi-flower1 area-icon"></i>
+                <h6>Spa &amp; Wellness</h6>
+                <p>Create exceptional moments of relaxation, wellbeing, and personal care.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     WHY RORI
+============================================================ -->
+<section class="section-dark" style="padding-top: 0;">
+    <div class="container">
+        <div class="text-center">
+            <p class="section-label">Why Rori</p>
+            <h2 class="section-title">Why Build Your Career With Rori?</h2>
+        </div>
+
+        <div class="why-grid">
+            <div class="why-item">
+                <i class="bi bi-graph-up-arrow why-icon"></i>
+                <h5>Professional Growth</h5>
+                <p>Develop your skills and grow through meaningful career opportunities.</p>
+            </div>
+            <div class="why-item">
+                <i class="bi bi-book why-icon"></i>
+                <h5>Learning &amp; Development</h5>
+                <p>Strengthen your professional knowledge through continuous learning and training.</p>
+            </div>
+            <div class="why-item">
+                <i class="bi bi-award why-icon"></i>
+                <h5>A Culture of Excellence</h5>
+                <p>Be part of a team committed to quality, professionalism, and exceptional service.</p>
+            </div>
+            <div class="why-item">
+                <i class="bi bi-people why-icon"></i>
+                <h5>Teamwork &amp; Respect</h5>
+                <p>Work in an environment where people, collaboration, and mutual respect matter.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     CTA SECTION
+============================================================ -->
+<section class="cta-section">
+    <div class="container">
+        <h2>
+            Your Career <span class="gold-text">Starts Here</span>
+        </h2>
+        <p>
+            Whether you are beginning your hospitality career or looking for your next professional challenge,
+            Rori Hotel Hawassa welcomes talented people who are ready to make a difference.
+        </p>
+        <div class="btn-group">
+            <a href="{{ url_for('jobs') }}" class="btn-luxury-primary">View All Vacancies</a>
+            <a href="{{ url_for('talent_pool') }}" class="btn-luxury-secondary">Submit Your Application</a>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     CONNECT & HR CONTACT
+============================================================ -->
+<section class="section-dark" style="padding-top: 3rem; padding-bottom: 4rem;">
+    <div class="container">
+        <div class="text-center">
+            <p class="section-label">Connect</p>
+            <h2 class="section-title">Connect With Rori Hotel Hawassa</h2>
+        </div>
+
+        <div class="social-links">
+            <a href="http://www.rorihotel.com"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Rori Hotel Website">
+                <i class="bi bi-globe2"></i> Official Website
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=100071793383934"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Rori Hotel Facebook">
+                <i class="bi bi-facebook"></i> Facebook
+            </a>
+            <a href="https://www.instagram.com/rorihotelhawassa/"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Rori Hotel Instagram">
+                <i class="bi bi-instagram"></i> Instagram
+            </a>
+            <a href="https://www.tiktok.com/@rorihotel"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Rori Hotel TikTok">
+                <i class="bi bi-tiktok"></i> TikTok
+            </a>
+            <a href="https://www.linkedin.com/company/rorihotelhawassa/"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Rori Hotel LinkedIn">
+                <i class="bi bi-linkedin"></i> LinkedIn
+            </a>
+            <a href="https://t.me/RorihotelhawassaLK"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Rori Hotel Telegram">
+                <i class="bi bi-telegram"></i> Telegram
+            </a>
+        </div>
+
+        <div class="hr-contact">
+            <h5>Human Resources</h5>
+            <p>HR Team — For career opportunities and recruitment inquiries:</p>
+            <div class="contact-detail">
+                <i class="bi bi-envelope-fill"></i> ashr@rorihotel.com
+            </div>
+            <div class="contact-detail mt-1">
+                <i class="bi bi-telephone-fill"></i> +251 915 976 742
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <p style="color: var(--text-muted); font-size: 0.9rem; letter-spacing: 2px; font-family: 'Cormorant Garamond', serif;">
+                Rori Hotel Hawassa — Where Service and Culture Meet
+            </p>
+        </div>
+    </div>
+</section>
 {% endblock %}
