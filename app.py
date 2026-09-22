@@ -95,19 +95,10 @@ class Config:
     # --------------------------------------------------------
     # SECRET KEY
     # --------------------------------------------------------
-    # Production: SECRET_KEY MUST be set as an environment
-    # variable (Render → Environment → SECRET_KEY). If it is
-    # missing, the app REFUSES to start — this prevents the
-    # multi-worker CSRF issue where each gunicorn worker would
-    # otherwise invent its own random key.
-    #
-    # Development: A safe local fallback is used so dev runs work.
-    # --------------------------------------------------------
     SECRET_KEY = os.environ.get("SECRET_KEY")
 
     if not SECRET_KEY:
         if IS_PRODUCTION:
-            # Hard fail — do not silently generate a random key.
             raise RuntimeError(
                 "SECRET_KEY must be set in production. "
                 "Add it in Render → Environment → SECRET_KEY "
@@ -322,19 +313,11 @@ mail = Mail(app)
 # ============================================================
 # CSRF PROTECTION
 # ============================================================
-# Registers csrf_token() as a Jinja global, enables
-# {{ form.hidden_tag() }} on FlaskForm instances, and
-# enforces CSRF validation on every POST request.
-# ============================================================
 csrf = CSRFProtect(app)
 
 
 # ============================================================
 # CSRF ERROR HANDLER
-# ============================================================
-# When a CSRF token is missing or expired, show a friendly
-# flash message and redirect the user back where they came
-# from, instead of returning a bare 400 page.
 # ============================================================
 
 @app.errorhandler(CSRFError)
@@ -448,7 +431,7 @@ else:
                 print("   [HTML]", _rel)
 
 # ------------------------------------------------------------
-# Critical lookups — verify Jinja can find each one
+# Critical lookups
 # ------------------------------------------------------------
 
 _critical_templates = [
@@ -489,14 +472,10 @@ print("======================================")
 
 
 # ============================================================
-# SAFE RENDER  (reports the ACTUAL missing template)
+# SAFE RENDER
 # ============================================================
 
 def safe_render(template_name, **context):
-    """
-    Wraps render_template so that a missing template returns
-    a helpful fallback page instead of a 500.
-    """
 
     try:
 
@@ -1273,10 +1252,6 @@ class ChangePasswordForm(FlaskForm):
 class InterviewForm(FlaskForm):
     """
     Shared form for creating AND editing interviews.
-
-    scheduled_at is a StringField so .data is always a str
-    (or None), making .strip() and strptime() safe.
-    Matches HTML <input type="datetime-local"> ("YYYY-MM-DDTHH:MM").
     """
 
     application_id = SelectField(
@@ -3102,7 +3077,7 @@ def forgot_password():
 
 
 # ============================================================
-# HR DASHBOARD
+# HR ANALYTICS DASHBOARD
 # ============================================================
 
 @app.route("/admin")
@@ -3112,66 +3087,260 @@ def forgot_password():
 @admin_required
 def admin_dashboard():
 
-    total_jobs = Job.query.count()
+    # --------------------------------------------------------
+    # FILTERS (from query string)
+    # --------------------------------------------------------
+    date_from = (request.args.get("date_from") or "").strip()
+    date_to = (request.args.get("date_to") or "").strip()
+    dept_filter = request.args.get("department", type=int)
+    job_filter = request.args.get("job", type=int)
+    status_filter = (request.args.get("status") or "").strip()
+    education_filter = (request.args.get("education") or "").strip()
 
-    active_jobs = Job.query.filter_by(is_active=True).count()
+    # --------------------------------------------------------
+    # BASE QUERY
+    # --------------------------------------------------------
+    query = Application.query
 
-    total_applications = Application.query.count()
+    if date_from:
+        try:
+            df = datetime.strptime(date_from, "%Y-%m-%d")
+            query = query.filter(Application.submitted_at >= df)
+        except (ValueError, TypeError):
+            pass
 
-    total_interviews = Interview.query.count()
+    if date_to:
+        try:
+            dt = datetime.strptime(date_to, "%Y-%m-%d")
+            dt = dt + timedelta(days=1)
+            query = query.filter(Application.submitted_at < dt)
+        except (ValueError, TypeError):
+            pass
 
-    recent_applications = (
-        Application.query
+    if dept_filter:
+        query = query.join(Job).filter(Job.department_id == dept_filter)
+
+    if job_filter:
+        query = query.filter(Application.job_id == job_filter)
+
+    if status_filter:
+        query = query.filter(Application.status == status_filter)
+
+    if education_filter:
+        query = query.filter(Application.education == education_filter)
+
+    applications = (
+        query
         .order_by(Application.submitted_at.desc())
-        .limit(10)
         .all()
     )
 
-    notifications = (
-        Notification.query
-        .order_by(Notification.created_at.desc())
-        .limit(10)
+    # --------------------------------------------------------
+    # KPI COUNTS
+    # --------------------------------------------------------
+    total_applications = len(applications)
+
+    status_counts = {
+        "NEW": 0,
+        "UNDER REVIEW": 0,
+        "SHORTLISTED": 0,
+        "INTERVIEW": 0,
+        "SELECTED": 0,
+        "HIRED": 0,
+        "REJECTED": 0,
+    }
+
+    for app_obj in applications:
+        if app_obj.status in status_counts:
+            status_counts[app_obj.status] += 1
+
+    new_applications = status_counts["NEW"]
+    under_review = status_counts["UNDER REVIEW"]
+    shortlisted = status_counts["SHORTLISTED"]
+    interviews_count = status_counts["INTERVIEW"]
+    selected = status_counts["SELECTED"]
+    hired = status_counts["HIRED"]
+    rejected = status_counts["REJECTED"]
+
+    # --------------------------------------------------------
+    # APPLICATIONS BY DEPARTMENT
+    # --------------------------------------------------------
+    dept_breakdown = {}
+
+    for app_obj in applications:
+        if app_obj.job and app_obj.job.department_ref:
+            name = app_obj.job.department_ref.name
+        else:
+            name = "Unassigned"
+        dept_breakdown[name] = dept_breakdown.get(name, 0) + 1
+
+    # --------------------------------------------------------
+    # APPLICATIONS BY EDUCATION
+    # --------------------------------------------------------
+    edu_breakdown = {}
+
+    for app_obj in applications:
+        edu = app_obj.education or "Not specified"
+        edu_breakdown[edu] = edu_breakdown.get(edu, 0) + 1
+
+    # --------------------------------------------------------
+    # APPLICATIONS BY JOB POSITION
+    # --------------------------------------------------------
+    job_breakdown = {}
+
+    for app_obj in applications:
+        title = app_obj.job.title if app_obj.job else "Unknown"
+        job_breakdown[title] = job_breakdown.get(title, 0) + 1
+
+    job_breakdown = dict(
+        sorted(
+            job_breakdown.items(),
+            key=lambda x: x[1],
+            reverse=True
+        )[:10]
+    )
+
+    # --------------------------------------------------------
+    # APPLICATIONS OVER TIME (Monthly)
+    # --------------------------------------------------------
+    time_series = {}
+
+    for app_obj in applications:
+        if app_obj.submitted_at:
+            key = app_obj.submitted_at.strftime("%Y-%m")
+            time_series[key] = time_series.get(key, 0) + 1
+
+    time_series = dict(sorted(time_series.items()))
+
+    # --------------------------------------------------------
+    # INTERVIEW ANALYTICS
+    # --------------------------------------------------------
+    filtered_app_ids = {app_obj.id for app_obj in applications}
+
+    relevant_interviews = (
+        Interview.query
+        .filter(Interview.application_id.in_(filtered_app_ids))
+        .all()
+    ) if filtered_app_ids else []
+
+    now_utc = datetime.utcnow()
+
+    interview_stats = {
+        "Scheduled": sum(
+            1 for i in relevant_interviews
+            if i.status == "Scheduled"
+        ),
+        "Completed": sum(
+            1 for i in relevant_interviews
+            if i.status == "Completed"
+        ),
+        "Cancelled": sum(
+            1 for i in relevant_interviews
+            if i.status == "Cancelled"
+        ),
+        "Rescheduled": sum(
+            1 for i in relevant_interviews
+            if i.status == "Rescheduled"
+        ),
+        "Upcoming": sum(
+            1 for i in relevant_interviews
+            if i.scheduled_at
+            and i.scheduled_at > now_utc
+            and i.status == "Scheduled"
+        ),
+    }
+
+    # --------------------------------------------------------
+    # TALENT POOL ANALYTICS
+    # --------------------------------------------------------
+    talent_candidates = TalentPool.query.all()
+    talent_pool_count = len(talent_candidates)
+
+    talent_edu = {}
+    talent_loc = {}
+
+    for t in talent_candidates:
+        edu = t.education or "Not specified"
+        talent_edu[edu] = talent_edu.get(edu, 0) + 1
+
+        loc = (t.location or "Not specified").strip() or "Not specified"
+        talent_loc[loc] = talent_loc.get(loc, 0) + 1
+
+    # --------------------------------------------------------
+    # RECENT APPLICATIONS (10)
+    # --------------------------------------------------------
+    recent_applications = applications[:10]
+
+    # --------------------------------------------------------
+    # FILTER DROPDOWN DATA
+    # --------------------------------------------------------
+    all_departments_list = (
+        Department.query
+        .order_by(Department.name)
         .all()
     )
 
-    statuses = [
-        "NEW",
-        "UNDER REVIEW",
-        "SHORTLISTED",
-        "INTERVIEW",
-        "SELECTED",
-        "HIRED",
-        "REJECTED"
+    all_jobs_list = (
+        Job.query
+        .order_by(Job.title)
+        .all()
+    )
+
+    education_choices = [
+        "High School",
+        "Technical Diploma",
+        "Bachelor Degree",
+        "Master Degree",
     ]
 
-    status_counts = {}
-
-    for status in statuses:
-
-        status_counts[status] = (
-            Application.query
-            .filter_by(status=status)
-            .count()
-        )
-
+    # --------------------------------------------------------
+    # RENDER
+    # --------------------------------------------------------
     return safe_render(
         "admin/dashboard.html",
 
-        total_jobs=total_jobs,
-
-        active_jobs=active_jobs,
-
+        # KPIs
         total_applications=total_applications,
+        new_applications=new_applications,
+        under_review=under_review,
+        shortlisted=shortlisted,
+        interviews_count=interviews_count,
+        selected=selected,
+        hired=hired,
+        rejected=rejected,
 
-        total_interviews=total_interviews,
-
-        recent_applications=recent_applications,
-
-        notifications=notifications,
-
+        # Status counts dict
         status_counts=status_counts,
 
-        applications=recent_applications
+        # Analytics data
+        dept_breakdown=dept_breakdown,
+        edu_breakdown=edu_breakdown,
+        job_breakdown=job_breakdown,
+        time_series=time_series,
+        interview_stats=interview_stats,
+
+        # Talent Pool
+        talent_pool_count=talent_pool_count,
+        talent_edu=talent_edu,
+        talent_loc=talent_loc,
+
+        # Recent Applications
+        recent_applications=recent_applications,
+
+        # Filter dropdowns
+        all_departments=all_departments_list,
+        all_jobs=all_jobs_list,
+        education_choices=education_choices,
+
+        # Current filter values
+        filters={
+            "date_from": date_from,
+            "date_to": date_to,
+            "department": dept_filter,
+            "job": job_filter,
+            "status": status_filter,
+            "education": education_filter,
+        },
     )
 
 
@@ -3949,7 +4118,7 @@ def admin_interviews():
 
 
 # ============================================================
-# NEW INTERVIEW  (uses InterviewForm — proper CSRF + validation)
+# NEW INTERVIEW
 # ============================================================
 
 @app.route("/admin/interview/new", methods=["GET", "POST"])
@@ -4106,7 +4275,7 @@ def admin_interview_new():
 
 
 # ============================================================
-# EDIT INTERVIEW  (uses InterviewForm — proper CSRF + validation)
+# EDIT INTERVIEW
 # ============================================================
 
 @app.route(
