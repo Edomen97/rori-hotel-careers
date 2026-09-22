@@ -117,3 +117,302 @@
   color: #ea868f;
   border-color: rgba(220, 53, 69, 0.35);
 }
+
+
+/* ================================================================
+   ADMIN DASHBOARD — DARK MODE FIX
+   Added to override white backgrounds from Bootstrap / inline styles
+   Preserves Rori Hotel navy + gold luxury design
+================================================================ */
+
+/* ---- Admin Cards & Table Dark Mode Fix ---- */
+.stat-card,
+.card,
+.bg-white,
+.table-responsive {
+    background-color: #111c38 !important;
+    border: 1px solid rgba(212, 175, 55, 0.2) !important;
+    color: #ffffff !important;
+}
+
+.stat-card h3,
+.stat-card p,
+.card h3,
+.card p {
+    color: #f8fafc !important;
+}
+
+table {
+    background-color: #111c38 !important;
+    color: #e2e8f0 !important;
+}
+
+th {
+    background-color: #1a2b56 !important;
+    color: #d4af37 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+td {
+    color: #ffffff !important;
+    background-color: #111c38 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.text-muted,
+.text-gray-500,
+td small {
+    color: #94a3b8 !important;
+}
+
+tbody tr:hover {
+    background-color: #17264a !important;
+}
+
+
+/* ================================================================
+   BOOTSTRAP DARK MODE OVERRIDES
+   Extra fixes for Bootstrap classes that stay white
+================================================================ */
+
+/* ---- Card Header (Bootstrap .card-header default is white) ---- */
+.card-header {
+    background-color: #17264a !important;
+    color: #ffffff !important;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2) !important;
+}
+
+.card-header h1,
+.card-header h2,
+.card-header h3,
+.card-header h4,
+.card-header h5,
+.card-header h6 {
+    color: #ffffff !important;
+}
+
+.card-header .text-muted,
+.card-header small {
+    color: #94a3b8 !important;
+}
+
+/* ---- Card Body (in case bg-white was applied) ---- */
+.card-body {
+    background-color: #111c38 !important;
+    color: #ffffff !important;
+}
+
+/* ---- Card Footer ---- */
+.card-footer {
+    background-color: #17264a !important;
+    border-top: 1px solid rgba(212, 175, 55, 0.2) !important;
+    color: #ffffff !important;
+}
+
+/* ---- Bootstrap .table with no background ---- */
+.table {
+    --bs-table-bg: transparent !important;
+    --bs-table-color: #e2e8f0 !important;
+    --bs-table-border-color: rgba(255, 255, 255, 0.05) !important;
+    --bs-table-hover-bg: #17264a !important;
+    --bs-table-hover-color: #ffffff !important;
+    color: #e2e8f0 !important;
+    background-color: transparent !important;
+}
+
+/* ---- Bootstrap .table-light variants ---- */
+.table-light,
+.table > :not(caption) > * > * {
+    background-color: #111c38 !important;
+    color: #e2e8f0 !important;
+}
+
+.table-light th,
+.table-light td {
+    background-color: #111c38 !important;
+    color: #e2e8f0 !important;
+}
+
+/* ---- Bootstrap table header ---- */
+.table thead th {
+    background-color: #1a2b56 !important;
+    color: #d4af37 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ---- Bootstrap hover rows ---- */
+.table-hover > tbody > tr:hover > * {
+    background-color: #17264a !important;
+    color: #ffffff !important;
+}
+
+/* ---- Striped rows ---- */
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: #0f1a33 !important;
+    color: #e2e8f0 !important;
+}
+
+.table-striped > tbody > tr:nth-of-type(even) > * {
+    background-color: #111c38 !important;
+    color: #e2e8f0 !important;
+}
+
+/* ---- Bootstrap badges (dark friendly) ---- */
+.badge {
+    color: #ffffff !important;
+}
+
+.badge.bg-secondary {
+    background-color: #475569 !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-light {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+.badge.bg-warning {
+    background-color: #d4af37 !important;
+    color: #0b132b !important;
+}
+
+.badge.bg-success {
+    background-color: #16a34a !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-info {
+    background-color: #0891b2 !important;
+    color: #ffffff !important;
+}
+
+/* ---- Bootstrap alert inside cards ---- */
+.card .alert {
+    background-color: #17264a !important;
+    border-color: rgba(212, 175, 55, 0.3) !important;
+    color: #e2e8f0 !important;
+}
+
+/* ---- Bootstrap table border-less tables ---- */
+.table-borderless > :not(caption) > * > * {
+    border-bottom-width: 0 !important;
+}
+
+/* ---- Table wrapper ---- */
+.table-responsive {
+    background-color: #111c38 !important;
+}
+
+/* ---- Modal content (in case it's used) ---- */
+.modal-content {
+    background-color: #111c38 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(212, 175, 55, 0.3) !important;
+}
+
+.modal-header,
+.modal-footer {
+    background-color: #17264a !important;
+    color: #ffffff !important;
+    border-color: rgba(212, 175, 55, 0.2) !important;
+}
+
+.modal-body {
+    background-color: #111c38 !important;
+    color: #e2e8f0 !important;
+}
+
+/* ---- Close button visibility on dark ---- */
+.btn-close {
+    filter: invert(1) brightness(2) !important;
+    opacity: 0.7 !important;
+}
+
+.btn-close:hover {
+    opacity: 1 !important;
+}
+
+/* ---- Bootstrap list-group in admin (if any) ---- */
+.list-group-item {
+    background-color: #111c38 !important;
+    color: #e2e8f0 !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ---- Pagination (if any) ---- */
+.page-link {
+    background-color: #111c38 !important;
+    color: #d4af37 !important;
+    border-color: rgba(212, 175, 55, 0.3) !important;
+}
+
+.page-link:hover {
+    background-color: #17264a !important;
+    color: #ffffff !important;
+}
+
+.page-item.active .page-link {
+    background-color: #d4af37 !important;
+    color: #0b132b !important;
+    border-color: #d4af37 !important;
+}
+
+/* ---- Forms in admin (search/filters) ---- */
+.form-control,
+.form-select {
+    background-color: #0f1a33 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(212, 175, 55, 0.3) !important;
+}
+
+.form-control::placeholder {
+    color: #64748b !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: #0f1a33 !important;
+    color: #ffffff !important;
+    border-color: #d4af37 !important;
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25) !important;
+}
+
+/* ---- Dark select dropdown ---- */
+.form-select option {
+    background-color: #0b132b !important;
+    color: #ffffff !important;
+}
+
+/* ---- Responsive — ensure mobile doesn't break ---- */
+@media (max-width: 767px) {
+    .table-responsive {
+        background-color: #111c38 !important;
+    }
+
+    .card,
+    .stat-card {
+        background-color: #111c38 !important;
+    }
+
+    .card-header,
+    .card-body,
+    .card-footer {
+        background-color: #111c38 !important;
+    }
+
+    th {
+        font-size: 0.75rem !important;
+        padding: 0.6rem 0.5rem !important;
+    }
+
+    td {
+        font-size: 0.8rem !important;
+        padding: 0.6rem 0.5rem !important;
+    }
+}
