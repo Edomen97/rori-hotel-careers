@@ -196,8 +196,8 @@
                             <div class="modal-content interview-modal">
                                 <div class="modal-header">
                                     <div>
-                                        <h5 class="modal-title fw-bold text-navy">Interview #{{ interview.id }}</h5>
-                                        <small class="text-muted">Interview details</small>
+                                        <h5 class="modal-title fw-bold">Interview #{{ interview.id }}</h5>
+                                        <small>Interview details</small>
                                     </div>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
@@ -206,10 +206,10 @@
                                         <div class="detail-profile mb-4">
                                             <div class="large-avatar">{{ (app.full_name or '?')[:1]|upper }}</div>
                                             <div>
-                                                <h5 class="fw-bold text-navy mb-1">{{ app.full_name or '—' }}</h5>
-                                                <div class="text-muted small">{{ app.email or '—' }}</div>
+                                                <h5 class="fw-bold mb-1">{{ app.full_name or '—' }}</h5>
+                                                <div class="small detail-muted">{{ app.email or '—' }}</div>
                                                 {% if app.phone %}
-                                                    <div class="text-muted small">{{ app.phone }}</div>
+                                                    <div class="small detail-muted">{{ app.phone }}</div>
                                                 {% endif %}
                                             </div>
                                         </div>
@@ -230,7 +230,7 @@
                                                 {% if interview.scheduled_at %}
                                                     {{ interview.scheduled_at.strftime('%B %d, %Y') }}
                                                     <br>
-                                                    <small class="text-muted">
+                                                    <small class="detail-muted">
                                                         {{ interview.scheduled_at.strftime('%I:%M %p') }}
                                                     </small>
                                                 {% else %}Not scheduled{% endif %}
@@ -320,8 +320,8 @@
                         <td colspan="7" class="py-5">
                             <div class="empty-state text-center">
                                 <div class="empty-icon mx-auto"><i class="bi bi-calendar-x"></i></div>
-                                <h5 class="fw-bold text-navy mt-3">No Interviews Scheduled</h5>
-                                <p class="text-muted mb-4">There are no candidate interviews in the system yet.</p>
+                                <h5 class="fw-bold mt-3">No Interviews Scheduled</h5>
+                                <p class="mb-4 empty-muted">There are no candidate interviews in the system yet.</p>
                                 <a href="{{ url_for('admin_interview_new') }}" class="btn btn-gold">
                                     <i class="bi bi-plus-circle me-2"></i> Schedule First Interview
                                 </a>
@@ -336,47 +336,473 @@
 </div>
 
 <style>
-.header-icon{width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px;background:rgba(197,160,89,0.12);color:var(--gold);font-size:1.15rem;}
-.summary-card{height:100%;display:flex;align-items:center;gap:1rem;padding:1.1rem;background:#fff;border:1px solid rgba(11,19,43,0.07);border-radius:14px;box-shadow:0 5px 20px rgba(11,19,43,0.05);}
-.summary-icon{width:42px;height:42px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:11px;background:rgba(197,160,89,0.12);color:var(--gold);}
-.summary-label{color:#6c757d;font-size:0.72rem;text-transform:uppercase;font-weight:700;letter-spacing:0.5px;}
-.summary-value{color:var(--navy);font-size:1.45rem;font-weight:800;line-height:1.2;}
-.interview-card{border-radius:16px;overflow:hidden;}
-.interview-card .table{min-width:1050px;}
-.interview-card thead th{background:#f8f9fa;color:#667085;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;border-bottom:1px solid #e9ecef;padding:0.9rem 0.75rem;white-space:nowrap;}
-.interview-card tbody td{padding:1rem 0.75rem;border-color:#f0f1f3;}
-.interview-id{color:var(--gold);font-weight:700;}
-.candidate-info{display:flex;align-items:center;gap:0.7rem;}
-.candidate-avatar,.large-avatar{display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;background:var(--navy);color:var(--gold);font-weight:700;}
-.candidate-avatar{width:38px;height:38px;font-size:0.9rem;}
-.candidate-name{color:var(--navy);font-size:0.9rem;font-weight:700;}
-.candidate-email{color:#8a9199;font-size:0.72rem;margin-top:2px;}
-.job-title{color:var(--navy);font-weight:600;font-size:0.86rem;}
-.schedule-date{color:var(--navy);font-size:0.84rem;font-weight:600;}
-.schedule-time{color:#7b8490;font-size:0.75rem;margin-top:3px;}
-.type-badge{display:inline-flex;align-items:center;padding:0.4rem 0.65rem;border-radius:7px;background:#f1f3f5;color:#495057;font-size:0.74rem;font-weight:600;}
-.status-badge{display:inline-flex;align-items:center;gap:0.35rem;padding:0.4rem 0.7rem;border-radius:50px;font-size:0.72rem;font-weight:700;white-space:nowrap;}
-.status-badge.scheduled{background:#fff3cd;color:#856404;}
-.status-badge.completed{background:#d1e7dd;color:#0f5132;}
-.status-badge.cancelled{background:#f8d7da;color:#842029;}
-.status-badge.default{background:#e9ecef;color:#495057;}
-.details-btn{border-radius:8px;font-size:0.75rem;font-weight:600;}
-.interview-modal{border:0;border-radius:18px;overflow:hidden;box-shadow:0 25px 70px rgba(0,0,0,0.2);}
-.interview-modal .modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid #edf0f2;}
-.interview-modal .modal-footer{border-top:1px solid #edf0f2;}
-.detail-profile{display:flex;align-items:center;gap:1rem;padding:1rem;background:#f8f9fa;border-radius:12px;}
-.large-avatar{width:54px;height:54px;font-size:1.1rem;}
-.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
-.detail-item{padding:0.85rem;border:1px solid #edf0f2;border-radius:10px;background:#fff;}
-.detail-label{display:block;color:#8a9199;font-size:0.7rem;text-transform:uppercase;font-weight:700;letter-spacing:0.4px;margin-bottom:0.3rem;}
-.detail-value{display:block;color:var(--navy);font-size:0.84rem;font-weight:600;}
-.rating{color:#b8871d;}
-.rating i{margin-right:3px;}
-.notes-box{padding:1rem;background:#f8f9fa;border-radius:10px;}
-.notes-text{color:#495057;font-size:0.84rem;line-height:1.6;white-space:pre-line;}
-.empty-state{padding:2rem 1rem;}
-.empty-icon{width:70px;height:70px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(197,160,89,0.1);color:var(--gold);font-size:1.8rem;}
-@media (max-width:767px){.detail-grid{grid-template-columns:1fr;}.summary-card{padding:0.9rem;}.summary-value{font-size:1.2rem;}}
+/* =============================================================
+   INTERVIEW MANAGEMENT — DARK LUXURY THEME
+   Applied last so it overrides external CSS + Bootstrap
+============================================================= */
+
+.header-icon {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: rgba(197, 160, 89, 0.15);
+    color: var(--gold, #C5A059);
+    font-size: 1.15rem;
+}
+
+/* ---- Override the H2 text color ---- */
+.container-fluid h2.text-navy,
+h2.text-navy {
+    color: #ffffff !important;
+}
+
+/* =============================================================
+   SUMMARY CARDS — DARK NAVY
+============================================================= */
+
+.summary-card {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem;
+    background: #111c38 !important;
+    border: 1px solid rgba(197, 160, 89, 0.25) !important;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.3s ease;
+}
+
+.summary-card:hover {
+    border-color: rgba(197, 160, 89, 0.5) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4) !important;
+}
+
+.summary-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: rgba(197, 160, 89, 0.15) !important;
+    color: #C5A059 !important;
+    font-size: 1.1rem;
+}
+
+.summary-label {
+    color: #94a3b8 !important;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.2rem;
+}
+
+.summary-value {
+    color: #ffffff !important;
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1.2;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* =============================================================
+   INTERVIEW CARD + TABLE — DARK NAVY
+============================================================= */
+
+.interview-card {
+    background: #111c38 !important;
+    border: 1px solid rgba(197, 160, 89, 0.2) !important;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+/* Card header — override bg-white */
+.interview-card .card-header {
+    background: #17264a !important;
+    border-bottom: 1px solid rgba(197, 160, 89, 0.15) !important;
+    padding: 1.25rem 1.5rem;
+}
+
+.interview-card .card-header h5 {
+    color: #ffffff !important;
+}
+
+.interview-card .card-header small,
+.interview-card .card-header .text-muted {
+    color: #94a3b8 !important;
+}
+
+/* Table */
+.interview-card .table {
+    min-width: 1050px;
+    background: #111c38 !important;
+    color: #e2e8f0 !important;
+}
+
+.interview-card .table thead th {
+    background: #1a2b56 !important;
+    color: #d4af37 !important;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 0.9rem 0.75rem;
+    white-space: nowrap;
+}
+
+.interview-card .table tbody td {
+    padding: 1rem 0.75rem;
+    background: #111c38 !important;
+    color: #ffffff !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    vertical-align: middle;
+}
+
+.interview-card .table tbody tr:hover td {
+    background: #17264a !important;
+}
+
+/* Table cell text */
+.interview-card .table .text-muted,
+.interview-card .table small {
+    color: #94a3b8 !important;
+}
+
+/* =============================================================
+   CELL ELEMENTS
+============================================================= */
+
+.interview-id {
+    color: #C5A059 !important;
+    font-weight: 700;
+}
+
+.candidate-info {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.candidate-avatar,
+.large-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #1a2b56 !important;
+    color: #C5A059 !important;
+    font-weight: 700;
+}
+
+.candidate-avatar {
+    width: 38px;
+    height: 38px;
+    font-size: 0.9rem;
+}
+
+.candidate-name {
+    color: #ffffff !important;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.candidate-email {
+    color: #94a3b8 !important;
+    font-size: 0.72rem;
+    margin-top: 2px;
+}
+
+.job-title {
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.86rem;
+}
+
+.schedule-date {
+    color: #ffffff !important;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.schedule-time {
+    color: #94a3b8 !important;
+    font-size: 0.75rem;
+    margin-top: 3px;
+}
+
+.type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.65rem;
+    border-radius: 7px;
+    background: rgba(197, 160, 89, 0.12) !important;
+    color: #E0C078 !important;
+    border: 1px solid rgba(197, 160, 89, 0.25) !important;
+    font-size: 0.74rem;
+    font-weight: 600;
+}
+
+/* Status badges — keep light colors (readable) */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 50px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-badge.scheduled {
+    background: rgba(255, 193, 7, 0.18) !important;
+    color: #ffda6a !important;
+    border: 1px solid rgba(255, 193, 7, 0.35) !important;
+}
+
+.status-badge.completed {
+    background: rgba(34, 197, 94, 0.18) !important;
+    color: #4ade80 !important;
+    border: 1px solid rgba(34, 197, 94, 0.4) !important;
+}
+
+.status-badge.cancelled {
+    background: rgba(239, 68, 68, 0.18) !important;
+    color: #f87171 !important;
+    border: 1px solid rgba(239, 68, 68, 0.4) !important;
+}
+
+.status-badge.default {
+    background: rgba(148, 163, 184, 0.18) !important;
+    color: #cbd5e1 !important;
+    border: 1px solid rgba(148, 163, 184, 0.3) !important;
+}
+
+/* Action buttons */
+.details-btn {
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.btn-outline-navy {
+    color: #C5A059 !important;
+    border-color: rgba(197, 160, 89, 0.4) !important;
+    background: transparent;
+}
+
+.btn-outline-navy:hover {
+    background: rgba(197, 160, 89, 0.15) !important;
+    border-color: #C5A059 !important;
+    color: #E0C078 !important;
+}
+
+.btn-outline-secondary {
+    color: #cbd5e1 !important;
+    border-color: rgba(203, 213, 225, 0.3) !important;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background: rgba(203, 213, 225, 0.1) !important;
+    color: #ffffff !important;
+    border-color: rgba(203, 213, 225, 0.6) !important;
+}
+
+/* =============================================================
+   MODAL — DARK NAVY
+============================================================= */
+
+.interview-modal {
+    border: 0;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+    background: #111c38 !important;
+    color: #ffffff !important;
+}
+
+.interview-modal .modal-header {
+    padding: 1.25rem 1.5rem;
+    background: #17264a !important;
+    border-bottom: 1px solid rgba(197, 160, 89, 0.15) !important;
+}
+
+.interview-modal .modal-header h5 {
+    color: #ffffff !important;
+}
+
+.interview-modal .modal-header small {
+    color: #94a3b8 !important;
+}
+
+.interview-modal .modal-body {
+    background: #111c38 !important;
+    color: #e2e8f0 !important;
+}
+
+.interview-modal .modal-footer {
+    background: #17264a !important;
+    border-top: 1px solid rgba(197, 160, 89, 0.15) !important;
+}
+
+.detail-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #17264a !important;
+    border-radius: 12px;
+    border: 1px solid rgba(197, 160, 89, 0.15);
+}
+
+.large-avatar {
+    width: 54px;
+    height: 54px;
+    font-size: 1.1rem;
+}
+
+.detail-profile h5 {
+    color: #ffffff !important;
+}
+
+.detail-muted {
+    color: #94a3b8 !important;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.detail-item {
+    padding: 0.85rem;
+    border: 1px solid rgba(197, 160, 89, 0.15) !important;
+    border-radius: 10px;
+    background: #17264a !important;
+}
+
+.detail-label {
+    display: block;
+    color: #94a3b8 !important;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    margin-bottom: 0.3rem;
+}
+
+.detail-value {
+    display: block;
+    color: #ffffff !important;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.rating {
+    color: #d4af37 !important;
+}
+
+.rating i {
+    margin-right: 3px;
+}
+
+.notes-box {
+    padding: 1rem;
+    background: #17264a !important;
+    border-radius: 10px;
+    border: 1px solid rgba(197, 160, 89, 0.15);
+}
+
+.notes-text {
+    color: #e2e8f0 !important;
+    font-size: 0.84rem;
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+/* Modal select + close button */
+.interview-modal .form-select {
+    background: #0f1a33 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(197, 160, 89, 0.3) !important;
+}
+
+.interview-modal .form-select option {
+    background: #0b132b !important;
+    color: #ffffff !important;
+}
+
+.interview-modal .btn-close {
+    filter: invert(1) brightness(2) !important;
+    opacity: 0.7;
+}
+
+.interview-modal .btn-close:hover {
+    opacity: 1;
+}
+
+/* =============================================================
+   EMPTY STATE
+============================================================= */
+
+.empty-state {
+    padding: 2rem 1rem;
+}
+
+.empty-icon {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(197, 160, 89, 0.1);
+    color: #C5A059;
+    font-size: 1.8rem;
+}
+
+.empty-state h5 {
+    color: #ffffff !important;
+}
+
+.empty-muted {
+    color: #94a3b8 !important;
+}
+
+/* =============================================================
+   RESPONSIVE
+============================================================= */
+
+@media (max-width: 767px) {
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-card {
+        padding: 0.9rem;
+    }
+
+    .summary-value {
+        font-size: 1.2rem;
+    }
+
+    .summary-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+}
 </style>
 
 {% endblock %}
