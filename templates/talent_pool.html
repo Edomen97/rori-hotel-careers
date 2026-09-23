@@ -1,406 +1,101 @@
-{% extends "base.html" %}
+{% extends "base_admin.html" %}
 
-{% block title %}Join Our Talent Pool - Rori Hotel Hawassa Careers{% endblock %}
+{% block title %}Talent Pool - Rori Hotel HR{% endblock %}
 
-{% block extra_css %}
-<style>
-.talent-hero {
-    background: linear-gradient(135deg, var(--primary-navy) 0%, #1a1a2e 100%);
-    padding: 4rem 0 3rem;
-    text-align: center;
-    border-bottom: 1px solid var(--border-gold);
-    position: relative;
-    overflow: hidden;
-}
-.talent-hero::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(ellipse at center, rgba(197,160,89,0.05), transparent 60%);
-    animation: shimmer 20s infinite alternate;
-}
-@keyframes shimmer {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(10%, 10%); }
-}
-.talent-hero .container {
-    position: relative;
-    z-index: 1;
-}
-.talent-hero .section-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 4px;
-    color: var(--accent-gold);
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-.talent-hero h1 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 3rem;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 1rem;
-}
-.talent-hero h1 .gold-text {
-    color: var(--accent-gold);
-    font-style: italic;
-}
-.talent-hero p {
-    color: var(--text-muted);
-    font-size: 1.1rem;
-    max-width: 700px;
-    margin: 0 auto;
-    line-height: 1.8;
-}
+{% block admin_content %}
 
-.talent-form-wrap {
-    padding: 3rem 0 4rem;
-}
+<div class="container-fluid px-0">
 
-.talent-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-gold);
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
-}
-
-.form-section-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #fff;
-    margin: 0 0 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--border-gold);
-}
-
-.form-label {
-    color: var(--text-main);
-    font-weight: 500;
-    margin-bottom: 0.4rem;
-    font-size: 0.88rem;
-}
-
-.form-control, .form-select {
-    background: #0F172A !important;
-    color: #fff !important;
-    border: 1px solid rgba(197,160,89,0.3) !important;
-    border-radius: 8px;
-    padding: 0.7rem 1rem;
-    transition: all 0.3s ease;
-}
-
-.form-control:focus, .form-select:focus {
-    background: #0F172A !important;
-    color: #fff !important;
-    border-color: var(--accent-gold) !important;
-    box-shadow: 0 0 0 0.25rem rgba(197,160,89,0.25) !important;
-}
-
-.form-control::placeholder {
-    color: rgba(255,255,255,0.3);
-}
-
-.form-select option {
-    background: var(--primary-dark);
-    color: #fff;
-}
-
-.btn-submit {
-    background: linear-gradient(135deg, #D4B46A 0%, var(--accent-gold) 100%);
-    color: var(--primary-navy) !important;
-    border: none;
-    padding: 0.95rem 3rem;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 0.9rem;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 12px 28px rgba(197,160,89,0.25);
-}
-.btn-submit:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 18px 40px rgba(197,160,89,0.4);
-    color: var(--primary-navy) !important;
-}
-
-.btn-back {
-    background: rgba(255,255,255,0.06);
-    backdrop-filter: blur(14px);
-    color: #fff !important;
-    border: 1px solid var(--border-gold);
-    padding: 0.95rem 2rem;
-    border-radius: 50px;
-    font-weight: 600;
-    font-size: 0.85rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    text-decoration: none;
-    display: inline-block;
-}
-.btn-back:hover {
-    background: rgba(197,160,89,0.15);
-    border-color: var(--accent-gold);
-    transform: translateY(-3px);
-    color: #fff !important;
-}
-
-.alert-flash {
-    background: var(--card-bg);
-    border: 1px solid var(--border-gold);
-    border-left: 4px solid var(--accent-gold);
-    border-radius: 10px;
-    color: var(--text-main);
-    padding: 1rem 1.25rem;
-    margin-bottom: 1.5rem;
-}
-.alert-flash.alert-danger { border-left-color: #dc3545; }
-.alert-flash.alert-success { border-left-color: #28a745; }
-.alert-flash.alert-warning { border-left-color: #ffc107; }
-
-@media (max-width: 767px) {
-    .talent-hero { padding: 3rem 0 2rem; }
-    .talent-hero h1 { font-size: 2rem; }
-    .talent-hero p { font-size: 1rem; }
-    .talent-card { padding: 1.5rem 1.25rem; border-radius: 16px; }
-    .talent-form-wrap { padding: 2rem 0 3rem; }
-    .btn-submit, .btn-back {
-        width: 100%;
-        text-align: center;
-        padding: 0.9rem 1.5rem;
-    }
-}
-</style>
-{% endblock %}
-
-{% block content %}
-
-<!-- ===== HERO ===== -->
-<section class="talent-hero">
-    <div class="container">
-        <p class="section-label">Rori Hotel Hawassa</p>
-        <h1>
-            Join Our <span class="gold-text">Talent Pool</span>
-        </h1>
-        <p>
-            Even if there's no perfect opening right now, we'd love to know you.
-            Share your CV and we'll reach out when a role matching your skills opens up.
-        </p>
-    </div>
-</section>
-
-<!-- ===== FORM ===== -->
-<section class="talent-form-wrap">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-
-                <!-- Flash Messages -->
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert-flash alert-{{ category }}">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
-
-                <div class="talent-card">
-                    <h3 class="form-section-title">
-                        <i class="bi bi-person-plus me-2" style="color: var(--accent-gold);"></i>
-                        Your Information
-                    </h3>
-
-                    <form method="POST"
-                          enctype="multipart/form-data"
-                          action="{{ url_for('talent_pool') }}"
-                          novalidate>
-
-                        {{ form.hidden_tag() }}
-
-                        <!-- Personal Info -->
-                        <div class="row g-3">
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="full_name">
-                                    Full Name <span class="text-danger">*</span>
-                                </label>
-                                {{ form.full_name(class="form-control", id="full_name", placeholder="Your full name") }}
-                                {% if form.full_name.errors %}
-                                    <div class="text-danger small mt-1">{{ form.full_name.errors|join(', ') }}</div>
-                                {% endif %}
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="email">
-                                    Email <span class="text-danger">*</span>
-                                </label>
-                                {{ form.email(class="form-control", id="email", placeholder="you@example.com") }}
-                                {% if form.email.errors %}
-                                    <div class="text-danger small mt-1">{{ form.email.errors|join(', ') }}</div>
-                                {% endif %}
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="phone">
-                                    Phone <span class="text-danger">*</span>
-                                </label>
-                                {{ form.phone(class="form-control", id="phone", placeholder="+251...") }}
-                                {% if form.phone.errors %}
-                                    <div class="text-danger small mt-1">{{ form.phone.errors|join(', ') }}</div>
-                                {% endif %}
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="location">
-                                    Current Location <span class="text-danger">*</span>
-                                </label>
-                                {{ form.location(class="form-control", id="location", placeholder="e.g. Hawassa") }}
-                                {% if form.location.errors %}
-                                    <div class="text-danger small mt-1">{{ form.location.errors|join(', ') }}</div>
-                                {% endif %}
-                            </div>
-
-                        </div>
-
-                        <h3 class="form-section-title mt-4">
-                            <i class="bi bi-mortarboard me-2" style="color: var(--accent-gold);"></i>
-                            Professional Background
-                        </h3>
-
-                        <div class="row g-3">
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="education">
-                                    Highest Education <span class="text-danger">*</span>
-                                </label>
-                                {{ form.education(class="form-select", id="education") }}
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="years_of_experience">
-                                    Years of Experience <span class="text-danger">*</span>
-                                </label>
-                                {{ form.years_of_experience(class="form-control", id="years_of_experience", placeholder="e.g. 3 years") }}
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="current_position">
-                                    Current Position
-                                </label>
-                                {{ form.current_position(class="form-control", id="current_position", placeholder="Optional") }}
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="previous_employer">
-                                    Previous Employer
-                                </label>
-                                {{ form.previous_employer(class="form-control", id="previous_employer", placeholder="Optional") }}
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="skills">
-                                    Key Skills <span class="text-danger">*</span>
-                                </label>
-                                {{ form.skills(class="form-control", id="skills", placeholder="e.g. Customer Service, POS, F&B") }}
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="languages">
-                                    Languages Spoken <span class="text-danger">*</span>
-                                </label>
-                                {{ form.languages(class="form-control", id="languages", placeholder="e.g. Amharic, English") }}
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="certifications">
-                                    Professional Certifications
-                                </label>
-                                {{ form.certifications(class="form-control", id="certifications", placeholder="Optional") }}
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="availability_date">
-                                    Earliest Availability Date
-                                </label>
-                                {{ form.availability_date(class="form-control", id="availability_date", type="date") }}
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="willing_to_relocate">
-                                    Willing to Relocate? <span class="text-danger">*</span>
-                                </label>
-                                {{ form.willing_to_relocate(class="form-select", id="willing_to_relocate") }}
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label" for="expected_salary">
-                                    Expected Monthly Salary
-                                </label>
-                                {{ form.expected_salary(class="form-control", id="expected_salary", placeholder="Optional (e.g. ETB 15,000)") }}
-                            </div>
-
-                        </div>
-
-                        <h3 class="form-section-title mt-4">
-                            <i class="bi bi-chat-left-text me-2" style="color: var(--accent-gold);"></i>
-                            About You &amp; CV
-                        </h3>
-
-                        <div class="row g-3">
-
-                            <div class="col-12">
-                                <label class="form-label" for="cover_letter">
-                                    Short Intro / Cover Letter <span class="text-danger">*</span>
-                                </label>
-                                {{ form.cover_letter(class="form-control", id="cover_letter", rows="5", placeholder="Tell us briefly about yourself and what you're looking for...") }}
-                                {% if form.cover_letter.errors %}
-                                    <div class="text-danger small mt-1">{{ form.cover_letter.errors|join(', ') }}</div>
-                                {% endif %}
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label" for="cv_file">
-                                    Upload CV <span class="text-danger">*</span>
-                                </label>
-                                {{ form.cv_file(class="form-control", id="cv_file", accept=".pdf,.doc,.docx") }}
-                                <small class="text-muted d-block mt-1">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Accepted formats: PDF, DOC, DOCX — Max 10 MB
-                                </small>
-                                {% if form.cv_file.errors %}
-                                    <div class="text-danger small mt-1">{{ form.cv_file.errors|join(', ') }}</div>
-                                {% endif %}
-                            </div>
-
-                        </div>
-
-                        <!-- Actions -->
-                        <div class="d-flex flex-wrap gap-3 justify-content-end mt-4">
-                            <a href="{{ url_for('home') }}" class="btn-back">
-                                <i class="bi bi-arrow-left me-1"></i>
-                                Back to Home
-                            </a>
-                            <button type="submit" class="btn-submit">
-                                <i class="bi bi-check2-circle me-2"></i>
-                                Join Talent Pool
-                            </button>
-                        </div>
-
-                    </form>
-                </div>
-
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="header-icon"><i class="bi bi-people"></i></span>
+                <h2 class="fw-bold text-navy mb-0">Talent Pool</h2>
             </div>
+            <p class="text-muted mb-0">Candidates who joined the general talent pool.</p>
+        </div>
+        <div class="badge bg-navy-light text-navy p-3">
+            {{ candidates|length }} candidate{{ '' if candidates|length == 1 else 's' }}
         </div>
     </div>
-</section>
+
+    <div class="card border-0 shadow-sm" style="border-radius:16px;overflow:hidden;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="min-width:950px;">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Candidate</th>
+                        <th>Contact</th>
+                        <th>Location</th>
+                        <th>Experience</th>
+                        <th>Skills</th>
+                        <th class="pe-4">Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for c in candidates %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <div style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--navy);color:var(--gold);font-weight:700;font-size:0.9rem;">
+                                    {{ c.full_name[:1]|upper }}
+                                </div>
+                                <div>
+                                    <div class="fw-semibold text-navy">{{ c.full_name }}</div>
+                                    <small class="text-muted">{{ c.education }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small">{{ c.email }}</div>
+                            <small class="text-muted">{{ c.phone }}</small>
+                        </td>
+                        <td>
+                            <span class="text-muted small">{{ c.location or '—' }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark">{{ c.years_of_experience }}</span>
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                {{ c.skills[:60] }}{% if c.skills|length > 60 %}…{% endif %}
+                            </small>
+                        </td>
+                        <td class="pe-4">
+                            <div class="small">{{ c.submitted_at.strftime('%b %d, %Y') }}</div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="py-5 text-center">
+                            <div style="width:70px;height:70px;margin:0 auto;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(197,160,89,0.1);color:var(--gold);font-size:1.8rem;">
+                                <i class="bi bi-person-plus"></i>
+                            </div>
+                            <h5 class="fw-bold text-navy mt-3">Talent Pool is Empty</h5>
+                            <p class="text-muted mb-0">
+                                Candidates who join the talent pool will appear here.
+                            </p>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.header-icon {
+    width:42px;height:42px;
+    display:inline-flex;align-items:center;justify-content:center;
+    border-radius:11px;background:rgba(197,160,89,0.12);
+    color:var(--gold);font-size:1.15rem;
+}
+.bg-navy-light {
+    background: rgba(11,19,43,0.08);
+    color: var(--navy);
+    font-weight: 600;
+}
+</style>
 
 {% endblock %}
