@@ -366,12 +366,42 @@
                         <!-- Actions -->
                         <td class="text-end px-3">
 
-                            <a
-                                href="{{ url_for('admin_candidate_detail', app_id=app.id) }}"
-                                class="btn btn-sm btn-outline-navy"
-                            >
-                                👁 View
-                            </a>
+                            <div class="d-flex gap-1 justify-content-end">
+
+                                <!-- View button -->
+                                <a
+                                    href="{{ url_for('admin_candidate_detail', app_id=app.id) }}"
+                                    class="btn btn-sm btn-outline-navy"
+                                    title="View candidate details"
+                                >
+                                    👁 View
+                                </a>
+
+                                <!-- Delete button (POST-only, CSRF protected) -->
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('admin_candidate_delete', app_id=app.id) }}"
+                                    class="d-inline"
+                                    onsubmit="return confirm('Are you sure you want to delete {{ app.full_name }}? This will also delete all associated interviews and the CV file. This action cannot be undone.');"
+                                >
+
+                                    <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="{{ csrf_token() }}"
+                                    >
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm btn-outline-danger"
+                                        title="Delete candidate"
+                                    >
+                                        🗑 Delete
+                                    </button>
+
+                                </form>
+
+                            </div>
 
                         </td>
 
