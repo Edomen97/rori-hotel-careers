@@ -92,9 +92,6 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 
 class Config:
 
-    # --------------------------------------------------------
-    # SECRET KEY
-    # --------------------------------------------------------
     SECRET_KEY = os.environ.get("SECRET_KEY")
 
     if not SECRET_KEY:
@@ -113,9 +110,6 @@ class Config:
                 "Set SECRET_KEY for production."
             )
 
-    # --------------------------------------------------------
-    # DATABASE
-    # --------------------------------------------------------
     DATABASE_URL = os.environ.get("DATABASE_URL")
 
     if DATABASE_URL:
@@ -147,10 +141,6 @@ class Config:
         "pool_recycle": 300
     }
 
-    # ========================================================
-    # LOCAL FILE UPLOADS
-    # ========================================================
-
     UPLOAD_FOLDER = os.path.join(
         BASE_DIR,
         "uploads",
@@ -180,10 +170,6 @@ class Config:
         "webp"
     }
 
-    # ========================================================
-    # CLOUDINARY
-    # ========================================================
-
     CLOUDINARY_CLOUD_NAME = os.environ.get(
         "CLOUDINARY_CLOUD_NAME"
     )
@@ -200,10 +186,6 @@ class Config:
         "CLOUDINARY_CV_FOLDER",
         "rori-hotel-cv"
     )
-
-    # ========================================================
-    # HR LOGIN
-    # ========================================================
 
     HR_USERNAME = (
         os.environ.get("HR_USERNAME")
@@ -248,10 +230,6 @@ class Config:
         HR_PASSWORD_HASH = generate_password_hash(
             HR_PASSWORD
         )
-
-    # ========================================================
-    # MAIL
-    # ========================================================
 
     MAIL_SERVER = os.environ.get(
         "MAIL_SERVER",
@@ -310,19 +288,11 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 mail = Mail(app)
 
-# ============================================================
-# CSRF PROTECTION
-# ============================================================
 csrf = CSRFProtect(app)
 
 
-# ============================================================
-# CSRF ERROR HANDLER
-# ============================================================
-
 @app.errorhandler(CSRFError)
 def handle_csrf_error(e):
-    """Friendly message when CSRF token is missing or expired."""
     print(f"[CSRF ERROR] {e.description} on {request.path}")
     flash(
         "የፎርሙ ጊዜ አልፏል ወይም የደህንነት ቶከን አልተገኘም። "
@@ -331,10 +301,6 @@ def handle_csrf_error(e):
     )
     return redirect(request.referrer or url_for("home"))
 
-
-# ============================================================
-# CLOUDINARY CONFIGURATION
-# ============================================================
 
 if (
     CLOUDINARY_AVAILABLE
@@ -362,7 +328,7 @@ else:
 
 
 # ============================================================
-# TEMPLATE LOADER  (FIXED + DIAGNOSTICS)
+# TEMPLATE LOADER
 # ============================================================
 
 template_dirs = [
@@ -399,10 +365,6 @@ app.jinja_loader = _loader
 if "jinja_env" in app.__dict__:
     del app.__dict__["jinja_env"]
 
-# ------------------------------------------------------------
-# Startup diagnostics
-# ------------------------------------------------------------
-
 print("======================================")
 print("[TEMPLATES] BASE_DIR        :", BASE_DIR)
 print("[TEMPLATES] TEMPLATES_DIR   :", TEMPLATES_DIR)
@@ -429,10 +391,6 @@ else:
                     BASE_DIR
                 )
                 print("   [HTML]", _rel)
-
-# ------------------------------------------------------------
-# Critical lookups
-# ------------------------------------------------------------
 
 _critical_templates = [
     "admin/interviews.html",
@@ -470,10 +428,6 @@ for _tpl in _critical_templates:
 
 print("======================================")
 
-
-# ============================================================
-# SAFE RENDER
-# ============================================================
 
 def safe_render(template_name, **context):
 
@@ -569,10 +523,6 @@ def safe_render(template_name, **context):
         </html>
         """
 
-
-# ============================================================
-# DIRECTORIES
-# ============================================================
 
 os.makedirs(
     app.config["UPLOAD_FOLDER"],
@@ -1250,9 +1200,6 @@ class ChangePasswordForm(FlaskForm):
 
 
 class InterviewForm(FlaskForm):
-    """
-    Shared form for creating AND editing interviews.
-    """
 
     application_id = SelectField(
         "Candidate",
@@ -1320,10 +1267,6 @@ def allowed_image_file(filename):
         in app.config["ALLOWED_IMAGE_EXTENSIONS"]
     )
 
-
-# ============================================================
-# CLOUDINARY HELPERS
-# ============================================================
 
 def cloudinary_ready():
 
@@ -1565,10 +1508,6 @@ def generate_cloudinary_cv_url(filename):
 
         return None
 
-
-# ============================================================
-# JOB IMAGE
-# ============================================================
 
 def save_job_image(file):
 
@@ -1899,10 +1838,6 @@ def send_application_status_email(
         print(f"EMAIL DISPATCH ERROR: {e}")
 
 
-# ============================================================
-# INTERVIEW EMAIL + NOTIFICATION HELPERS
-# ============================================================
-
 def _format_interview_when(interview):
 
     try:
@@ -2188,10 +2123,6 @@ def apply_interview_side_effects(
     )
 
 
-# ============================================================
-# SIMILAR JOBS
-# ============================================================
-
 def get_similar_jobs(job, limit=3):
 
     query = Job.query.filter(
@@ -2340,10 +2271,6 @@ def jobs():
     )
 
 
-# ============================================================
-# JOB DETAIL
-# ============================================================
-
 @app.route("/job/<int:job_id>")
 def job_detail(job_id):
 
@@ -2355,10 +2282,6 @@ def job_detail(job_id):
         similar_jobs=get_similar_jobs(job)
     )
 
-
-# ============================================================
-# DEPARTMENTS
-# ============================================================
 
 @app.route("/departments")
 def departments():
@@ -2388,10 +2311,6 @@ def department_detail(dept_id):
     )
 
 
-# ============================================================
-# LOCATIONS
-# ============================================================
-
 @app.route("/locations")
 def locations():
 
@@ -2401,19 +2320,11 @@ def locations():
     )
 
 
-# ============================================================
-# ABOUT
-# ============================================================
-
 @app.route("/about-careers")
 def about_careers():
 
     return render_template("about_careers.html")
 
-
-# ============================================================
-# TRACK STATUS
-# ============================================================
 
 @app.route("/track-status", methods=["GET", "POST"])
 @app.route("/application/lookup", methods=["GET", "POST"])
@@ -2447,10 +2358,6 @@ def track_status():
         searched=searched
     )
 
-
-# ============================================================
-# APPLY
-# ============================================================
 
 @app.route("/apply/<int:job_id>", methods=["GET", "POST"])
 def apply(job_id):
@@ -2659,10 +2566,6 @@ def apply(job_id):
     )
 
 
-# ============================================================
-# APPLICATION SUCCESS
-# ============================================================
-
 @app.route("/application/success/<int:app_id>")
 def application_success(app_id):
 
@@ -2674,10 +2577,6 @@ def application_success(app_id):
         job=application.job
     )
 
-
-# ============================================================
-# APPLICATION STATUS
-# ============================================================
 
 @app.route("/application/status/<int:app_id>")
 def application_status(app_id):
@@ -2699,10 +2598,6 @@ def application_status(app_id):
         job=application.job
     )
 
-
-# ============================================================
-# TALENT POOL
-# ============================================================
 
 @app.route("/talent-pool", methods=["GET", "POST"])
 def talent_pool():
@@ -2817,10 +2712,6 @@ def talent_pool():
         form=form
     )
 
-
-# ============================================================
-# ADMIN / HR LOGIN
-# ============================================================
 
 @app.route("/admin/login", methods=["GET", "POST"])
 @app.route("/hr/login", methods=["GET", "POST"])
@@ -2960,10 +2851,6 @@ def admin_login():
     )
 
 
-# ============================================================
-# CHANGE PASSWORD
-# ============================================================
-
 @app.route("/admin/change-password", methods=["GET", "POST"])
 @app.route("/hr/change-password", methods=["GET", "POST"])
 @admin_required
@@ -3031,10 +2918,6 @@ def admin_change_password():
     )
 
 
-# ============================================================
-# LOGOUT
-# ============================================================
-
 @app.route("/admin/logout")
 @app.route("/hr/logout")
 @app.route("/auth/logout")
@@ -3056,10 +2939,6 @@ def admin_logout():
     return redirect(url_for("admin_login"))
 
 
-# ============================================================
-# FORGOT PASSWORD
-# ============================================================
-
 @app.route("/auth/forgot-password", methods=["GET", "POST"])
 def forgot_password():
 
@@ -3076,10 +2955,6 @@ def forgot_password():
     return render_template("forgot_password.html")
 
 
-# ============================================================
-# HR ANALYTICS DASHBOARD
-# ============================================================
-
 @app.route("/admin")
 @app.route("/admin/dashboard")
 @app.route("/hr")
@@ -3087,9 +2962,6 @@ def forgot_password():
 @admin_required
 def admin_dashboard():
 
-    # --------------------------------------------------------
-    # FILTERS (from query string)
-    # --------------------------------------------------------
     date_from = (request.args.get("date_from") or "").strip()
     date_to = (request.args.get("date_to") or "").strip()
     dept_filter = request.args.get("department", type=int)
@@ -3097,9 +2969,6 @@ def admin_dashboard():
     status_filter = (request.args.get("status") or "").strip()
     education_filter = (request.args.get("education") or "").strip()
 
-    # --------------------------------------------------------
-    # BASE QUERY
-    # --------------------------------------------------------
     query = Application.query
 
     if date_from:
@@ -3135,9 +3004,6 @@ def admin_dashboard():
         .all()
     )
 
-    # --------------------------------------------------------
-    # KPI COUNTS
-    # --------------------------------------------------------
     total_applications = len(applications)
 
     status_counts = {
@@ -3162,9 +3028,6 @@ def admin_dashboard():
     hired = status_counts["HIRED"]
     rejected = status_counts["REJECTED"]
 
-    # --------------------------------------------------------
-    # APPLICATIONS BY DEPARTMENT
-    # --------------------------------------------------------
     dept_breakdown = {}
 
     for app_obj in applications:
@@ -3174,18 +3037,12 @@ def admin_dashboard():
             name = "Unassigned"
         dept_breakdown[name] = dept_breakdown.get(name, 0) + 1
 
-    # --------------------------------------------------------
-    # APPLICATIONS BY EDUCATION
-    # --------------------------------------------------------
     edu_breakdown = {}
 
     for app_obj in applications:
         edu = app_obj.education or "Not specified"
         edu_breakdown[edu] = edu_breakdown.get(edu, 0) + 1
 
-    # --------------------------------------------------------
-    # APPLICATIONS BY JOB POSITION
-    # --------------------------------------------------------
     job_breakdown = {}
 
     for app_obj in applications:
@@ -3200,9 +3057,6 @@ def admin_dashboard():
         )[:10]
     )
 
-    # --------------------------------------------------------
-    # APPLICATIONS OVER TIME (Monthly)
-    # --------------------------------------------------------
     time_series = {}
 
     for app_obj in applications:
@@ -3212,9 +3066,6 @@ def admin_dashboard():
 
     time_series = dict(sorted(time_series.items()))
 
-    # --------------------------------------------------------
-    # INTERVIEW ANALYTICS
-    # --------------------------------------------------------
     filtered_app_ids = {app_obj.id for app_obj in applications}
 
     relevant_interviews = (
@@ -3250,9 +3101,6 @@ def admin_dashboard():
         ),
     }
 
-    # --------------------------------------------------------
-    # TALENT POOL ANALYTICS
-    # --------------------------------------------------------
     talent_candidates = TalentPool.query.all()
     talent_pool_count = len(talent_candidates)
 
@@ -3266,14 +3114,8 @@ def admin_dashboard():
         loc = (t.location or "Not specified").strip() or "Not specified"
         talent_loc[loc] = talent_loc.get(loc, 0) + 1
 
-    # --------------------------------------------------------
-    # RECENT APPLICATIONS (10)
-    # --------------------------------------------------------
     recent_applications = applications[:10]
 
-    # --------------------------------------------------------
-    # FILTER DROPDOWN DATA
-    # --------------------------------------------------------
     all_departments_list = (
         Department.query
         .order_by(Department.name)
@@ -3293,13 +3135,9 @@ def admin_dashboard():
         "Master Degree",
     ]
 
-    # --------------------------------------------------------
-    # RENDER
-    # --------------------------------------------------------
     return safe_render(
         "admin/dashboard.html",
 
-        # KPIs
         total_applications=total_applications,
         new_applications=new_applications,
         under_review=under_review,
@@ -3309,30 +3147,24 @@ def admin_dashboard():
         hired=hired,
         rejected=rejected,
 
-        # Status counts dict
         status_counts=status_counts,
 
-        # Analytics data
         dept_breakdown=dept_breakdown,
         edu_breakdown=edu_breakdown,
         job_breakdown=job_breakdown,
         time_series=time_series,
         interview_stats=interview_stats,
 
-        # Talent Pool
         talent_pool_count=talent_pool_count,
         talent_edu=talent_edu,
         talent_loc=talent_loc,
 
-        # Recent Applications
         recent_applications=recent_applications,
 
-        # Filter dropdowns
         all_departments=all_departments_list,
         all_jobs=all_jobs_list,
         education_choices=education_choices,
 
-        # Current filter values
         filters={
             "date_from": date_from,
             "date_to": date_to,
@@ -3343,10 +3175,6 @@ def admin_dashboard():
         },
     )
 
-
-# ============================================================
-# CANDIDATES
-# ============================================================
 
 @app.route("/admin/candidates")
 @app.route("/hr/candidates")
@@ -3388,10 +3216,6 @@ def admin_candidates():
     )
 
 
-# ============================================================
-# CANDIDATE DETAIL
-# ============================================================
-
 @app.route("/admin/candidate/<int:app_id>")
 @app.route("/hr/candidate/<int:app_id>")
 @admin_required
@@ -3420,6 +3244,97 @@ def admin_candidate_detail(app_id):
         application=application,
         interviews=interviews
     )
+
+
+# ============================================================
+# DELETE CANDIDATE  (POST-only for CSRF safety)
+# ============================================================
+
+@app.route(
+    "/admin/candidate/<int:app_id>/delete",
+    methods=["POST"]
+)
+@app.route(
+    "/hr/candidate/<int:app_id>/delete",
+    methods=["POST"]
+)
+@admin_required
+def admin_candidate_delete(app_id):
+
+    application = Application.query.get_or_404(app_id)
+
+    candidate_name = application.full_name
+    candidate_ref = (
+        application.reference_no
+        or f"APP-{application.id}"
+    )
+    cv_filename = application.cv_filename
+
+    # Delete associated interviews first (foreign key)
+    try:
+
+        Interview.query.filter_by(
+            application_id=application.id
+        ).delete(synchronize_session=False)
+
+        db.session.flush()
+
+    except Exception:
+
+        db.session.rollback()
+        traceback.print_exc()
+
+        flash(
+            "Could not delete associated interviews.",
+            "danger"
+        )
+
+        return redirect(url_for("admin_candidates"))
+
+    # Delete the application
+    try:
+
+        db.session.delete(application)
+        db.session.commit()
+
+    except Exception:
+
+        db.session.rollback()
+        traceback.print_exc()
+
+        flash(
+            "ማመልከቻውን ማጥፋት አልተቻለም።",
+            "danger"
+        )
+
+        return redirect(url_for("admin_candidates"))
+
+    # Delete the CV file (Cloudinary or local)
+    try:
+
+        if cv_filename:
+            delete_uploaded_file(cv_filename)
+
+    except Exception:
+
+        traceback.print_exc()
+
+    log_audit(
+        "Deleted Candidate",
+        (
+            f"Deleted candidate: {candidate_name} "
+            f"({candidate_ref})"
+        ),
+        "Application",
+        app_id
+    )
+
+    flash(
+        f'ማመልከቻ "{candidate_name}" በስኬት ተሰርዟል!',
+        "success"
+    )
+
+    return redirect(url_for("admin_candidates"))
 
 
 # ============================================================
@@ -3517,10 +3432,6 @@ def download_candidate_cv(app_id):
         request.referrer or url_for("admin_candidates")
     )
 
-
-# ============================================================
-# UPDATE APPLICATION STATUS
-# ============================================================
 
 @app.route("/admin/application/<int:app_id>/status", methods=["POST"])
 @app.route("/hr/application/<int:app_id>/status", methods=["POST"])
@@ -3650,10 +3561,6 @@ def update_application_status(app_id):
     )
 
 
-# ============================================================
-# JOB MANAGEMENT
-# ============================================================
-
 @app.route("/admin/jobs")
 @app.route("/hr/jobs")
 @admin_required
@@ -3670,10 +3577,6 @@ def admin_jobs():
         jobs=jobs_list
     )
 
-
-# ============================================================
-# JOB FORM CHOICES
-# ============================================================
 
 def configure_job_form_choices(form):
 
@@ -3705,10 +3608,6 @@ def configure_job_form_choices(form):
         ]
     )
 
-
-# ============================================================
-# CREATE JOB
-# ============================================================
 
 @app.route("/admin/job/new", methods=["GET", "POST"])
 @app.route("/hr/job/new", methods=["GET", "POST"])
@@ -3837,10 +3736,6 @@ def admin_job_new():
         is_new=True
     )
 
-
-# ============================================================
-# EDIT JOB
-# ============================================================
 
 @app.route("/admin/job/<int:job_id>/edit", methods=["GET", "POST"])
 @app.route("/hr/job/<int:job_id>/edit", methods=["GET", "POST"])
@@ -3985,10 +3880,6 @@ def admin_job_edit(job_id):
     )
 
 
-# ============================================================
-# TOGGLE JOB
-# ============================================================
-
 @app.route("/admin/job/<int:job_id>/toggle", methods=["POST"])
 @app.route("/hr/job/<int:job_id>/toggle", methods=["POST"])
 @admin_required
@@ -4029,10 +3920,6 @@ def admin_job_toggle(job_id):
 
     return redirect(url_for("admin_jobs"))
 
-
-# ============================================================
-# DELETE JOB  (POST-only for CSRF safety)
-# ============================================================
 
 @app.route("/admin/job/<int:job_id>/delete", methods=["POST"])
 @app.route("/hr/job/<int:job_id>/delete", methods=["POST"])
@@ -4096,10 +3983,6 @@ def admin_job_delete(job_id):
     return redirect(url_for("admin_jobs"))
 
 
-# ============================================================
-# INTERVIEWS  (LIST) — ascending by scheduled_at
-# ============================================================
-
 @app.route("/admin/interviews")
 @app.route("/hr/interviews")
 @admin_required
@@ -4116,10 +3999,6 @@ def admin_interviews():
         interviews=interviews
     )
 
-
-# ============================================================
-# NEW INTERVIEW
-# ============================================================
 
 @app.route("/admin/interview/new", methods=["GET", "POST"])
 @app.route("/admin/interviews/new", methods=["GET", "POST"])
@@ -4273,10 +4152,6 @@ def admin_interview_new():
         selected_app_id=None
     )
 
-
-# ============================================================
-# EDIT INTERVIEW
-# ============================================================
 
 @app.route(
     "/admin/interview/<int:interview_id>/edit",
@@ -4512,10 +4387,6 @@ def admin_interview_edit(interview_id):
     )
 
 
-# ============================================================
-# INTERVIEW STATUS (quick update)
-# ============================================================
-
 @app.route(
     "/admin/interview/<int:interview_id>/status",
     methods=["POST"]
@@ -4625,10 +4496,6 @@ def admin_interview_status(interview_id):
     )
 
 
-# ============================================================
-# TALENT POOL ADMIN
-# ============================================================
-
 @app.route("/admin/talent-pool")
 @app.route("/hr/talent-pool")
 @admin_required
@@ -4645,10 +4512,6 @@ def admin_talent_pool():
         candidates=candidates
     )
 
-
-# ============================================================
-# AUDIT LOG
-# ============================================================
 
 @app.route("/admin/audit-log")
 @app.route("/hr/audit-log")
@@ -4667,10 +4530,6 @@ def admin_audit_log():
         logs=logs
     )
 
-
-# ============================================================
-# TEMPLATE DEBUG ROUTE
-# ============================================================
 
 @app.route("/admin/debug/templates")
 @admin_required
@@ -4718,10 +4577,6 @@ def admin_debug_templates():
         + "</pre>"
     )
 
-
-# ============================================================
-# DATABASE MIGRATION
-# ============================================================
 
 def safe_add_column(table_name, column_name, column_type):
 
@@ -4829,10 +4684,6 @@ def migrate_existing_database():
             safe_add_column(table_name, column.name, column_type)
 
 
-# ============================================================
-# SEED DEFAULT DATA
-# ============================================================
-
 def seed_default_data():
 
     admin_username = app.config.get("HR_USERNAME")
@@ -4937,10 +4788,6 @@ def init_db_safe():
             traceback.print_exc()
 
 
-# ============================================================
-# ERROR HANDLERS
-# ============================================================
-
 @app.errorhandler(404)
 def page_not_found(error):
 
@@ -4989,10 +4836,6 @@ def internal_server_error(error):
         ), 500
 
 
-# ============================================================
-# STARTUP
-# ============================================================
-
 try:
 
     init_db_safe()
@@ -5001,10 +4844,6 @@ except Exception:
 
     traceback.print_exc()
 
-
-# ============================================================
-# DEVELOPMENT
-# ============================================================
 
 if __name__ == "__main__":
 
