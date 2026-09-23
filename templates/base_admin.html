@@ -10,7 +10,7 @@
     <div class="row">
 
         <!-- HR / Admin Sidebar -->
-        <nav class="col-md-2 d-md-block bg-navy admin-sidebar" id="adminSidebar">
+        <nav class="col-md-2 d-none d-md-block bg-navy admin-sidebar" id="adminSidebar">
 
             <ul class="nav flex-column">
 
@@ -121,5 +121,323 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 </script>
+
+
+<!-- ================================================================
+     GLOBAL ADMIN DARK MODE — Loads LAST, wins over child inline styles
+================================================================ -->
+<style>
+/* ---------- CARD ---------- */
+.card,
+.card-body,
+.summary-card,
+[class*="summary-card"],
+[class*="stat-card"],
+[class*="candidate-card"],
+[class*="detail-card"] {
+    background-color: #111c38 !important;
+    color: #ffffff !important;
+    border-color: rgba(197, 160, 89, 0.2) !important;
+}
+
+/* ---------- CARD HEADER (overrides .bg-white) ---------- */
+.card-header,
+.card-header.bg-white,
+.card-header[class*="bg-"] {
+    background-color: #17264a !important;
+    color: #ffffff !important;
+    border-bottom: 1px solid rgba(197, 160, 89, 0.15) !important;
+}
+
+.card-header h1,
+.card-header h2,
+.card-header h3,
+.card-header h4,
+.card-header h5,
+.card-header h6 {
+    color: #ffffff !important;
+}
+
+.card-header small,
+.card-header .text-muted {
+    color: #94a3b8 !important;
+}
+
+/* ---------- CARD FOOTER ---------- */
+.card-footer {
+    background-color: #17264a !important;
+    border-top: 1px solid rgba(197, 160, 89, 0.15) !important;
+    color: #ffffff !important;
+}
+
+/* ---------- TABLE ---------- */
+table,
+table.table,
+.table-responsive {
+    background-color: #111c38 !important;
+    color: #e2e8f0 !important;
+}
+
+table thead th,
+table.table thead th,
+th {
+    background-color: #1a2b56 !important;
+    color: #d4af37 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+table tbody td,
+table.table tbody td,
+td {
+    background-color: #111c38 !important;
+    color: #ffffff !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+table tbody tr:hover,
+table.table tbody tr:hover,
+tbody tr:hover {
+    background-color: #17264a !important;
+}
+
+table tbody tr:hover td,
+table.table tbody tr:hover td {
+    background-color: #17264a !important;
+    color: #ffffff !important;
+}
+
+/* ---------- TEXT COLORS ---------- */
+.text-muted,
+small.text-muted,
+p.text-muted,
+span.text-muted,
+small,
+.text-gray-500 {
+    color: #94a3b8 !important;
+}
+
+h1, h2, h3, h4, h5, h6,
+.fw-bold,
+.fw-semibold,
+h2.text-navy,
+h5.text-navy,
+h3.text-navy,
+.text-navy,
+.text-dark,
+.text-black,
+.text-body {
+    color: #ffffff !important;
+}
+
+/* ---------- SUMMARY CARDS ---------- */
+.summary-card {
+    background-color: #111c38 !important;
+    border: 1px solid rgba(197, 160, 89, 0.25) !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.summary-icon {
+    background-color: rgba(197, 160, 89, 0.15) !important;
+    color: #C5A059 !important;
+}
+
+.summary-label {
+    color: #94a3b8 !important;
+}
+
+.summary-value {
+    color: #ffffff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ---------- BADGES ---------- */
+.badge.bg-light {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+.badge.bg-white {
+    background-color: #17264a !important;
+    color: #e2e8f0 !important;
+}
+
+.badge.bg-navy-light,
+.bg-navy-light {
+    background-color: rgba(197, 160, 89, 0.15) !important;
+    color: #C5A059 !important;
+}
+
+/* ---------- EMPTY STATE ---------- */
+.empty-state,
+.empty-state p,
+.empty-state small,
+.empty-muted {
+    color: #94a3b8 !important;
+}
+
+.empty-state h1,
+.empty-state h2,
+.empty-state h3,
+.empty-state h4,
+.empty-state h5,
+.empty-state h6 {
+    color: #ffffff !important;
+}
+
+/* ---------- DETAIL ITEMS ---------- */
+.detail-item,
+.detail-box,
+.info-box,
+.info-item,
+.detail-profile,
+.notes-box {
+    background-color: #17264a !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(197, 160, 89, 0.15) !important;
+}
+
+.detail-label,
+.info-label {
+    color: #94a3b8 !important;
+}
+
+.detail-value,
+.info-value {
+    color: #ffffff !important;
+}
+
+.detail-muted {
+    color: #94a3b8 !important;
+}
+
+/* ---------- FORMS ---------- */
+.form-control,
+.form-select {
+    background-color: #0f1a33 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(197, 160, 89, 0.3) !important;
+}
+
+.form-control::placeholder {
+    color: #64748b !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: #0f1a33 !important;
+    color: #ffffff !important;
+    border-color: #C5A059 !important;
+    box-shadow: 0 0 0 0.2rem rgba(197, 160, 89, 0.25) !important;
+}
+
+.form-select option {
+    background-color: #0b132b !important;
+    color: #ffffff !important;
+}
+
+.form-label {
+    color: #e2e8f0 !important;
+}
+
+/* ---------- BUTTONS ---------- */
+.btn-outline-secondary {
+    color: #cbd5e1 !important;
+    border-color: rgba(203, 213, 225, 0.3) !important;
+    background: transparent !important;
+}
+
+.btn-outline-secondary:hover {
+    background: rgba(203, 213, 225, 0.1) !important;
+    color: #ffffff !important;
+    border-color: rgba(203, 213, 225, 0.6) !important;
+}
+
+.btn-outline-danger {
+    color: #f87171 !important;
+    border-color: rgba(239, 68, 68, 0.4) !important;
+    background: transparent !important;
+}
+
+.btn-outline-danger:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+/* ---------- MODALS ---------- */
+.modal-content {
+    background-color: #111c38 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(197, 160, 89, 0.2) !important;
+}
+
+.modal-header,
+.modal-footer {
+    background-color: #17264a !important;
+    color: #ffffff !important;
+    border-color: rgba(197, 160, 89, 0.15) !important;
+}
+
+.modal-body {
+    background-color: #111c38 !important;
+    color: #e2e8f0 !important;
+}
+
+.modal-title {
+    color: #ffffff !important;
+}
+
+.btn-close {
+    filter: invert(1) brightness(2) !important;
+    opacity: 0.7 !important;
+}
+
+.btn-close:hover {
+    opacity: 1 !important;
+}
+
+/* ---------- ALERTS ---------- */
+.alert {
+    background-color: #17264a !important;
+    border-color: rgba(197, 160, 89, 0.3) !important;
+    color: #e2e8f0 !important;
+}
+
+/* ---------- KILL INLINE WHITE BACKGROUNDS ---------- */
+[style*="background: white"],
+[style*="background: #fff"],
+[style*="background: #FFF"],
+[style*="background-color: white"],
+[style*="background-color: #fff"],
+[style*="background-color: #FFF"],
+[style*="background:white"],
+[style*="background:#fff"],
+[style*="background-color:white"],
+[style*="background-color:#fff"] {
+    background-color: #111c38 !important;
+    background: #111c38 !important;
+}
+
+/* ---------- KILL INLINE DARK TEXT ---------- */
+[style*="color: #000"],
+[style*="color: black"],
+[style*="color:#000"],
+[style*="color: #000000"],
+[style*="color:black"] {
+    color: #ffffff !important;
+}
+
+/* ---------- HR CONTACT / FILE BOX ---------- */
+.hr-contact,
+.contact-box,
+.contact-card,
+.cv-box,
+.file-box {
+    background-color: #111c38 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(197, 160, 89, 0.2) !important;
+}
+</style>
 
 {% endblock %}
