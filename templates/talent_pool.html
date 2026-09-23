@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Join Our Talent Pool - Rori Hotel Hawassa Careers{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <h1 class="mb-2">Join Our Talent Pool</h1>
+            <p class="text-muted mb-4">
+                Even if there's no perfect opening right now, we'd love to know you.
+                Share your CV and we'll reach out when a role matching your skills opens up.
+            </p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" enctype="multipart/form-data" novalidate>
+
+                {{ form.hidden_tag() }}
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Full Name *</label>
+                        {{ form.full_name(class="form-control", placeholder="Your full name") }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Email *</label>
+                        {{ form.email(class="form-control", placeholder="you@example.com") }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Phone *</label>
+                        {{ form.phone(class="form-control", placeholder="+251...") }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Current Location *</label>
+                        {{ form.location(class="form-control", placeholder="e.g. Hawassa") }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Education *</label>
+                        {{ form.education(class="form-select") }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Years of Experience *</label>
+                        {{ form.years_of_experience(class="form-control", placeholder="e.g. 3 years") }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Current Position</label>
+                        {{ form.current_position(class="form-control", placeholder="Optional") }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Previous Employer</label>
+                        {{ form.previous_employer(class="form-control", placeholder="Optional") }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Key Skills *</label>
+                        {{ form.skills(class="form-control", placeholder="e.g. Customer Service, POS") }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Languages *</label>
+                        {{ form.languages(class="form-control", placeholder="e.g. Amharic, English") }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Certifications</label>
+                        {{ form.certifications(class="form-control", placeholder="Optional") }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Availability Date</label>
+                        {{ form.availability_date(class="form-control", type="date") }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Willing to Relocate? *</label>
+                        {{ form.willing_to_relocate(class="form-select") }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Expected Salary</label>
+                        {{ form.expected_salary(class="form-control", placeholder="Optional") }}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Cover Letter *</label>
+                        {{ form.cover_letter(class="form-control", rows="5", placeholder="Tell us about yourself...") }}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Upload CV *</label>
+                        {{ form.cv_file(class="form-control", accept=".pdf,.doc,.docx") }}
+                        <small class="text-muted">PDF, DOC, DOCX — Max 10 MB</small>
+                    </div>
+
+                </div>
+
+                <div class="d-flex justify-content-end gap-3 mt-4">
+                    <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-gold">
+                        Join Talent Pool
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
