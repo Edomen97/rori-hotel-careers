@@ -171,743 +171,943 @@ Candidate Details - {{ application.full_name }}
             padding: 15px;
         }
     }
-</style><div class="candidate-page"><!-- PAGE HEADER -->
-<div class="page-header">
 
-    <div class="d-flex flex-column flex-md-row
-                justify-content-between
-                align-items-md-center gap-3">
+    /* ============================================================
+       DARK MODE OVERRIDES — appended, wins over above rules
+       because they are later in the cascade
+    ============================================================ */
 
-        <div>
-            <h1>
-                👤 Candidate Details
-            </h1>
+    .candidate-page {
+        color: #ffffff !important;
+    }
 
-            <small>
-                Rori Hotel Hawassa — HR Recruitment
-            </small>
-        </div>
+    .section-card {
+        background-color: #111c38 !important;
+        border: 1px solid rgba(197, 160, 89, 0.2) !important;
+        color: #ffffff !important;
+    }
 
-        <div>
-            <span class="badge bg-light text-dark px-3 py-2">
-                {{ application.reference_no or 'No Reference' }}
-            </span>
+    .section-card .card-body {
+        background-color: #111c38 !important;
+        color: #ffffff !important;
+    }
+
+    .section-title {
+        color: #ffffff !important;
+    }
+
+    .section-card small.text-muted,
+    .section-card .text-muted {
+        color: #94a3b8 !important;
+    }
+
+    /* Summary items */
+    .summary-item {
+        background: #17264a !important;
+        border: 1px solid rgba(197, 160, 89, 0.2) !important;
+        border-left: 4px solid #c5a059 !important;
+        color: #ffffff !important;
+    }
+
+    .summary-item strong {
+        color: #ffffff !important;
+    }
+
+    .summary-item small.text-muted {
+        color: #94a3b8 !important;
+    }
+
+    /* Cover letter box */
+    .cover-letter-box {
+        background: #17264a !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(197, 160, 89, 0.2) !important;
+        border-left: 5px solid #c5a059 !important;
+    }
+
+    .cover-letter-box,
+    .cover-letter-box * {
+        color: #ffffff !important;
+    }
+
+    /* CV box */
+    .cv-box {
+        background: #17264a !important;
+        border: 1px solid rgba(197, 160, 89, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    .cv-filename {
+        color: #ffffff !important;
+    }
+
+    /* Interview item */
+    .interview-item {
+        background: #17264a !important;
+        border: 1px solid rgba(197, 160, 89, 0.15) !important;
+        border-left: 4px solid #c5a059 !important;
+        color: #ffffff !important;
+    }
+
+    .interview-item strong {
+        color: #ffffff !important;
+    }
+
+    .interview-item small.text-muted {
+        color: #94a3b8 !important;
+    }
+
+    /* No-data fallback */
+    .no-data {
+        background: #17264a !important;
+        color: #94a3b8 !important;
+        border: 1px solid rgba(197, 160, 89, 0.15) !important;
+    }
+
+    /* Status select */
+    .status-select {
+        background-color: #0f1a33 !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(197, 160, 89, 0.3) !important;
+    }
+
+    .status-select option {
+        background-color: #0b132b !important;
+        color: #ffffff !important;
+    }
+
+    /* Form labels */
+    .section-card .form-label {
+        color: #e2e8f0 !important;
+    }
+
+    /* Back button */
+    .btn-outline-secondary {
+        color: #cbd5e1 !important;
+        border-color: rgba(203, 213, 225, 0.3) !important;
+        background: transparent !important;
+    }
+
+    .btn-outline-secondary:hover {
+        background: rgba(203, 213, 225, 0.1) !important;
+        color: #ffffff !important;
+    }
+
+    /* Danger Zone card */
+    .danger-zone {
+        background: #2a1a1f !important;
+        border: 1px solid rgba(239, 68, 68, 0.4) !important;
+    }
+
+    .danger-zone .section-title {
+        color: #f87171 !important;
+    }
+
+    .danger-zone .text-muted,
+    .danger-zone small {
+        color: #cbd5e1 !important;
+    }
+
+    .btn-delete {
+        background: #dc2626 !important;
+        color: #ffffff !important;
+        border: none !important;
+        min-height: 46px;
+        font-weight: 700;
+    }
+
+    .btn-delete:hover {
+        background: #b91c1c !important;
+        color: #ffffff !important;
+    }
+</style>
+
+<div class="candidate-page">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
+        <div class="d-flex flex-column flex-md-row
+                    justify-content-between
+                    align-items-md-center gap-3">
+
+            <div>
+                <h1>
+                    👤 Candidate Details
+                </h1>
+
+                <small>
+                    Rori Hotel Hawassa — HR Recruitment
+                </small>
+            </div>
+
+            <div>
+                <span class="badge bg-light text-dark px-3 py-2">
+                    {{ application.reference_no or 'No Reference' }}
+                </span>
+            </div>
+
         </div>
 
     </div>
 
-</div>
+    <div class="row">
 
-<div class="row">
+        <!-- LEFT SIDE -->
+        <div class="col-lg-8">
 
-    <!-- LEFT SIDE -->
-    <div class="col-lg-8">
+            <!-- CANDIDATE SUMMARY -->
+            <div class="card section-card">
 
-        <!-- CANDIDATE SUMMARY -->
-        <div class="card section-card">
+                <div class="card-body p-4">
 
-            <div class="card-body p-4">
+                    <div class="d-flex
+                                justify-content-between
+                                align-items-center
+                                mb-4">
 
-                <div class="d-flex
-                            justify-content-between
-                            align-items-center
-                            mb-4">
+                        <div>
+                            <h5 class="section-title mb-1">
+                                📊 Candidate Summary
+                            </h5>
 
-                    <div>
-                        <h5 class="section-title mb-1">
-                            📊 Candidate Summary
-                        </h5>
+                            <small class="text-muted">
+                                Complete candidate overview
+                            </small>
+                        </div>
 
-                        <small class="text-muted">
-                            Complete candidate overview
-                        </small>
+                        {% if application.status == 'NEW' %}
+                            <span class="badge bg-primary px-3 py-2">NEW</span>
+                        {% elif application.status == 'UNDER REVIEW' %}
+                            <span class="badge bg-warning text-dark px-3 py-2">
+                                UNDER REVIEW
+                            </span>
+                        {% elif application.status == 'SHORTLISTED' %}
+                            <span class="badge bg-info text-dark px-3 py-2">
+                                SHORTLISTED
+                            </span>
+                        {% elif application.status == 'INTERVIEW' %}
+                            <span class="badge bg-secondary px-3 py-2">
+                                INTERVIEW
+                            </span>
+                        {% elif application.status == 'SELECTED' %}
+                            <span class="badge bg-success px-3 py-2">
+                                SELECTED
+                            </span>
+                        {% elif application.status == 'HIRED' %}
+                            <span class="badge bg-success px-3 py-2">
+                                HIRED
+                            </span>
+                        {% elif application.status == 'REJECTED' %}
+                            <span class="badge bg-danger px-3 py-2">
+                                REJECTED
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary px-3 py-2">
+                                {{ application.status or '—' }}
+                            </span>
+                        {% endif %}
+
                     </div>
 
-                    {% if application.status == 'NEW' %}
-                        <span class="badge bg-primary px-3 py-2">NEW</span>
-                    {% elif application.status == 'UNDER REVIEW' %}
-                        <span class="badge bg-warning text-dark px-3 py-2">
-                            UNDER REVIEW
-                        </span>
-                    {% elif application.status == 'SHORTLISTED' %}
-                        <span class="badge bg-info text-dark px-3 py-2">
-                            SHORTLISTED
-                        </span>
-                    {% elif application.status == 'INTERVIEW' %}
-                        <span class="badge bg-secondary px-3 py-2">
-                            INTERVIEW
-                        </span>
-                    {% elif application.status == 'SELECTED' %}
-                        <span class="badge bg-success px-3 py-2">
-                            SELECTED
-                        </span>
-                    {% elif application.status == 'HIRED' %}
-                        <span class="badge bg-success px-3 py-2">
-                            HIRED
-                        </span>
-                    {% elif application.status == 'REJECTED' %}
-                        <span class="badge bg-danger px-3 py-2">
-                            REJECTED
-                        </span>
+                    <div class="row g-4">
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    👤 Candidate
+                                </small>
+                                <strong>
+                                    {{ application.full_name or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    💼 Position Applied
+                                </small>
+                                <strong>
+                                    {{ application.job.title
+                                       if application.job
+                                       else 'General Application' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    🔖 Reference No.
+                                </small>
+                                <strong>
+                                    {{ application.reference_no or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    📧 Email
+                                </small>
+                                <strong>
+                                    {{ application.email or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    📱 Phone
+                                </small>
+                                <strong>
+                                    {{ application.phone or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    📍 Location
+                                </small>
+                                <strong>
+                                    {{ application.location or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    🎓 Education
+                                </small>
+                                <strong>
+                                    {{ application.education or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    ⭐ Experience
+                                </small>
+                                <strong>
+                                    {{ application.years_of_experience or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    💼 Current Position
+                                </small>
+                                <strong>
+                                    {{ application.current_position or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    🏢 Previous Employer
+                                </small>
+                                <strong>
+                                    {{ application.previous_employer or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    🌐 Languages
+                                </small>
+                                <strong>
+                                    {{ application.languages or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    💰 Expected Salary
+                                </small>
+                                <strong>
+                                    {{ application.expected_salary or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    📅 Availability
+                                </small>
+                                <strong>
+                                    {{ application.availability_date or '—' }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    🚗 Willing to Relocate
+                                </small>
+                                <strong>
+                                    {% if application.willing_to_relocate %}
+                                        Yes
+                                    {% else %}
+                                        No
+                                    {% endif %}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-4">
+                            <div class="summary-item">
+                                <small class="text-muted d-block mb-1">
+                                    📨 Submitted
+                                </small>
+                                <strong>
+                                    {% if application.submitted_at %}
+                                        {{ application.submitted_at.strftime(
+                                            '%d %b %Y, %H:%M'
+                                        ) }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </strong>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- SKILLS -->
+            <div class="card section-card">
+
+                <div class="card-body p-4">
+
+                    <h5 class="section-title mb-3">
+                        🛠️ Skills
+                    </h5>
+
+                    {% if application.skills %}
+
+                        <div class="cover-letter-box">
+                            {{ application.skills }}
+                        </div>
+
                     {% else %}
-                        <span class="badge bg-secondary px-3 py-2">
-                            {{ application.status or '—' }}
-                        </span>
+
+                        <div class="no-data">
+                            No skills information submitted.
+                        </div>
+
                     {% endif %}
 
                 </div>
 
-                <div class="row g-4">
+            </div>
 
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                👤 Candidate
-                            </small>
-                            <strong>
-                                {{ application.full_name or '—' }}
-                            </strong>
-                        </div>
-                    </div>
+            <!-- CERTIFICATIONS -->
+            <div class="card section-card">
 
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                💼 Position Applied
-                            </small>
-                            <strong>
-                                {{ application.job.title
-                                   if application.job
-                                   else 'General Application' }}
-                            </strong>
-                        </div>
-                    </div>
+                <div class="card-body p-4">
 
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                🔖 Reference No.
-                            </small>
-                            <strong>
-                                {{ application.reference_no or '—' }}
-                            </strong>
-                        </div>
-                    </div>
+                    <h5 class="section-title mb-3">
+                        📜 Certifications
+                    </h5>
 
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                📧 Email
-                            </small>
-                            <strong>
-                                {{ application.email or '—' }}
-                            </strong>
-                        </div>
-                    </div>
+                    {% if application.certifications %}
 
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                📱 Phone
-                            </small>
-                            <strong>
-                                {{ application.phone or '—' }}
-                            </strong>
+                        <div class="cover-letter-box">
+                            {{ application.certifications }}
                         </div>
-                    </div>
 
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                📍 Location
-                            </small>
-                            <strong>
-                                {{ application.location or '—' }}
-                            </strong>
-                        </div>
-                    </div>
+                    {% else %}
 
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                🎓 Education
-                            </small>
-                            <strong>
-                                {{ application.education or '—' }}
-                            </strong>
+                        <div class="no-data">
+                            No certifications submitted.
                         </div>
-                    </div>
 
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                ⭐ Experience
-                            </small>
-                            <strong>
-                                {{ application.years_of_experience or '—' }}
-                            </strong>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                💼 Current Position
-                            </small>
-                            <strong>
-                                {{ application.current_position or '—' }}
-                            </strong>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                🏢 Previous Employer
-                            </small>
-                            <strong>
-                                {{ application.previous_employer or '—' }}
-                            </strong>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                🌐 Languages
-                            </small>
-                            <strong>
-                                {{ application.languages or '—' }}
-                            </strong>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                💰 Expected Salary
-                            </small>
-                            <strong>
-                                {{ application.expected_salary or '—' }}
-                            </strong>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                📅 Availability
-                            </small>
-                            <strong>
-                                {{ application.availability_date or '—' }}
-                            </strong>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                🚗 Willing to Relocate
-                            </small>
-                            <strong>
-                                {% if application.willing_to_relocate %}
-                                    Yes
-                                {% else %}
-                                    No
-                                {% endif %}
-                            </strong>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 col-xl-4">
-                        <div class="summary-item">
-                            <small class="text-muted d-block mb-1">
-                                📨 Submitted
-                            </small>
-                            <strong>
-                                {% if application.submitted_at %}
-                                    {{ application.submitted_at.strftime(
-                                        '%d %b %Y, %H:%M'
-                                    ) }}
-                                {% else %}
-                                    —
-                                {% endif %}
-                            </strong>
-                        </div>
-                    </div>
+                    {% endif %}
 
                 </div>
 
             </div>
 
-        </div>
+            <!-- COVER LETTER -->
+            <div class="card section-card">
 
-        <!-- SKILLS -->
-        <div class="card section-card">
+                <div class="card-body p-4">
 
-            <div class="card-body p-4">
+                    <div class="d-flex
+                                justify-content-between
+                                align-items-center
+                                mb-3">
 
-                <h5 class="section-title mb-3">
-                    🛠️ Skills
-                </h5>
+                        <h5 class="section-title mb-0">
+                            📝 Cover Letter
+                        </h5>
 
-                {% if application.skills %}
+                        {% if application.cover_letter %}
 
-                    <div class="cover-letter-box">
-                        {{ application.skills }}
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-secondary"
+                                onclick="copyCoverLetter()"
+                            >
+                                <i class="bi bi-copy me-1"></i>
+                                Copy
+                            </button>
+
+                        {% endif %}
+
                     </div>
-
-                {% else %}
-
-                    <div class="no-data">
-                        No skills information submitted.
-                    </div>
-
-                {% endif %}
-
-            </div>
-
-        </div>
-
-        <!-- CERTIFICATIONS -->
-        <div class="card section-card">
-
-            <div class="card-body p-4">
-
-                <h5 class="section-title mb-3">
-                    📜 Certifications
-                </h5>
-
-                {% if application.certifications %}
-
-                    <div class="cover-letter-box">
-                        {{ application.certifications }}
-                    </div>
-
-                {% else %}
-
-                    <div class="no-data">
-                        No certifications submitted.
-                    </div>
-
-                {% endif %}
-
-            </div>
-
-        </div>
-
-        <!-- COVER LETTER -->
-        <div class="card section-card">
-
-            <div class="card-body p-4">
-
-                <div class="d-flex
-                            justify-content-between
-                            align-items-center
-                            mb-3">
-
-                    <h5 class="section-title mb-0">
-                        📝 Cover Letter
-                    </h5>
 
                     {% if application.cover_letter %}
 
-                        <button
-                            type="button"
-                            class="btn btn-sm btn-outline-secondary"
-                            onclick="copyCoverLetter()"
+                        <div
+                            id="coverLetterText"
+                            class="cover-letter-box"
                         >
-                            <i class="bi bi-copy me-1"></i>
-                            Copy
-                        </button>
+                            {{ application.cover_letter }}
+                        </div>
+
+                    {% else %}
+
+                        <div class="no-data">
+                            No cover letter submitted.
+                        </div>
 
                     {% endif %}
 
                 </div>
 
-                {% if application.cover_letter %}
-
-                    <div
-                        id="coverLetterText"
-                        class="cover-letter-box"
-                    >
-                        {{ application.cover_letter }}
-                    </div>
-
-                {% else %}
-
-                    <div class="no-data">
-                        No cover letter submitted.
-                    </div>
-
-                {% endif %}
-
             </div>
 
-        </div>
+            <!-- CV -->
+            <div class="card section-card">
 
-        <!-- CV -->
-        <div class="card section-card">
+                <div class="card-body p-4">
 
-            <div class="card-body p-4">
+                    <h5 class="section-title mb-3">
+                        📄 Curriculum Vitae (CV)
+                    </h5>
 
-                <h5 class="section-title mb-3">
-                    📄 Curriculum Vitae (CV)
-                </h5>
+                    {% if application.cv_filename %}
 
-                {% if application.cv_filename %}
+                        <div class="cv-box">
 
-                    <div class="cv-box">
+                            <div class="d-flex
+                                        flex-column
+                                        flex-md-row
+                                        justify-content-between
+                                        align-items-md-center
+                                        gap-3">
 
-                        <div class="d-flex
-                                    flex-column
-                                    flex-md-row
-                                    justify-content-between
-                                    align-items-md-center
-                                    gap-3">
+                                <div>
 
-                            <div>
+                                    <div class="d-flex
+                                                align-items-center
+                                                gap-3">
 
-                                <div class="d-flex
-                                            align-items-center
-                                            gap-3">
+                                        <i class="
+                                            bi
+                                            bi-file-earmark-pdf
+                                            cv-icon
+                                        "></i>
 
-                                    <i class="
-                                        bi
-                                        bi-file-earmark-pdf
-                                        cv-icon
-                                    "></i>
+                                        <div>
 
-                                    <div>
+                                            <div class="cv-filename">
+                                                {{ application.cv_filename }}
+                                            </div>
 
-                                        <div class="cv-filename">
-                                            {{ application.cv_filename }}
+                                            <small class="text-muted">
+                                                Candidate CV
+                                            </small>
+
                                         </div>
-
-                                        <small class="text-muted">
-                                            Candidate CV
-                                        </small>
 
                                     </div>
 
                                 </div>
 
-                            </div>
+                                <a
+                                    href="{{ url_for(
+                                        'download_candidate_cv',
+                                        app_id=application.id
+                                    ) }}"
+                                    class="btn btn-navy btn-sm"
+                                    target="_blank"
+                                    rel="noopener"
+                                >
+                                    <i class="bi bi-eye me-1"></i>
+                                    Open CV
+                                </a>
 
-                            <a
-                                href="{{ url_for(
-                                    'download_candidate_cv',
-                                    app_id=application.id
-                                ) }}"
-                                class="btn btn-navy btn-sm"
-                                target="_blank"
-                                rel="noopener"
-                            >
-                                <i class="bi bi-eye me-1"></i>
-                                Open CV
-                            </a>
+                            </div>
 
                         </div>
 
-                    </div>
+                    {% else %}
 
-                {% else %}
+                        <div class="no-data">
+                            No CV uploaded.
+                        </div>
 
-                    <div class="no-data">
-                        No CV uploaded.
-                    </div>
+                    {% endif %}
 
-                {% endif %}
+                </div>
 
             </div>
 
-        </div>
+            <!-- INTERVIEWS -->
+            <div class="card section-card">
 
-        <!-- INTERVIEWS -->
-        <div class="card section-card">
+                <div class="card-body p-4">
 
-            <div class="card-body p-4">
+                    <h5 class="section-title mb-3">
+                        📅 Interviews
+                    </h5>
 
-                <h5 class="section-title mb-3">
-                    📅 Interviews
-                </h5>
+                    {% if interviews %}
 
-                {% if interviews %}
+                        {% for interview in interviews %}
 
-                    {% for interview in interviews %}
+                            <div class="interview-item">
 
-                        <div class="interview-item">
-
-                            <div class="row g-3">
-
-                                <div class="col-md-6">
-
-                                    <small class="text-muted d-block">
-                                        Scheduled At
-                                    </small>
-
-                                    <strong>
-
-                                        {% if interview.scheduled_at %}
-
-                                            {{ interview.scheduled_at.strftime(
-                                                '%d %b %Y, %H:%M'
-                                            ) }}
-
-                                        {% else %}
-
-                                            —
-
-                                        {% endif %}
-
-                                    </strong>
-
-                                </div>
-
-                                <div class="col-md-6">
-
-                                    <small class="text-muted d-block">
-                                        Status
-                                    </small>
-
-                                    <strong>
-                                        {{ interview.status or '—' }}
-                                    </strong>
-
-                                </div>
-
-                                {% if interview.location %}
+                                <div class="row g-3">
 
                                     <div class="col-md-6">
 
                                         <small class="text-muted d-block">
-                                            Location
+                                            Scheduled At
                                         </small>
 
                                         <strong>
-                                            {{ interview.location }}
+
+                                            {% if interview.scheduled_at %}
+
+                                                {{ interview.scheduled_at.strftime(
+                                                    '%d %b %Y, %H:%M'
+                                                ) }}
+
+                                            {% else %}
+
+                                                —
+
+                                            {% endif %}
+
                                         </strong>
 
                                     </div>
 
-                                {% endif %}
-
-                                {% if interview.notes %}
-
-                                    <div class="col-12">
+                                    <div class="col-md-6">
 
                                         <small class="text-muted d-block">
-                                            Notes
+                                            Status
                                         </small>
 
-                                        <div>
-                                            {{ interview.notes }}
-                                        </div>
+                                        <strong>
+                                            {{ interview.status or '—' }}
+                                        </strong>
 
                                     </div>
 
-                                {% endif %}
+                                    {% if interview.location %}
+
+                                        <div class="col-md-6">
+
+                                            <small class="text-muted d-block">
+                                                Location
+                                            </small>
+
+                                            <strong>
+                                                {{ interview.location }}
+                                            </strong>
+
+                                        </div>
+
+                                    {% endif %}
+
+                                    {% if interview.notes %}
+
+                                        <div class="col-12">
+
+                                            <small class="text-muted d-block">
+                                                Notes
+                                            </small>
+
+                                            <div>
+                                                {{ interview.notes }}
+                                            </div>
+
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
 
                             </div>
 
+                        {% endfor %}
+
+                    {% else %}
+
+                        <div class="no-data">
+                            No interviews scheduled for this candidate.
                         </div>
 
-                    {% endfor %}
+                    {% endif %}
 
-                {% else %}
-
-                    <div class="no-data">
-                        No interviews scheduled for this candidate.
-                    </div>
-
-                {% endif %}
+                </div>
 
             </div>
 
         </div>
 
-    </div>
+        <!-- RIGHT SIDE -->
+        <div class="col-lg-4">
 
-    <!-- RIGHT SIDE -->
-    <div class="col-lg-4">
+            <div class="candidate-actions">
 
-        <div class="candidate-actions">
+                <!-- HR ACTIONS -->
+                <div class="card section-card">
 
-            <!-- HR ACTIONS -->
-            <div class="card section-card">
+                    <div class="card-body p-4">
 
-                <div class="card-body p-4">
+                        <h5 class="section-title mb-3">
+                            ⚙️ HR Actions
+                        </h5>
 
-                    <h5 class="section-title mb-3">
-                        ⚙️ HR Actions
-                    </h5>
-
-                    <form
-                        method="POST"
-                        action="{{ url_for(
-                            'update_application_status',
-                            app_id=application.id
-                        ) }}"
-                    >
-
-                        <label class="form-label fw-bold">
-                            Application Status
-                        </label>
-
-                        <select
-                            name="status"
-                            class="form-select status-select mb-3"
-                            required
+                        <form
+                            method="POST"
+                            action="{{ url_for(
+                                'update_application_status',
+                                app_id=application.id
+                            ) }}"
                         >
 
-                            <option
-                                value="NEW"
-                                {% if application.status == 'NEW' %}
-                                    selected
-                                {% endif %}
+                            <label class="form-label fw-bold">
+                                Application Status
+                            </label>
+
+                            <select
+                                name="status"
+                                class="form-select status-select mb-3"
+                                required
                             >
-                                NEW
-                            </option>
 
-                            <option
-                                value="UNDER REVIEW"
-                                {% if application.status == 'UNDER REVIEW' %}
-                                    selected
-                                {% endif %}
+                                <option
+                                    value="NEW"
+                                    {% if application.status == 'NEW' %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    NEW
+                                </option>
+
+                                <option
+                                    value="UNDER REVIEW"
+                                    {% if application.status == 'UNDER REVIEW' %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    UNDER REVIEW
+                                </option>
+
+                                <option
+                                    value="SHORTLISTED"
+                                    {% if application.status == 'SHORTLISTED' %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    SHORTLISTED
+                                </option>
+
+                                <option
+                                    value="INTERVIEW"
+                                    {% if application.status == 'INTERVIEW' %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    INTERVIEW
+                                </option>
+
+                                <option
+                                    value="SELECTED"
+                                    {% if application.status == 'SELECTED' %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    SELECTED
+                                </option>
+
+                                <option
+                                    value="HIRED"
+                                    {% if application.status == 'HIRED' %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    HIRED
+                                </option>
+
+                                <option
+                                    value="REJECTED"
+                                    {% if application.status == 'REJECTED' %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    REJECTED
+                                </option>
+
+                            </select>
+
+                            <button
+                                type="submit"
+                                class="btn btn-navy save-status-btn w-100"
                             >
-                                UNDER REVIEW
-                            </option>
+                                <i class="bi bi-check-circle me-1"></i>
+                                አስቀምጥ (Save Status)
+                            </button>
 
-                            <option
-                                value="SHORTLISTED"
-                                {% if application.status == 'SHORTLISTED' %}
-                                    selected
-                                {% endif %}
-                            >
-                                SHORTLISTED
-                            </option>
-
-                            <option
-                                value="INTERVIEW"
-                                {% if application.status == 'INTERVIEW' %}
-                                    selected
-                                {% endif %}
-                            >
-                                INTERVIEW
-                            </option>
-
-                            <option
-                                value="SELECTED"
-                                {% if application.status == 'SELECTED' %}
-                                    selected
-                                {% endif %}
-                            >
-                                SELECTED
-                            </option>
-
-                            <option
-                                value="HIRED"
-                                {% if application.status == 'HIRED' %}
-                                    selected
-                                {% endif %}
-                            >
-                                HIRED
-                            </option>
-
-                            <option
-                                value="REJECTED"
-                                {% if application.status == 'REJECTED' %}
-                                    selected
-                                {% endif %}
-                            >
-                                REJECTED
-                            </option>
-
-                        </select>
-
-                        <button
-                            type="submit"
-                            class="btn btn-navy save-status-btn w-100"
-                        >
-                            <i class="bi bi-check-circle me-1"></i>
-                            አስቀምጥ (Save Status)
-                        </button>
-
-                    </form>
-
-                </div>
-
-            </div>
-
-            <!-- APPLICATION INFORMATION -->
-            <div class="card section-card">
-
-                <div class="card-body p-4">
-
-                    <h5 class="section-title mb-3">
-                        📋 Application Information
-                    </h5>
-
-                    <div class="mb-3">
-
-                        <small class="text-muted d-block">
-                            Current Status
-                        </small>
-
-                        <strong>
-                            {{ application.status or '—' }}
-                        </strong>
-
-                    </div>
-
-                    <div class="mb-3">
-
-                        <small class="text-muted d-block">
-                            Status Updated
-                        </small>
-
-                        <strong>
-
-                            {% if application.status_updated_at %}
-
-                                {{ application.status_updated_at.strftime(
-                                    '%d %b %Y, %H:%M'
-                                ) }}
-
-                            {% else %}
-
-                                —
-
-                            {% endif %}
-
-                        </strong>
-
-                    </div>
-
-                    <div>
-
-                        <small class="text-muted d-block">
-                            Application ID
-                        </small>
-
-                        <strong>
-                            #{{ application.id }}
-                        </strong>
+                        </form>
 
                     </div>
 
                 </div>
 
-            </div>
+                <!-- APPLICATION INFORMATION -->
+                <div class="card section-card">
 
-            <!-- BACK BUTTON -->
-            <a
-                href="{{ url_for('admin_candidates') }}"
-                class="btn btn-outline-secondary w-100 mb-4"
-            >
-                <i class="bi bi-arrow-left me-1"></i>
-                Back to Candidates
-            </a>
+                    <div class="card-body p-4">
+
+                        <h5 class="section-title mb-3">
+                            📋 Application Information
+                        </h5>
+
+                        <div class="mb-3">
+
+                            <small class="text-muted d-block">
+                                Current Status
+                            </small>
+
+                            <strong>
+                                {{ application.status or '—' }}
+                            </strong>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <small class="text-muted d-block">
+                                Status Updated
+                            </small>
+
+                            <strong>
+
+                                {% if application.status_updated_at %}
+
+                                    {{ application.status_updated_at.strftime(
+                                        '%d %b %Y, %H:%M'
+                                    ) }}
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </strong>
+
+                        </div>
+
+                        <div>
+
+                            <small class="text-muted d-block">
+                                Application ID
+                            </small>
+
+                            <strong>
+                                #{{ application.id }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- DANGER ZONE — DELETE CANDIDATE -->
+                <div class="card section-card danger-zone">
+
+                    <div class="card-body p-4">
+
+                        <h5 class="section-title mb-3">
+                            ⚠️ Danger Zone
+                        </h5>
+
+                        <p class="text-muted small mb-3">
+                            Deleting this candidate will permanently remove
+                            their application, all associated interviews,
+                            and the uploaded CV file. This action
+                            <strong>cannot be undone</strong>.
+                        </p>
+
+                        <form
+                            method="POST"
+                            action="{{ url_for(
+                                'admin_candidate_delete',
+                                app_id=application.id
+                            ) }}"
+                            onsubmit="return confirm('Are you sure you want to permanently delete {{ application.full_name }}? This will also delete all associated interviews and the CV file. This action cannot be undone.');"
+                        >
+
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="{{ csrf_token() }}"
+                            >
+
+                            <button
+                                type="submit"
+                                class="btn btn-delete w-100"
+                            >
+                                <i class="bi bi-trash me-1"></i>
+                                Delete Candidate
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+                <!-- BACK BUTTON -->
+                <a
+                    href="{{ url_for('admin_candidates') }}"
+                    class="btn btn-outline-secondary w-100 mb-4"
+                >
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Back to Candidates
+                </a>
+
+            </div>
 
         </div>
 
@@ -915,7 +1115,7 @@ Candidate Details - {{ application.full_name }}
 
 </div>
 
-</div><script>
+<script>
 function copyCoverLetter() {
 
     const element =
@@ -992,4 +1192,6 @@ function fallbackCopy(text) {
 
     document.body.removeChild(textarea);
 }
-</script>{% endblock %}
+</script>
+
+{% endblock %}
